@@ -13,6 +13,9 @@ from collective_phase_control_fabric.v6.models import (
     MANDATORY_DIMENSIONS,
     AnalysisSnapshot,
     AuthorityAttestation,
+    CoordinationEventDocument,
+    CoordinationPlan,
+    CoordinationSession,
     DimensionResult,
     Document,
     EvidenceAttestation,
@@ -21,12 +24,14 @@ from collective_phase_control_fabric.v6.models import (
     OperationalProfile,
     OrganizationWitness,
     PersistencePlan,
+    PerturbationScenario,
     PerturbationSuite,
     PhaseContract,
     QuorumDecisionDocument,
     RateObservationAttestation,
     ResourceObservationAttestation,
     ServiceCurveAttestation,
+    SourceArtifactEnvelope,
     StateAttestation,
     SupplyAttestation,
     TransformationAttestation,
@@ -40,6 +45,7 @@ from collective_phase_control_fabric.v6.registry import document_digest
 from collective_phase_control_fabric.v6.structural_analysis import (
     deterministic_curve_bounds,
     enumerate_minimal_siphons,
+    exact_generalized_generative_raf,
     unfed_siphons,
 )
 from collective_phase_control_fabric.v6.trust import validate_policy
@@ -67,6 +73,15 @@ class Budget:
             raise AnalysisBudgetExceeded
 
 
+@dataclass(frozen=True)
+class ReducedSnapshot:
+    """A counterfactual snapshot plus the exact object view audited for it."""
+
+    snapshot: AnalysisSnapshot | None
+    objects: dict[str, Document]
+    blockers: tuple[str, ...]
+
+
 def rational(value: str) -> Fraction:
     result = Fraction(value)
     if result.numerator.bit_length() > MAX_RATIONAL_BITS:
@@ -84,6 +99,9 @@ def analysis_basis_digest(snapshot: AnalysisSnapshot) -> str:
     value = snapshot.model_dump(mode="json", exclude_none=True)
     value["spec"]["analysis_basis_digest"] = "sha256:" + "0" * 64
     value["spec"]["witness_digests"] = []
+    value["spec"]["object_digests"] = sorted(value["spec"]["object_digests"])
+    value["spec"]["target_ids"] = sorted(value["spec"]["target_ids"])
+    value["spec"]["required_dimensions"] = sorted(value["spec"]["required_dimensions"])
     return digest_bytes(canonical_bytes(value))
 
 
@@ -167,6 +185,16 @@ def _provenance(
         if invalid:
             continue
         live[digest] = item
+    identities: dict[tuple[str, str], str] = {}
+    for digest, item in sorted(live.items()):
+        identity = _typed_identity(item)
+        if identity is None:
+            continue
+        previous = identities.get(identity)
+        if previous is not None:
+            blockers.append(f"duplicate_typed_identity:{identity[0]}:{identity[1]}")
+        else:
+            identities[identity] = digest
     required = set(MANDATORY_DIMENSIONS)
     if not required.issubset(snapshot.spec.required_dimensions):
         blockers.append("mandatory_security_or_science_dimension_disabled")
@@ -190,6 +218,30 @@ def _provenance(
         ),
         live,
     )
+
+
+def _typed_identity(item: Document) -> tuple[str, str] | None:
+    """Return identities whose duplicate live attestations would make state ambiguous."""
+
+    if isinstance(item, StateAttestation):
+        return item.kind, item.spec.state_id
+    if isinstance(item, ResourceObservationAttestation):
+        return item.kind, item.spec.coordinate
+    if isinstance(item, SupplyAttestation):
+        return item.kind, item.spec.supply_id
+    if isinstance(item, TransformationAttestation):
+        return item.kind, item.spec.transformation_id
+    if isinstance(item, AuthorityAttestation):
+        return item.kind, item.spec.authority_id
+    if isinstance(item, EvidenceAttestation):
+        return item.kind, item.spec.evidence_id
+    if isinstance(item, VerifierStageAttestation):
+        return item.kind, item.spec.stage_id
+    if isinstance(item, RateObservationAttestation):
+        return item.kind, item.spec.transformation_id
+    if isinstance(item, IndependenceAttestation):
+        return item.kind, item.spec.domain_id
+    return None
 
 
 def _temporal(
@@ -526,6 +578,20 @@ def _persistence(
             blockers=[f"ambiguous_resource_observation:{item}" for item in sorted(duplicates)],
         )
     transformations = _transformations(objects, at)
+    rates: dict[str, RateObservationAttestation] = {}
+    duplicate_rates: set[str] = set()
+    for item in objects.values():
+        if isinstance(item, RateObservationAttestation) and _live(item.spec.lifecycle, at):
+            if item.spec.transformation_id in rates:
+                duplicate_rates.add(item.spec.transformation_id)
+            rates[item.spec.transformation_id] = item
+    if duplicate_rates:
+        return _result(
+            "violated",
+            blockers=[
+                f"ambiguous_persistence_rate:{identifier}" for identifier in sorted(duplicate_rates)
+            ],
+        )
     supplies = {
         item.spec.supply_id: item
         for item in objects.values()
@@ -547,6 +613,15 @@ def _persistence(
             count = rational(count_value)
             if count < 0:
                 blockers.append(f"negative_action_count:{transformation_id}")
+            rate = rates.get(transformation_id)
+            if rate is None:
+                blockers.append(f"persistence_rate_missing:{transformation_id}")
+            elif duration > 0:
+                action_rate = count / duration
+                if action_rate < rational(rate.spec.rate_lower) or action_rate > rational(
+                    rate.spec.rate_upper
+                ):
+                    blockers.append(f"persistence_rate_outside_bound:{transformation_id}")
             for coordinate, value in transformation.spec.inputs.items():
                 delta[coordinate] = delta.get(coordinate, Fraction(0)) - rational(value) * count
             for coordinate, value in transformation.spec.outputs.items():
@@ -592,7 +667,11 @@ def _persistence(
     unfed = unfed_siphons(
         siphons.values,
         structural_markings,
-        (supply.spec.coordinate for supply in supplies.values()),
+        (
+            supply.spec.coordinate
+            for supply in supplies.values()
+            if rational(supply.spec.rate_lower) > 0
+        ),
     )
     blockers.extend(f"unfed_minimal_siphon:{','.join(siphon)}" for siphon in unfed)
     return _result(
@@ -615,41 +694,41 @@ def _raf(
             blockers=["snapshot_bound_organization_required_for_raf"],
         )
     _, food, evidence, authority = _available_sets(objects, at)
-    available = set(food)
     live_transformations = _transformations(objects, at)
     transformations = {
         identifier: live_transformations[identifier]
         for identifier in witness.spec.transformation_ids
         if identifier in live_transformations
     }
-    remaining = set(transformations)
-    used: set[str] = set()
-    while remaining:
-        layer: list[str] = []
-        for transformation_id in sorted(remaining):
-            budget.spend()
-            item = transformations[transformation_id]
-            if not set(item.spec.inputs).issubset(available):
-                continue
-            if set(item.spec.inhibitors) & available:
-                continue
-            if not set(item.spec.required_evidence).issubset(evidence):
-                continue
-            if not set(item.spec.required_authority).issubset(authority):
-                continue
-            if not _catalyst_satisfied(item, available):
-                continue
-            layer.append(transformation_id)
-        if not layer:
-            break
-        produced: set[str] = set()
-        for transformation_id in layer:
-            produced.update(transformations[transformation_id].spec.outputs)
-        available.update(produced)
-        used.update(layer)
-        remaining.difference_update(layer)
-    missing = sorted(set(snapshot.spec.target_ids) - available)
-    blockers = [f"raf_target_not_generated:{item}" for item in missing]
+    blockers: list[str] = []
+    missing_transformations = sorted(set(witness.spec.transformation_ids) - set(transformations))
+    blockers.extend(
+        f"raf_transformation_missing:{identifier}" for identifier in missing_transformations
+    )
+    analysis = exact_generalized_generative_raf(
+        transformations,
+        food,
+        evidence,
+        authority,
+        budget,
+    )
+    if not analysis.exhaustive:
+        return _result(
+            "unknown_due_to_budget",
+            blockers=["raf_transformation_limit_exceeded"],
+        )
+    maximal_union = {identifier for maximal in analysis.maximal_rafs for identifier in maximal}
+    blockers.extend(
+        f"transformation_not_in_any_maximal_generalized_raf:{identifier}"
+        for identifier in sorted(set(transformations) - maximal_union)
+    )
+    if transformations and not analysis.full_set_is_raf:
+        blockers.append("organization_transformation_set_not_generalized_raf")
+    generalized_targets = sorted(set(snapshot.spec.target_ids) - set(analysis.generalized_closure))
+    blockers.extend(f"generalized_raf_target_not_generated:{item}" for item in generalized_targets)
+    missing = sorted(set(snapshot.spec.target_ids) - set(analysis.generative_closure))
+    blockers.extend(f"raf_target_not_generated:{item}" for item in missing)
+    used = {identifier for layer in analysis.generative_layers for identifier in layer}
     if not used:
         blockers.append("no_food_supported_catalytic_transformation")
     unused_organization = sorted(set(witness.spec.transformation_ids) - used)
@@ -950,6 +1029,317 @@ def audit_snapshot(
         return _budget_unknown(snapshot_digest)
 
 
+def _semantic_removal_digests(
+    all_objects: dict[str, Document],
+    scenario: PerturbationScenario,
+) -> tuple[set[str], dict[str, set[str]]]:
+    """Resolve every typed selector against immutable input documents.
+
+    Selectors remove attestations; they never rewrite a signed object. State and coordinate removal
+    also removes incident transformations so a deleted node cannot be recreated by the reduced
+    network. Catalyst loss removes its sources and transformations that have no unaffected
+    catalyst alternative. Inhibitor loss removes its sources, allowing previously inhibited
+    transformations to be reconsidered by the shared kernel.
+    """
+
+    selected = {
+        "remove_principal_ids": set(scenario.remove_principal_ids),
+        "remove_key_ids": set(scenario.remove_key_ids),
+        "remove_source_systems": set(scenario.remove_source_systems),
+        "remove_state_ids": set(scenario.remove_state_ids),
+        "remove_transformation_ids": set(scenario.remove_transformation_ids),
+        "remove_resource_coordinates": set(scenario.remove_resource_coordinates),
+        "remove_supply_ids": set(scenario.remove_supply_ids),
+        "remove_rate_transformation_ids": set(scenario.remove_rate_transformation_ids),
+        "remove_catalyst_ids": set(scenario.remove_catalyst_ids),
+        "remove_inhibitor_ids": set(scenario.remove_inhibitor_ids),
+        "remove_verifier_stage_ids": set(scenario.remove_verifier_stage_ids),
+        "remove_infrastructure_domains": set(scenario.remove_infrastructure_domains),
+        "remove_coordination_session_ids": set(scenario.remove_coordination_session_ids),
+        "remove_independence_domains": set(scenario.remove_independence_domains),
+    }
+    matched: dict[str, set[str]] = {name: set() for name in selected}
+    removed: set[str] = set()
+    removed_raw_artifacts: set[str] = set()
+    removed_states = selected["remove_state_ids"]
+    removed_catalysts = selected["remove_catalyst_ids"]
+    removed_inhibitors = selected["remove_inhibitor_ids"]
+    removed_coordinates = selected["remove_resource_coordinates"]
+
+    for digest, item in all_objects.items():
+        remove = False
+        if isinstance(item, TrustPolicyDocument):
+            for principal in item.spec.principals:
+                if principal.principal_id in selected["remove_principal_ids"]:
+                    matched["remove_principal_ids"].add(principal.principal_id)
+                    remove = True
+                if principal.key_id in selected["remove_key_ids"]:
+                    matched["remove_key_ids"].add(principal.key_id)
+                    remove = True
+                if principal.infrastructure_domain in selected["remove_infrastructure_domains"]:
+                    matched["remove_infrastructure_domains"].add(principal.infrastructure_domain)
+                    remove = True
+        elif isinstance(item, SourceArtifactEnvelope):
+            if item.spec.source_system in selected["remove_source_systems"]:
+                matched["remove_source_systems"].add(item.spec.source_system)
+                removed_raw_artifacts.add(item.spec.raw_digest)
+                remove = True
+        elif isinstance(item, StateAttestation):
+            state_id = item.spec.state_id
+            for field, values in (
+                ("remove_state_ids", removed_states),
+                ("remove_catalyst_ids", removed_catalysts),
+                ("remove_inhibitor_ids", removed_inhibitors),
+            ):
+                if state_id in values:
+                    matched[field].add(state_id)
+                    remove = True
+        elif isinstance(item, ResourceObservationAttestation):
+            coordinate = item.spec.coordinate
+            if coordinate in removed_coordinates:
+                matched["remove_resource_coordinates"].add(coordinate)
+                remove = True
+        elif isinstance(item, SupplyAttestation):
+            if item.spec.supply_id in selected["remove_supply_ids"]:
+                matched["remove_supply_ids"].add(item.spec.supply_id)
+                remove = True
+            if item.spec.coordinate in removed_coordinates:
+                matched["remove_resource_coordinates"].add(item.spec.coordinate)
+                remove = True
+        elif isinstance(item, RateObservationAttestation):
+            if item.spec.transformation_id in selected["remove_rate_transformation_ids"]:
+                matched["remove_rate_transformation_ids"].add(item.spec.transformation_id)
+                remove = True
+        elif isinstance(item, VerifierStageAttestation):
+            if item.spec.stage_id in selected["remove_verifier_stage_ids"]:
+                matched["remove_verifier_stage_ids"].add(item.spec.stage_id)
+                remove = True
+            if item.spec.independence_domain in selected["remove_independence_domains"]:
+                matched["remove_independence_domains"].add(item.spec.independence_domain)
+                remove = True
+        elif isinstance(item, IndependenceAttestation):
+            if item.spec.domain_id in selected["remove_independence_domains"]:
+                matched["remove_independence_domains"].add(item.spec.domain_id)
+                remove = True
+            if item.spec.infrastructure_domain in selected["remove_infrastructure_domains"]:
+                matched["remove_infrastructure_domains"].add(item.spec.infrastructure_domain)
+                remove = True
+            if item.spec.principal_id in selected["remove_principal_ids"]:
+                matched["remove_principal_ids"].add(item.spec.principal_id)
+                remove = True
+            if item.spec.key_id in selected["remove_key_ids"]:
+                matched["remove_key_ids"].add(item.spec.key_id)
+                remove = True
+        elif (
+            isinstance(item, (CoordinationPlan, CoordinationEventDocument, CoordinationSession))
+            and item.spec.session_id in selected["remove_coordination_session_ids"]
+        ):
+            matched["remove_coordination_session_ids"].add(item.spec.session_id)
+            remove = True
+
+        if isinstance(item, TransformationAttestation):
+            spec = item.spec
+            transformation_id = spec.transformation_id
+            incident = set(spec.inputs) | set(spec.outputs)
+            catalyst_ids = {
+                catalyst for clause in spec.catalyst_clauses for catalyst in clause.all_of
+            }
+            if transformation_id in selected["remove_transformation_ids"]:
+                matched["remove_transformation_ids"].add(transformation_id)
+                remove = True
+            if transformation_id in selected["remove_rate_transformation_ids"]:
+                matched["remove_rate_transformation_ids"].add(transformation_id)
+            for state_id in removed_states.intersection(
+                incident | catalyst_ids | set(spec.inhibitors)
+            ):
+                matched["remove_state_ids"].add(state_id)
+                remove = True
+            for coordinate in removed_coordinates.intersection(incident):
+                matched["remove_resource_coordinates"].add(coordinate)
+                remove = True
+            affected_inhibitors = removed_inhibitors.intersection(
+                set(spec.inhibitors) | set(spec.outputs)
+            )
+            for inhibitor in affected_inhibitors:
+                matched["remove_inhibitor_ids"].add(inhibitor)
+                if inhibitor in spec.outputs:
+                    remove = True
+            affected_catalysts = removed_catalysts.intersection(catalyst_ids | set(spec.outputs))
+            if affected_catalysts:
+                matched["remove_catalyst_ids"].update(affected_catalysts)
+                unaffected_clause_exists = any(
+                    not set(clause.all_of).intersection(removed_catalysts)
+                    for clause in spec.catalyst_clauses
+                )
+                if not unaffected_clause_exists or set(spec.outputs).intersection(
+                    removed_catalysts
+                ):
+                    remove = True
+        if remove:
+            removed.add(digest)
+
+    if removed_raw_artifacts:
+        for digest, item in all_objects.items():
+            if (
+                isinstance(item, EvidenceAttestation)
+                and item.spec.raw_artifact_digest in removed_raw_artifacts
+            ):
+                removed.add(digest)
+    return removed, matched
+
+
+def reduce_snapshot(
+    snapshot: AnalysisSnapshot,
+    all_objects: dict[str, Document],
+    scenario: PerturbationScenario,
+) -> ReducedSnapshot:
+    """Create one immutable reduced snapshot or return explicit reduction blockers."""
+
+    baseline_digests = {
+        *snapshot.spec.object_digests,
+        *snapshot.spec.witness_digests,
+        snapshot.spec.contract_digest,
+        snapshot.spec.trust_policy_digest,
+        snapshot.spec.trusted_time_receipt_digest,
+        snapshot.spec.unit_registry_digest,
+    }
+    baseline_objects = {
+        digest: item for digest, item in all_objects.items() if digest in baseline_digests
+    }
+    semantic_removed, matched = _semantic_removal_digests(baseline_objects, scenario)
+    removed = set(scenario.remove_object_digests) | semantic_removed
+    blockers: list[str] = []
+    for digest in scenario.remove_object_digests:
+        if digest not in baseline_digests:
+            blockers.append(f"perturbation_object_not_in_baseline:{digest}")
+    for matched_field, label, requested in (
+        ("remove_principal_ids", "principal", scenario.remove_principal_ids),
+        ("remove_key_ids", "key", scenario.remove_key_ids),
+        ("remove_source_systems", "source_system", scenario.remove_source_systems),
+        ("remove_state_ids", "state", scenario.remove_state_ids),
+        (
+            "remove_transformation_ids",
+            "transformation",
+            scenario.remove_transformation_ids,
+        ),
+        (
+            "remove_resource_coordinates",
+            "resource_coordinate",
+            scenario.remove_resource_coordinates,
+        ),
+        ("remove_supply_ids", "supply", scenario.remove_supply_ids),
+        (
+            "remove_rate_transformation_ids",
+            "rate_transformation",
+            scenario.remove_rate_transformation_ids,
+        ),
+        ("remove_catalyst_ids", "catalyst", scenario.remove_catalyst_ids),
+        ("remove_inhibitor_ids", "inhibitor", scenario.remove_inhibitor_ids),
+        (
+            "remove_verifier_stage_ids",
+            "verifier_stage",
+            scenario.remove_verifier_stage_ids,
+        ),
+        (
+            "remove_infrastructure_domains",
+            "infrastructure",
+            scenario.remove_infrastructure_domains,
+        ),
+        (
+            "remove_coordination_session_ids",
+            "coordination_session",
+            scenario.remove_coordination_session_ids,
+        ),
+        (
+            "remove_independence_domains",
+            "independence_domain",
+            scenario.remove_independence_domains,
+        ),
+    ):
+        for value in requested:
+            if value not in matched[matched_field]:
+                blockers.append(f"perturbation_selector_unmatched:{label}:{value}")
+
+    replacements = [(digest, False) for digest in scenario.replacement_object_digests] + [
+        (digest, True) for digest in scenario.replacement_witness_digests
+    ]
+    witness_types = (OrganizationWitness, PersistencePlan, PerturbationSuite)
+    for digest, must_be_witness in replacements:
+        item = all_objects.get(digest)
+        if item is None or document_digest(item) != digest:
+            blockers.append(f"perturbation_replacement_invalid:{digest}")
+            continue
+        if item.metadata.tenant_id != snapshot.metadata.tenant_id or (
+            item.metadata.workspace_id != snapshot.metadata.workspace_id
+        ):
+            blockers.append(f"perturbation_replacement_scope_mismatch:{digest}")
+        if must_be_witness != isinstance(item, witness_types):
+            blockers.append(f"perturbation_replacement_kind_mismatch:{digest}")
+
+    trusted_time_digest = snapshot.spec.trusted_time_receipt_digest
+    if scenario.advance_trusted_time_receipt_digest is not None:
+        candidate = all_objects.get(scenario.advance_trusted_time_receipt_digest)
+        prior = all_objects.get(snapshot.spec.trusted_time_receipt_digest)
+        if not isinstance(candidate, TrustedTimeReceipt) or (
+            document_digest(candidate) != scenario.advance_trusted_time_receipt_digest
+        ):
+            blockers.append("perturbation_trusted_time_receipt_invalid")
+        elif not isinstance(prior, TrustedTimeReceipt):
+            blockers.append("perturbation_prior_trusted_time_receipt_missing")
+        elif candidate.spec.issued_at <= prior.spec.issued_at:
+            blockers.append("perturbation_trusted_time_not_monotonic")
+        elif candidate.metadata.tenant_id != snapshot.metadata.tenant_id or (
+            candidate.metadata.workspace_id != snapshot.metadata.workspace_id
+        ):
+            blockers.append("perturbation_trusted_time_scope_mismatch")
+        else:
+            trusted_time_digest = scenario.advance_trusted_time_receipt_digest
+
+    if blockers:
+        return ReducedSnapshot(None, {}, tuple(sorted(set(blockers))))
+
+    reduced_refs = [
+        digest for digest in snapshot.spec.object_digests if digest not in removed
+    ] + list(scenario.replacement_object_digests)
+    reduced_witnesses = [
+        digest for digest in snapshot.spec.witness_digests if digest not in removed
+    ] + list(scenario.replacement_witness_digests)
+    reduced_objects = {
+        digest: item for digest, item in all_objects.items() if digest not in removed
+    }
+    reduced_snapshot = snapshot.model_copy(
+        update={
+            "spec": snapshot.spec.model_copy(
+                update={
+                    "object_digests": list(dict.fromkeys(reduced_refs)),
+                    "witness_digests": list(dict.fromkeys(reduced_witnesses)),
+                    "trusted_time_receipt_digest": trusted_time_digest,
+                    "analysis_basis_digest": "sha256:" + "0" * 64,
+                }
+            )
+        }
+    )
+    reduced_snapshot = reduced_snapshot.model_copy(
+        update={
+            "spec": reduced_snapshot.spec.model_copy(
+                update={"analysis_basis_digest": analysis_basis_digest(reduced_snapshot)}
+            )
+        }
+    )
+    for digest in scenario.replacement_witness_digests:
+        witness = reduced_objects[digest]
+        witness_spec = getattr(witness, "spec", None)
+        bound_digest = getattr(witness_spec, "analysis_snapshot_digest", None)
+        baseline_digest = getattr(witness_spec, "baseline_snapshot_digest", None)
+        if bound_digest not in (None, reduced_snapshot.spec.analysis_basis_digest) or (
+            baseline_digest not in (None, reduced_snapshot.spec.analysis_basis_digest)
+        ):
+            blockers.append(f"perturbation_replacement_snapshot_mismatch:{digest}")
+    if blockers:
+        return ReducedSnapshot(None, {}, tuple(sorted(set(blockers))))
+    return ReducedSnapshot(reduced_snapshot, reduced_objects, ())
+
+
 def replay_perturbations(
     snapshot: AnalysisSnapshot,
     all_objects: dict[str, Document],
@@ -960,6 +1350,13 @@ def replay_perturbations(
     """Construct each reduced snapshot and rerun this same kernel from raw typed inputs."""
 
     active_budget = budget or Budget()
+    if suite.spec.baseline_snapshot_digest != snapshot.spec.analysis_basis_digest:
+        return {
+            "dimension": _result(
+                "violated", blockers=["perturbation_suite_baseline_snapshot_mismatch"]
+            ),
+            "scenarios": [],
+        }
     required = set(snapshot.spec.required_dimensions) - {"perturbation_robustness"}
     if not required.issubset(suite.spec.required_dimensions):
         return {
@@ -972,47 +1369,25 @@ def replay_perturbations(
     blockers: list[str] = []
     for scenario in suite.spec.scenarios:
         active_budget.spend()
-        removed = set(scenario.remove_object_digests)
-        reduced_objects = {
-            digest: item
-            for digest, item in all_objects.items()
-            if digest not in removed
-            and not (
-                isinstance(item, TrustPolicyDocument)
-                and any(
-                    principal.principal_id in scenario.remove_principal_ids
-                    for principal in item.spec.principals
-                )
+        reduction = reduce_snapshot(snapshot, all_objects, scenario)
+        if reduction.snapshot is None:
+            blockers.append(f"scenario_invalid:{scenario.scenario_id}")
+            scenario_results.append(
+                {
+                    "scenario_id": scenario.scenario_id,
+                    "reduced_snapshot_digest": None,
+                    "failed_dimensions": [],
+                    "reduction_blockers": list(reduction.blockers),
+                    "profile": None,
+                }
             )
-        }
-        reduced_refs = [item for item in snapshot.spec.object_digests if item not in removed]
-        reduced_witnesses = [
-            item for item in snapshot.spec.witness_digests if item not in removed
-        ] + list(scenario.replacement_witness_digests)
-        reduced_snapshot = snapshot.model_copy(
-            update={
-                "spec": snapshot.spec.model_copy(
-                    update={
-                        "object_digests": reduced_refs,
-                        "witness_digests": reduced_witnesses,
-                        "analysis_basis_digest": "sha256:" + "0" * 64,
-                    }
-                ),
-            }
-        )
-        reduced_snapshot = reduced_snapshot.model_copy(
-            update={
-                "spec": reduced_snapshot.spec.model_copy(
-                    update={"analysis_basis_digest": analysis_basis_digest(reduced_snapshot)}
-                )
-            }
-        )
+            continue
+        reduced_snapshot = reduction.snapshot
         profile = audit_snapshot(
             reduced_snapshot,
-            reduced_objects,
+            reduction.objects,
             budget=active_budget,
             include_robustness=False,
-            evaluation_at=scenario.expire_at,
         )
         failed = [
             name

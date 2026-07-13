@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import builtins
 from fractions import Fraction
+from itertools import combinations
 
 import pytest
 
@@ -28,6 +29,7 @@ from collective_phase_control_fabric.v6.structural_analysis import (
     enumerate_minimal_enablement_sets,
     enumerate_minimal_siphons,
     exact_flux_coupling,
+    exact_generalized_generative_raf,
     structural_closure,
     unfed_siphons,
 )
@@ -46,6 +48,29 @@ def transformation(
             inputs=inputs,
             outputs=outputs,
             uncatalyzed=True,
+            lifecycle=Lifecycle(valid_from=VALID_FROM, valid_until=VALID_UNTIL),
+        ),
+    )
+
+
+def catalyzed_transformation(
+    identifier: str,
+    inputs: dict[str, str],
+    outputs: dict[str, str],
+    *,
+    catalysts: tuple[str, ...] = (),
+    inhibitors: tuple[str, ...] = (),
+    uncatalyzed: bool = False,
+) -> TransformationAttestation:
+    return TransformationAttestation(
+        metadata=metadata(identifier),
+        spec=TransformationSpec(
+            transformation_id=identifier,
+            inputs=inputs,
+            outputs=outputs,
+            catalyst_clauses=([CatalystClause(all_of=list(catalysts))] if catalysts else []),
+            inhibitors=list(inhibitors),
+            uncatalyzed=uncatalyzed,
             lifecycle=Lifecycle(valid_from=VALID_FROM, valid_until=VALID_UNTIL),
         ),
     )
@@ -86,6 +111,115 @@ def test_minimal_siphons_and_fed_obligations_match_exhaustive_reference() -> Non
         Budget(operations=1000),
     )
     assert not limited.exhaustive
+
+
+def test_generalized_and_generative_raf_match_exhaustive_small_network_reference() -> None:
+    network = {
+        "catalyzed": catalyzed_transformation(
+            "catalyzed", {"A": "1"}, {"B": "1"}, catalysts=("C",)
+        ),
+        "catalyst-source": catalyzed_transformation(
+            "catalyst-source", {"A": "1"}, {"C": "1"}, uncatalyzed=True
+        ),
+    }
+    result = exact_generalized_generative_raf(
+        network,
+        {"A"},
+        set(),
+        set(),
+        Budget(operations=10_000),
+    )
+    assert result.exhaustive and result.full_set_is_raf
+    assert result.maximal_rafs == (("catalyst-source", "catalyzed"),)
+    assert result.generative_layers == (("catalyst-source",), ("catalyzed",))
+    assert set(result.generative_closure) == {"A", "B", "C"}
+
+    circular = {
+        "make-b": catalyzed_transformation("make-b", {"A": "1"}, {"B": "1"}, catalysts=("C",)),
+        "make-c": catalyzed_transformation("make-c", {"A": "1"}, {"C": "1"}, catalysts=("B",)),
+    }
+    circular_result = exact_generalized_generative_raf(
+        circular,
+        {"A"},
+        set(),
+        set(),
+        Budget(operations=10_000),
+    )
+    assert circular_result.full_set_is_raf
+    assert circular_result.generative_layers == ()
+    assert circular_result.generative_closure == ("A",)
+
+    inhibited = {
+        "productive": catalyzed_transformation(
+            "productive",
+            {"A": "1"},
+            {"B": "1"},
+            catalysts=("A",),
+            inhibitors=("X",),
+        ),
+        "inhibitor-source": catalyzed_transformation(
+            "inhibitor-source", {"A": "1"}, {"X": "1"}, uncatalyzed=True
+        ),
+    }
+    inhibited_result = exact_generalized_generative_raf(
+        inhibited,
+        {"A"},
+        set(),
+        set(),
+        Budget(operations=10_000),
+    )
+    assert not inhibited_result.full_set_is_raf
+    assert set(inhibited_result.maximal_rafs) == {
+        ("inhibitor-source",),
+        ("productive",),
+    }
+
+    identifiers = tuple(sorted(inhibited))
+    independently_valid: set[tuple[str, ...]] = set()
+    for size in range(1, len(identifiers) + 1):
+        for values in combinations(identifiers, size):
+            closure = {"A"}
+            changed = True
+            while changed:
+                changed = False
+                for identifier in values:
+                    spec = inhibited[identifier].spec
+                    if set(spec.inputs).issubset(closure):
+                        before = len(closure)
+                        closure.update(spec.outputs)
+                        changed = changed or before != len(closure)
+            if all(
+                not set(inhibited[identifier].spec.inhibitors).intersection(closure)
+                and (
+                    inhibited[identifier].spec.uncatalyzed
+                    or any(
+                        set(clause.all_of).issubset(closure)
+                        for clause in inhibited[identifier].spec.catalyst_clauses
+                    )
+                )
+                for identifier in values
+            ):
+                independently_valid.add(values)
+    independent_maximal = {
+        values
+        for values in independently_valid
+        if not any(set(values) < set(other) for other in independently_valid)
+    }
+    assert set(inhibited_result.maximal_rafs) == independent_maximal
+
+    oversized = {
+        f"r-{index}": catalyzed_transformation(
+            f"r-{index}", {"A": "1"}, {f"S-{index}": "1"}, uncatalyzed=True
+        )
+        for index in range(21)
+    }
+    assert not exact_generalized_generative_raf(
+        oversized,
+        {"A"},
+        set(),
+        set(),
+        Budget(operations=100),
+    ).exhaustive
 
 
 def test_cut_and_enablement_sets_are_semantically_minimal() -> None:

@@ -13,8 +13,9 @@ physical phase, causal treatment, or intelligent super-organism.
   <https://pubmed.ncbi.nlm.nih.gov/38774958/>. CPCF implements multi-catalyst clauses, inhibitors,
   explicit uncatalyzed operations, food provenance, and strictly prior generative layers.
 - CatReNet provides exact small-network RAF/CAF algorithm references:
-  <https://pubmed.ncbi.nlm.nih.gov/39163485/>. Exhaustive differential RAF tests are a release gate;
-  the current v0.6 kernel implements bounded generative closure but does not claim full CatReNet
+  <https://pubmed.ncbi.nlm.nih.gov/39163485/>. The v0.6 reference kernel now differentially checks
+  exact inhibited generalized RAF subsets and strict-prior generative layers for networks within a
+  20-transformation bound. It returns unknown beyond the bound and does not claim full CatReNet
   equivalence.
 - Horn and Jackson separate stoichiometric structure from dynamical and equilibrium conclusions:
   <https://doi.org/10.1007/BF00251225>. CPCF never promotes a balance identity to an equilibrium,
@@ -77,8 +78,10 @@ physical phase, causal treatment, or intelligent super-organism.
 
 - Strong and strong-cyclic FOND policies differ in their treatment of nondeterministic outcomes:
   <https://arxiv.org/abs/1806.09455>. CPCF uses bounded strong planning as its target semantics and
-  introduces no fairness or eventual-success assumption. Full-kernel successor recomputation is not
-  yet implemented.
+  introduces no fairness or eventual-success assumption. Each branch removes worst-case objects,
+  advances its exact resource trajectory, reruns the shared audit kernel, and keeps hypothetical
+  output pending until receipt-backed promotion. Signed capability admission remains a separate
+  authoritative-loader obligation.
 - DSSE authenticates payload type and bytes while leaving key management out of scope:
   <https://github.com/secure-systems-lab/dsse>. CPCF adds pinned identity, policy sequence, trusted
   time, and role-quorum semantics.

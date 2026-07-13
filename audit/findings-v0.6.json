@@ -71,8 +71,8 @@
       "severity": "critical",
       "exploit": "Incomplete siphon, coupling, cut, service-curve, or occurrence analysis can be mistaken for a negative result.",
       "affected_claim": "Exact bounded scientific profile",
-      "correction": "Closed result kinds and bounded exact reference algorithms now preserve exhaustion; large-network and mutation/differential release evidence remains required.",
-      "regression_test": "tests/test_v6_structural_analysis.py",
+      "correction": "Closed result kinds, an integrated intervention portfolio, inhibited generalized/generative RAF enumeration, and bounded exact reference algorithms preserve exhaustion; large-network and mutation release evidence remains required.",
+      "regression_test": "tests/test_v6_structural_analysis.py and tests/test_v6_intervention.py",
       "status": "partial"
     },
     {
@@ -80,18 +80,18 @@
       "severity": "critical",
       "exploit": "A perturbation can reuse baseline facts after expiry, revocation, or a typed value change.",
       "affected_claim": "Perturbation robustness",
-      "correction": "Object-removal replay exists; complete reduced-snapshot transformation classes remain required.",
-      "regression_test": "release gate: fresh-audit equivalence for every perturbation class",
-      "status": "open"
+      "correction": "Typed removal selectors, trusted-time advancement, replacement binding, and fresh shared-kernel replay are implemented; loader-authenticated replacements and every revocation/value-change integration path remain required.",
+      "regression_test": "tests/test_v6_science_assurance.py and release gate: authoritative fresh-audit equivalence for every perturbation class",
+      "status": "partial"
     },
     {
       "id": "V6-010",
       "severity": "critical",
       "exploit": "An abstract planner successor can retain science, authority, trial, or independence that an outcome removed.",
       "affected_claim": "Strong contingent control",
-      "correction": "Every branch must invoke the shared audit kernel over a complete successor snapshot.",
-      "regression_test": "release gate: full-snapshot AND-OR differential suite",
-      "status": "open"
+      "correction": "Every branch now keeps hypothetical output pending, propagates exact resource and operational facets, applies worst-case removals, and invokes the shared audit kernel; API enforcement of loader-approved capabilities remains required.",
+      "regression_test": "tests/test_v6_planning_assurance.py and release gate: authoritative full-snapshot AND-OR differential suite",
+      "status": "partial"
     },
     {
       "id": "V6-011",
@@ -164,6 +164,42 @@
       "correction": "The pypi environment records kadubon with prevent_self_review=false exactly as configured, and all audit and release documents label this as self-approval rather than independent review.",
       "regression_test": "GitHub environment settings audit and docs/release.md",
       "status": "accepted_risk"
+    },
+    {
+      "id": "V6-019",
+      "severity": "critical",
+      "exploit": "A declared branch output could enter live evidence and satisfy a blocker before a runner receipt and independent projection approval existed.",
+      "affected_claim": "Evidence-bound contingent control",
+      "correction": "Branch additions create pending projections only; live evidence changes only through authoritative promotion.",
+      "regression_test": "tests/test_v6_planning_assurance.py::test_hypothetical_outputs_remain_pending_and_removals_trigger_fresh_audit",
+      "status": "closed"
+    },
+    {
+      "id": "V6-020",
+      "severity": "critical",
+      "exploit": "A perturbation caller could choose an unsigned evaluation timestamp and manufacture expiry or continued validity.",
+      "affected_claim": "Temporal perturbation integrity",
+      "correction": "Perturbation time advancement now requires a scoped monotonic trusted-time receipt digest.",
+      "regression_test": "tests/test_v6_science_assurance.py::test_typed_perturbation_reduction_requires_live_selectors_and_trusted_time",
+      "status": "closed"
+    },
+    {
+      "id": "V6-021",
+      "severity": "high",
+      "exploit": "Duplicate live typed identifiers could be silently overwritten during index construction.",
+      "affected_claim": "Deterministic scientific provenance",
+      "correction": "The provenance kernel rejects duplicate live identities before scientific indexing.",
+      "regression_test": "tests/test_v6_science_assurance.py::test_duplicate_live_typed_identity_invalidates_provenance",
+      "status": "closed"
+    },
+    {
+      "id": "V6-022",
+      "severity": "high",
+      "exploit": "A finite-horizon persistence plan could use unmeasured or interval-infeasible action rates, and a zero-lower-bound supply could discharge a siphon obligation.",
+      "affected_claim": "Finite-horizon resource persistence",
+      "correction": "Every used transformation requires a live rate interval, exact action rate must lie inside it, and fed-siphon credit requires positive lower supply.",
+      "regression_test": "tests/test_v6_science_assurance.py and tests/test_v6_science_planner.py",
+      "status": "closed"
     }
   ]
 }

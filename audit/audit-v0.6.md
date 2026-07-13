@@ -51,14 +51,20 @@ This audit lists known findings only. It does not assert that undiscovered defec
    and output admission, receipt replay protection, cleanup evidence, and pending-only projection.
    Its multi-replica PostgreSQL repository, deployed Envoy sidecar, and integration evidence are not
    complete.
-4. Minimal/fed siphons, exact flux coupling, cut/enablement sets, deterministic service curves, and
-   bounded occurrence prefixes now have closed result kinds and bounded exact reference algorithms.
-   Their large-network solver integration, mutation score, and exhaustive differential gate remain
+4. Minimal/fed siphons, exact flux coupling, cut/enablement sets, deterministic service curves,
+   inhibited generalized/generative RAFs, and bounded occurrence prefixes now have closed result
+   kinds, an integrated intervention portfolio, exact bounded reference algorithms, and
+   small-network differential tests. Large-network solver profiles and the full mutation gate remain
    incomplete.
-5. Perturbations support bounded object removal but not every expiry, revocation, and typed value
-   change required by the plan.
-6. Planner successors do not recompute the complete provenance, lifecycle, scientific,
-   coordination, trial, and projection snapshot for every outcome.
+5. Perturbations now resolve typed object, principal, key, source, state, transformation, resource,
+   supply, rate, catalyst, inhibitor, verifier, infrastructure, coordination, and independence
+   selectors; they can advance only through a trusted-time receipt and can bind typed replacement
+   objects. A loader-authenticated signed replacement chain and every revocation/value-change
+   integration path remain release gates.
+6. Planner successors keep hypothetical additions pending, preserve exact resource trajectories and
+   operational facets, apply worst-case removal, and rerun the shared audit kernel for every outcome.
+   API use of only loader-approved capabilities and differential coverage for every typed replacement
+   remains incomplete.
 7. Coordination and trial kernels validate supplied records, but the authoritative API does not yet
    recompute every event/registration/amendment/result quorum on admission.
 8. Remote onboarding still returns conservative bootstrap blockers instead of aggregating every
@@ -78,3 +84,18 @@ tags, and GitHub Releases remain prohibited. The pending publisher claims are pr
 satisfy the independent-review release blocker. `PYPI_PUBLISH_ENABLED` remains false.
 
 Machine-readable status is in `audit/findings-v0.6.json`.
+
+## Science/control assurance added in the staged implementation
+
+- The perturbation API no longer accepts an unsigned caller-selected evaluation time. Time movement
+  requires a referenced `trusted-time-receipt`, must be monotonic, and must match tenant/workspace.
+- Duplicate live typed identities now invalidate provenance instead of being overwritten by map
+  construction.
+- A persistence action count must have a live transformation-rate attestation and remain inside its
+  exact rational interval; only a positive lower supply rate can discharge a fed-siphon obligation.
+- Inhibited generalized RAF membership is enumerated exactly within the fixed 20-transformation
+  profile, and strict-prior generative layers are checked separately. Exhaustion remains unknown.
+- Planner `must_add` values create pending projections only. They cannot enter `live_objects`, clear a
+  scientific dimension, or become evidence before independent receipt-backed promotion.
+- The focused science, structural, planning, and intervention branch-coverage gate is above 95
+  percent. Full mutation and external integration gates remain blocking.

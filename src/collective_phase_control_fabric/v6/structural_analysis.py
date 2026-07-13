@@ -74,6 +74,16 @@ class OccurrencePrefix:
     exhaustive: bool
 
 
+@dataclass(frozen=True)
+class RafAnalysis:
+    maximal_rafs: tuple[tuple[str, ...], ...]
+    full_set_is_raf: bool
+    generalized_closure: tuple[str, ...]
+    generative_layers: tuple[tuple[str, ...], ...]
+    generative_closure: tuple[str, ...]
+    exhaustive: bool
+
+
 def _flows(
     transformation: TransformationAttestation,
 ) -> tuple[set[str], set[str]]:
@@ -161,6 +171,132 @@ def structural_closure(
                 available.update(outputs)
                 changed = True
     return available
+
+
+def _raf_closure(
+    food: Iterable[str],
+    identifiers: frozenset[str],
+    transformations: Mapping[str, TransformationAttestation],
+    budget: BudgetLike,
+) -> set[str]:
+    closure = set(food)
+    changed = True
+    while changed:
+        changed = False
+        for identifier in sorted(identifiers):
+            budget.spend()
+            inputs, outputs = _flows(transformations[identifier])
+            if inputs.issubset(closure):
+                before = len(closure)
+                closure.update(outputs)
+                changed = changed or len(closure) > before
+    return closure
+
+
+def _is_generalized_raf(
+    identifiers: frozenset[str],
+    transformations: Mapping[str, TransformationAttestation],
+    closure: set[str],
+    evidence: set[str],
+    authority: set[str],
+) -> bool:
+    if not identifiers:
+        return False
+    for identifier in identifiers:
+        spec = transformations[identifier].spec
+        inputs, _ = _flows(transformations[identifier])
+        if not inputs.issubset(closure):
+            return False
+        if set(spec.inhibitors).intersection(closure):
+            return False
+        if not set(spec.required_evidence).issubset(evidence):
+            return False
+        if not set(spec.required_authority).issubset(authority):
+            return False
+        if not spec.uncatalyzed and not any(
+            set(clause.all_of).issubset(closure) for clause in spec.catalyst_clauses
+        ):
+            return False
+    return True
+
+
+def exact_generalized_generative_raf(
+    transformations: Mapping[str, TransformationAttestation],
+    food: Iterable[str],
+    evidence: Iterable[str],
+    authority: Iterable[str],
+    budget: BudgetLike,
+    *,
+    maximum_transformations: int = 20,
+) -> RafAnalysis:
+    """Enumerate inhibited generalized RAFs and check strict-prior generative layers exactly."""
+
+    identifiers = tuple(sorted(transformations))
+    food_set = set(food)
+    evidence_set = set(evidence)
+    authority_set = set(authority)
+    if len(identifiers) > maximum_transformations:
+        return RafAnalysis((), False, tuple(sorted(food_set)), (), tuple(sorted(food_set)), False)
+    valid: list[frozenset[str]] = []
+    closure_by_subset: dict[frozenset[str], set[str]] = {}
+    for size in range(1, len(identifiers) + 1):
+        for values in combinations(identifiers, size):
+            budget.spend()
+            candidate = frozenset(values)
+            closure = _raf_closure(food_set, candidate, transformations, budget)
+            if _is_generalized_raf(
+                candidate,
+                transformations,
+                closure,
+                evidence_set,
+                authority_set,
+            ):
+                valid.append(candidate)
+                closure_by_subset[candidate] = closure
+    maximal = [candidate for candidate in valid if not any(candidate < other for other in valid)]
+    full_set = frozenset(identifiers)
+    generalized_closure = closure_by_subset.get(full_set, set(food_set))
+
+    generative_available = set(food_set)
+    remaining = set(identifiers)
+    layers: list[tuple[str, ...]] = []
+    while remaining:
+        layer: list[str] = []
+        for identifier in sorted(remaining):
+            budget.spend()
+            item = transformations[identifier]
+            spec = item.spec
+            inputs, _ = _flows(item)
+            if not inputs.issubset(generative_available):
+                continue
+            if set(spec.inhibitors).intersection(generative_available):
+                continue
+            if not set(spec.required_evidence).issubset(evidence_set):
+                continue
+            if not set(spec.required_authority).issubset(authority_set):
+                continue
+            if not spec.uncatalyzed and not any(
+                set(clause.all_of).issubset(generative_available)
+                for clause in spec.catalyst_clauses
+            ):
+                continue
+            layer.append(identifier)
+        if not layer:
+            break
+        produced = {
+            output for identifier in layer for output in _flows(transformations[identifier])[1]
+        }
+        generative_available.update(produced)
+        remaining.difference_update(layer)
+        layers.append(tuple(layer))
+    return RafAnalysis(
+        maximal_rafs=tuple(sorted(tuple(sorted(item)) for item in maximal)),
+        full_set_is_raf=full_set in closure_by_subset,
+        generalized_closure=tuple(sorted(generalized_closure)),
+        generative_layers=tuple(layers),
+        generative_closure=tuple(sorted(generative_available)),
+        exhaustive=True,
+    )
 
 
 def enumerate_minimal_cut_sets(
