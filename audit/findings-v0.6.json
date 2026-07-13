@@ -137,6 +137,15 @@
       "correction": "Generated references force LF, platform-only APIs use runtime module dictionaries, role DDL uses a safely composed literal, and Mutmut copies the full source tree while mutating only critical modules.",
       "regression_test": ".github/workflows/ci.yml platform, PostgreSQL, and mutation jobs",
       "status": "partial"
+    },
+    {
+      "id": "V6-016",
+      "severity": "critical",
+      "exploit": "An online Alembic command can report a successful upgrade while its uncommitted DDL is rolled back when the connection closes.",
+      "affected_claim": "Deployable PostgreSQL control-plane schema",
+      "correction": "The online migration now configures and executes every revision inside Alembic's explicit transaction boundary.",
+      "regression_test": "tests/test_v6_postgres.py and .github/workflows/ci.yml postgres-integration",
+      "status": "closed"
     }
   ]
 }
