@@ -130,7 +130,7 @@ jobs:
           enable-cache: true
       - run: uv sync --frozen --all-extras --group dev --group security
       - run: uv run --frozen mutmut run
-      - run: uv run --frozen mutmut results --all > mutation-results.txt
+      - run: uv run --frozen mutmut results --all true > mutation-results.txt
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 
   release-assets:

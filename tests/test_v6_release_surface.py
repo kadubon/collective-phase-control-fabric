@@ -91,6 +91,7 @@ def test_publication_hygiene_rejects_sensitive_and_local_content(tmp_path: Path)
 
 def test_release_workflow_is_fail_closed() -> None:
     workflow = (ROOT / ".github" / "workflows" / "workflow.yml").read_text(encoding="utf-8")
+    ci_workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     assert "workflow_dispatch:" in workflow
     assert "github.event_name == 'release'" in workflow
     assert "github.event.release.prerelease == false" in workflow
@@ -100,6 +101,8 @@ def test_release_workflow_is_fail_closed() -> None:
     assert "pypa/gh-action-pypi-publish@" in workflow
     assert "packages-dir: dist/" in workflow
     assert "--cov-fail-under=95" in workflow
+    assert "mutmut results --all true > mutation-results.txt" in workflow
+    assert "mutmut results --all true > mutation-results.txt" in ci_workflow
     assert "check_mutation_score.py mutation-results.txt --minimum 85" in workflow
 
 
