@@ -60,6 +60,13 @@ def test_result_and_attestation_kinds_are_closed_and_registered() -> None:
         "cut-set-analysis-result",
         "occurrence-prefix-result",
         "intervention-portfolio",
+        "signed-statement",
+        "operational-profile-result",
+        "perturbation-result",
+        "planner-result",
+        "trial-assessment",
+        "coordination-session",
+        "repair-record",
     }.issubset(DOCUMENT_MODELS)
 
 

@@ -97,6 +97,7 @@ def test_cli_request_reports_control_plane_failures_without_token_leakage(
 
 def test_cli_remote_command_routes_preserve_mutation_and_generation_contracts(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     calls: list[tuple[str, str, dict[str, object]]] = []
 
@@ -111,8 +112,38 @@ def test_cli_remote_command_routes_preserve_mutation_and_generation_contracts(
     )
     assert cli_entry(["schema", "list", "--json"]) == 0
     assert cli_entry(["bundle", "verify", "bundle.zip", "--json"]) == 0
-    assert cli_entry(["workspace", "create", "workspace-a", "--json"]) == 0
+    assert (
+        cli_entry(
+            [
+                "workspace",
+                "create",
+                "workspace-a",
+                "--root-spki-fingerprint",
+                "sha256:" + "1" * 64,
+                "--genesis-envelope-fingerprint",
+                "sha256:" + "2" * 64,
+                "--json",
+            ]
+        )
+        == 0
+    )
     assert cli_entry(["workspace", "status", "workspace-a", "--json"]) == 0
+    material = tmp_path / "material.json"
+    material.write_bytes(b"{}")
+    assert (
+        cli_entry(
+            [
+                "object",
+                "upload",
+                "workspace-a",
+                str(material),
+                "--generation",
+                "sha256:" + "a" * 64,
+                "--json",
+            ]
+        )
+        == 0
+    )
     assert (
         cli_entry(
             [
@@ -129,8 +160,28 @@ def test_cli_remote_command_routes_preserve_mutation_and_generation_contracts(
     assert cli_entry(["audit", "status", "job-a", "--json"]) == 0
     assert cli_entry(["agent", "onboard", "--workspace", "workspace-a", "--json"]) == 0
     assert calls == [
-        ("POST", "/v1/workspaces", {"body": {"workspace_id": "workspace-a"}, "mutation": True}),
+        (
+            "POST",
+            "/v1/workspaces",
+            {
+                "body": {
+                    "workspace_id": "workspace-a",
+                    "root_spki_fingerprint": "sha256:" + "1" * 64,
+                    "genesis_envelope_fingerprint": "sha256:" + "2" * 64,
+                },
+                "mutation": True,
+            },
+        ),
         ("GET", "/v1/workspaces/workspace-a", {}),
+        (
+            "PUT",
+            "/v1/workspaces/workspace-a/cas/sha256/44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            {
+                "content": b"{}",
+                "mutation": True,
+                "generation": "sha256:" + "a" * 64,
+            },
+        ),
         (
             "POST",
             "/v1/workspaces/workspace-a/analyses",

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import secrets
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -16,6 +17,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    select,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -28,10 +30,26 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from collective_phase_control_fabric.v6.authority import (
+    AuthoritativeView,
+    load_authoritative_generation,
+)
 from collective_phase_control_fabric.v6.canonical import (
     canonical_bytes,
     digest_bytes,
     loads_bounded,
+)
+from collective_phase_control_fabric.v6.models import (
+    AuditEvent,
+    TrustedTimeReceipt,
+    TrustPolicyDocument,
+    WorkspaceGeneration,
+)
+from collective_phase_control_fabric.v6.registry import document_digest, parse_document
+from collective_phase_control_fabric.v6.storage import (
+    ObjectStore,
+    generation_digest,
+    validate_ledger,
 )
 from cpcf_api.app import ApiResponse, WorkspaceRecord
 
@@ -46,6 +64,8 @@ class WorkspaceRow(Base):
     workspace_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     current_generation_digest: Mapped[str] = mapped_column(String(71), nullable=False)
     generation_sequence: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    root_spki_fingerprint: Mapped[str] = mapped_column(String(71), nullable=False)
+    genesis_envelope_fingerprint: Mapped[str] = mapped_column(String(71), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
@@ -75,6 +95,47 @@ class GenerationRow(Base):
             ["workspaces.tenant_id", "workspaces.workspace_id"],
         ),
         UniqueConstraint("tenant_id", "workspace_id", "sequence"),
+    )
+
+
+class LedgerRow(Base):
+    __tablename__ = "object_ledger"
+    tenant_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    workspace_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    generation_digest: Mapped[str] = mapped_column(String(71), primary_key=True)
+    object_digest: Mapped[str] = mapped_column(String(71), primary_key=True)
+    object_kind: Mapped[str] = mapped_column(String(128), nullable=False)
+    authority_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    source_digests: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "workspace_id", "generation_digest"],
+            ["generations.tenant_id", "generations.workspace_id", "generations.generation_digest"],
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "object_digest"],
+            ["objects.tenant_id", "objects.object_digest"],
+        ),
+    )
+
+
+class QuarantineRow(Base):
+    __tablename__ = "quarantine"
+    tenant_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    workspace_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    object_digest: Mapped[str] = mapped_column(String(71), primary_key=True)
+    reason_code: Mapped[str] = mapped_column(String(128), nullable=False)
+    quarantined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "workspace_id"],
+            ["workspaces.tenant_id", "workspaces.workspace_id"],
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "object_digest"],
+            ["objects.tenant_id", "objects.object_digest"],
+        ),
     )
 
 
@@ -117,7 +178,9 @@ TENANT_TABLES = (
     "workspaces",
     "objects",
     "generations",
+    "object_ledger",
     "audit_events",
+    "quarantine",
     "outbox",
     "idempotency_keys",
 )
@@ -203,6 +266,106 @@ async def lock_workspace(
     return row
 
 
+@dataclass(frozen=True)
+class ObjectAdmission:
+    object_digest: str
+    object_kind: str
+    authority_status: str
+    byte_length: int
+    object_key: str
+
+
+@dataclass(frozen=True)
+class GenerationMutation:
+    tenant_id: str
+    workspace_id: str
+    expected_generation: str
+    generation: WorkspaceGeneration
+    audit_event: AuditEvent
+    idempotency_key: str
+    request_digest: str
+    response: ApiResponse
+    object_admissions: tuple[ObjectAdmission, ...] = ()
+    quarantine_additions: tuple[tuple[str, str], ...] = ()
+    quarantine_resolutions: tuple[str, ...] = ()
+    outbox_topic: str | None = None
+    outbox_payload: dict[str, Any] = field(default_factory=dict)
+
+
+def _validate_generation_mutation(
+    mutation: GenerationMutation,
+    object_store: ObjectStore,
+) -> None:
+    generation = mutation.generation
+    if generation.metadata.tenant_id != mutation.tenant_id:
+        raise ValueError("generation_tenant_mismatch")
+    if generation.metadata.workspace_id != mutation.workspace_id:
+        raise ValueError("generation_workspace_mismatch")
+    if generation.spec.generation_digest != generation_digest(generation):
+        raise ValueError("generation_digest_mismatch")
+    if generation.spec.prior_generation_digest != mutation.expected_generation:
+        raise ValueError("generation_predecessor_mismatch")
+    if not 16 <= len(mutation.idempotency_key) <= 128:
+        raise ValueError("idempotency_key_length_invalid")
+    request_hash = mutation.request_digest.removeprefix("sha256:")
+    if (
+        len(request_hash) != 64
+        or request_hash != request_hash.lower()
+        or any(character not in "0123456789abcdef" for character in request_hash)
+    ):
+        raise ValueError("request_digest_invalid")
+    if mutation.response.generation_digest != generation.spec.generation_digest:
+        raise ValueError("response_generation_binding_mismatch")
+    if document_digest(mutation.audit_event) != generation.spec.history_head_digest:
+        raise ValueError("generation_history_head_mismatch")
+    if mutation.audit_event.metadata.tenant_id != mutation.tenant_id:
+        raise ValueError("audit_event_tenant_mismatch")
+    if mutation.audit_event.metadata.workspace_id != mutation.workspace_id:
+        raise ValueError("audit_event_workspace_mismatch")
+    ledger_reasons = validate_ledger(generation, object_store)
+    if ledger_reasons:
+        raise ValueError("generation_ledger_invalid:" + ",".join(ledger_reasons))
+    admissions = {item.object_digest: item for item in mutation.object_admissions}
+    if len(admissions) != len(mutation.object_admissions):
+        raise ValueError("object_admission_digest_duplicate")
+    ledger = {item.object_digest: item for item in generation.spec.ledger}
+    for digest, admission in admissions.items():
+        entry = ledger.get(digest)
+        if entry is None:
+            raise ValueError("object_admission_not_in_generation")
+        if (
+            entry.object_kind != admission.object_kind
+            or entry.authority_status != admission.authority_status
+        ):
+            raise ValueError("object_admission_ledger_mismatch")
+        if admission.byte_length != len(object_store.get(mutation.tenant_id, digest)):
+            raise ValueError("object_admission_length_mismatch")
+        key_parts = admission.object_key.split("/")
+        if (
+            "\\" in admission.object_key
+            or any(part in {"", ".", ".."} for part in key_parts)
+            or key_parts[-3:] != [mutation.tenant_id, "sha256", digest[7:]]
+        ):
+            raise ValueError("object_admission_key_not_tenant_digest_scoped")
+    quarantine_digests = [digest for digest, _ in mutation.quarantine_additions]
+    if len(quarantine_digests) != len(set(quarantine_digests)):
+        raise ValueError("quarantine_addition_duplicate")
+    if len(mutation.quarantine_resolutions) != len(set(mutation.quarantine_resolutions)):
+        raise ValueError("quarantine_resolution_duplicate")
+
+
+def _quarantine_interrupted_uploads(
+    object_store: ObjectStore,
+    tenant_id: str,
+    admissions: tuple[ObjectAdmission, ...],
+) -> None:
+    quarantine = getattr(object_store, "quarantine_unreferenced", None)
+    if not callable(quarantine):
+        return
+    for admission in admissions:
+        quarantine(tenant_id, admission.object_digest, "database_transaction_rolled_back")
+
+
 class PostgresBackend:
     """Serializable tenant backend using forced RLS and a transactional outbox."""
 
@@ -213,7 +376,13 @@ class PostgresBackend:
         async with self.sessions() as session:
             await assert_application_role(session)
 
-    async def create_workspace(self, tenant_id: str, workspace_id: str) -> WorkspaceRecord:
+    async def create_workspace(
+        self,
+        tenant_id: str,
+        workspace_id: str,
+        root_spki_fingerprint: str,
+        genesis_envelope_fingerprint: str,
+    ) -> WorkspaceRecord:
         now = datetime.now(UTC)
         generation = digest_bytes(
             canonical_bytes(
@@ -221,6 +390,8 @@ class PostgresBackend:
                     "tenant_id": tenant_id,
                     "workspace_id": workspace_id,
                     "sequence": 0,
+                    "root_spki_fingerprint": root_spki_fingerprint,
+                    "genesis_envelope_fingerprint": genesis_envelope_fingerprint,
                     "created_at": now.isoformat(),
                 }
             )
@@ -234,12 +405,20 @@ class PostgresBackend:
                         workspace_id=workspace_id,
                         current_generation_digest=generation,
                         generation_sequence=0,
+                        root_spki_fingerprint=root_spki_fingerprint,
+                        genesis_envelope_fingerprint=genesis_envelope_fingerprint,
                         created_at=now,
                     )
                 )
         except IntegrityError as error:
             raise ValueError("workspace_already_exists") from error
-        return WorkspaceRecord(tenant_id, workspace_id, generation)
+        return WorkspaceRecord(
+            tenant_id,
+            workspace_id,
+            generation,
+            root_spki_fingerprint=root_spki_fingerprint,
+            genesis_envelope_fingerprint=genesis_envelope_fingerprint,
+        )
 
     async def workspace(self, tenant_id: str, workspace_id: str) -> WorkspaceRecord:
         async with self.sessions() as session:
@@ -254,7 +433,262 @@ class PostgresBackend:
                 workspace_id=row.workspace_id,
                 generation_digest=row.current_generation_digest,
                 sequence=row.generation_sequence,
+                root_spki_fingerprint=row.root_spki_fingerprint,
+                genesis_envelope_fingerprint=row.genesis_envelope_fingerprint,
             )
+
+    async def authoritative_view(
+        self,
+        tenant_id: str,
+        workspace_id: str,
+        object_store: ObjectStore,
+        *,
+        policy: TrustPolicyDocument,
+        trusted_time: TrustedTimeReceipt,
+    ) -> AuthoritativeView:
+        """Load one DB snapshot and route every authoritative read through the shared loader."""
+
+        async with self.sessions() as session:
+            await set_tenant(session, tenant_id)
+            workspace = await session.get(
+                WorkspaceRow,
+                {"tenant_id": tenant_id, "workspace_id": workspace_id},
+            )
+            if workspace is None:
+                raise ValueError("workspace_not_found")
+            row = await session.get(
+                GenerationRow,
+                {
+                    "tenant_id": tenant_id,
+                    "workspace_id": workspace_id,
+                    "generation_digest": workspace.current_generation_digest,
+                },
+            )
+            if row is None:
+                raise ValueError("workspace_generation_not_admitted")
+            parsed = parse_document(row.manifest)
+            if not isinstance(parsed, WorkspaceGeneration):
+                raise ValueError("workspace_generation_document_required")
+            ledger_result = await session.execute(
+                select(LedgerRow).where(
+                    LedgerRow.tenant_id == tenant_id,
+                    LedgerRow.workspace_id == workspace_id,
+                    LedgerRow.generation_digest == workspace.current_generation_digest,
+                )
+            )
+            stored_ledger = {
+                (
+                    item.object_digest,
+                    item.object_kind,
+                    item.authority_status,
+                    tuple(item.source_digests),
+                )
+                for item in ledger_result.scalars().all()
+            }
+            manifest_ledger = {
+                (
+                    item.object_digest,
+                    item.object_kind,
+                    item.authority_status,
+                    tuple(item.source_digests),
+                )
+                for item in parsed.spec.ledger
+            }
+            if stored_ledger != manifest_ledger:
+                raise RuntimeError("database_ledger_manifest_mismatch")
+            return load_authoritative_generation(
+                parsed,
+                object_store,
+                policy=policy,
+                trusted_time=trusted_time,
+                expected_root_spki_fingerprint=workspace.root_spki_fingerprint,
+                expected_genesis_envelope_fingerprint=workspace.genesis_envelope_fingerprint,
+            )
+
+    async def commit_generation(
+        self,
+        mutation: GenerationMutation,
+        object_store: ObjectStore,
+    ) -> ApiResponse:
+        """Atomically commit every authoritative database effect for one generation."""
+
+        _validate_generation_mutation(mutation, object_store)
+        now = datetime.now(UTC)
+        admissions = {item.object_digest: item for item in mutation.object_admissions}
+        try:
+            async with self.sessions.begin() as session:
+                await session.execute(text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"))
+                await set_tenant(session, mutation.tenant_id)
+                existing_idempotency = await session.get(
+                    IdempotencyRow,
+                    {
+                        "tenant_id": mutation.tenant_id,
+                        "idempotency_key": mutation.idempotency_key,
+                    },
+                )
+                if existing_idempotency is not None:
+                    if not secrets.compare_digest(
+                        existing_idempotency.request_digest, mutation.request_digest
+                    ):
+                        raise ValueError("idempotency_key_reused_with_different_request")
+                    return ApiResponse.model_validate(
+                        loads_bounded(existing_idempotency.response_body)
+                    )
+                workspace = await lock_workspace(
+                    session,
+                    mutation.tenant_id,
+                    mutation.workspace_id,
+                    mutation.expected_generation,
+                )
+                if mutation.generation.spec.sequence != workspace.generation_sequence + 1:
+                    raise ValueError("generation_sequence_mismatch")
+                prior_generation = await session.get(
+                    GenerationRow,
+                    {
+                        "tenant_id": mutation.tenant_id,
+                        "workspace_id": mutation.workspace_id,
+                        "generation_digest": mutation.expected_generation,
+                    },
+                )
+                prior_history_head: str | None = None
+                if prior_generation is not None:
+                    prior_spec = prior_generation.manifest.get("spec", {})
+                    if isinstance(prior_spec, dict):
+                        candidate = prior_spec.get("history_head_digest")
+                        prior_history_head = candidate if isinstance(candidate, str) else None
+                if mutation.audit_event.spec.prior_event_digest != prior_history_head:
+                    raise ValueError("audit_event_predecessor_mismatch")
+                for entry in mutation.generation.spec.ledger:
+                    stored = await session.get(
+                        ObjectRow,
+                        {
+                            "tenant_id": mutation.tenant_id,
+                            "object_digest": entry.object_digest,
+                        },
+                    )
+                    admission = admissions.get(entry.object_digest)
+                    if stored is None:
+                        if admission is None:
+                            raise ValueError("object_admission_required")
+                        session.add(
+                            ObjectRow(
+                                tenant_id=mutation.tenant_id,
+                                object_digest=admission.object_digest,
+                                object_kind=admission.object_kind,
+                                authority_status=admission.authority_status,
+                                byte_length=admission.byte_length,
+                                object_key=admission.object_key,
+                                created_at=now,
+                            )
+                        )
+                    elif stored.object_kind != entry.object_kind or stored.byte_length != len(
+                        object_store.get(mutation.tenant_id, entry.object_digest)
+                    ):
+                        raise ValueError("stored_object_metadata_mismatch")
+                session.add(
+                    GenerationRow(
+                        tenant_id=mutation.tenant_id,
+                        workspace_id=mutation.workspace_id,
+                        generation_digest=mutation.generation.spec.generation_digest,
+                        sequence=mutation.generation.spec.sequence,
+                        prior_generation_digest=mutation.expected_generation,
+                        manifest=mutation.generation.model_dump(mode="json", exclude_none=True),
+                        created_at=now,
+                    )
+                )
+                for entry in mutation.generation.spec.ledger:
+                    session.add(
+                        LedgerRow(
+                            tenant_id=mutation.tenant_id,
+                            workspace_id=mutation.workspace_id,
+                            generation_digest=mutation.generation.spec.generation_digest,
+                            object_digest=entry.object_digest,
+                            object_kind=entry.object_kind,
+                            authority_status=entry.authority_status,
+                            source_digests=list(entry.source_digests),
+                        )
+                    )
+                session.add(
+                    AuditEventRow(
+                        tenant_id=mutation.tenant_id,
+                        workspace_id=mutation.workspace_id,
+                        event_sequence=mutation.generation.spec.sequence,
+                        event_digest=document_digest(mutation.audit_event),
+                        prior_event_digest=mutation.audit_event.spec.prior_event_digest,
+                        event=mutation.audit_event.model_dump(mode="json", exclude_none=True),
+                    )
+                )
+                for digest, reason_code in mutation.quarantine_additions:
+                    if digest not in {
+                        item.object_digest for item in mutation.generation.spec.ledger
+                    }:
+                        raise ValueError("quarantine_object_not_in_generation")
+                    existing_quarantine = await session.get(
+                        QuarantineRow,
+                        {
+                            "tenant_id": mutation.tenant_id,
+                            "workspace_id": mutation.workspace_id,
+                            "object_digest": digest,
+                        },
+                    )
+                    if existing_quarantine is None:
+                        session.add(
+                            QuarantineRow(
+                                tenant_id=mutation.tenant_id,
+                                workspace_id=mutation.workspace_id,
+                                object_digest=digest,
+                                reason_code=reason_code,
+                                quarantined_at=now,
+                            )
+                        )
+                    else:
+                        existing_quarantine.reason_code = reason_code
+                        existing_quarantine.quarantined_at = now
+                        existing_quarantine.resolved_at = None
+                for digest in mutation.quarantine_resolutions:
+                    existing_quarantine = await session.get(
+                        QuarantineRow,
+                        {
+                            "tenant_id": mutation.tenant_id,
+                            "workspace_id": mutation.workspace_id,
+                            "object_digest": digest,
+                        },
+                    )
+                    if existing_quarantine is None or existing_quarantine.resolved_at is not None:
+                        raise ValueError("quarantine_resolution_not_active")
+                    existing_quarantine.resolved_at = now
+                if mutation.outbox_topic is not None:
+                    session.add(
+                        OutboxRow(
+                            tenant_id=mutation.tenant_id,
+                            message_id=secrets.token_hex(16),
+                            workspace_id=mutation.workspace_id,
+                            topic=mutation.outbox_topic,
+                            payload=dict(mutation.outbox_payload),
+                            available_at=now,
+                        )
+                    )
+                response_body = canonical_bytes(
+                    mutation.response.model_dump(mode="json", exclude_none=True)
+                )
+                session.add(
+                    IdempotencyRow(
+                        tenant_id=mutation.tenant_id,
+                        idempotency_key=mutation.idempotency_key,
+                        request_digest=mutation.request_digest,
+                        response_status=200,
+                        response_body=response_body,
+                        expires_at=now + timedelta(hours=24),
+                    )
+                )
+                workspace.current_generation_digest = mutation.generation.spec.generation_digest
+                workspace.generation_sequence = mutation.generation.spec.sequence
+        except Exception:
+            _quarantine_interrupted_uploads(
+                object_store, mutation.tenant_id, mutation.object_admissions
+            )
+            raise
+        return mutation.response
 
     async def enqueue(self, tenant_id: str, workspace_id: str, topic: str) -> str:
         message_id = secrets.token_hex(16)

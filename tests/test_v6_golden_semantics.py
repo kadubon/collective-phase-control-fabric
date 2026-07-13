@@ -57,7 +57,7 @@ from tests.v6_helpers import NOW, metadata, trust_fixture
 def test_native_digest_and_encoding_goldens_are_stable() -> None:
     snapshot, snapshot_objects = build_science_fixture()
     assert analysis_basis_digest(snapshot) == (
-        "sha256:1eebba8f157d3f057ec1465027d524e16a35b70305b158adad347b20a8bfe7a9"
+        "sha256:f60d254ed84ef9830d2fad2e63987f49e6d28d73b3fa8d6b624a5d0067564b4c"
     )
     capability_value = capability("golden", "blocker", "3/2")
     action_value = action("action:golden", capability_value)
@@ -77,7 +77,7 @@ def test_native_digest_and_encoding_goldens_are_stable() -> None:
         "sha256:134da671f3f3f573195def58972a3192edd4c35611718cf0b33d0eb8fea52706"
     )
     assert digest_bytes(canonical_bytes(registry_manifest())) == (
-        "sha256:19bb56d37d31b9f7bdd202c8cf076d937fbcc2091ff4f62a0ae026cf0bfc1a0c"
+        "sha256:edc802e3fc881ee42e8e13f64dfdd1f13d1d5a2b89409510b1cf59659a9c735a"
     )
     assert dsse_pae("type", b"abc") == b"DSSEv1 4 type 3 abc"
     assert dsse_pae(PAYLOAD_TYPE, b"") == (
@@ -85,7 +85,7 @@ def test_native_digest_and_encoding_goldens_are_stable() -> None:
     )
     profile = audit_snapshot(snapshot, snapshot_objects)  # type: ignore[arg-type]
     assert digest_bytes(canonical_bytes(profile.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:6c4df49c7adb8ace7169aa308ed022a64b9407dbba06b71cb010b008216e8c77"
+        "sha256:70048ff7a69830d5574041e7d3bb810d2cbbd01d3caa998370e60b145a255c2d"
     )
 
 
@@ -162,7 +162,7 @@ def test_complete_planner_result_golden_binds_policy_and_rejections() -> None:
         [cheap, expensive],
     )
     assert digest_bytes(canonical_bytes(result.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:d2c29c0fe0e8d3346471d11d6db7b4b00d9ef92157f05e16ba115da824cf701c"
+        "sha256:c0b4035db76d32d4f13c1f2b7207038962722ba72634fe1fe83bf6572562f3ae"
     )
 
 

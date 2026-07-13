@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -116,6 +117,7 @@ def _request(
     path: str,
     *,
     body: dict[str, Any] | None = None,
+    content: bytes | None = None,
     mutation: bool = False,
     generation: str | None = None,
     authenticated: bool = True,
@@ -127,6 +129,7 @@ def _request(
                 method,
                 base + path,
                 json=body,
+                content=content,
                 headers=_headers(
                     mutation=mutation,
                     generation=generation,
@@ -187,10 +190,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     workspace = commands.add_parser("workspace", help="Create and inspect tenant workspaces.")
     workspace_sub = workspace.add_subparsers(dest="subcommand", required=True)
-    create = workspace_sub.add_parser("create")
+    create = workspace_sub.add_parser(
+        "create", help="Create a workspace with two out-of-band genesis fingerprints."
+    )
     create.add_argument("workspace")
+    create.add_argument("--root-spki-fingerprint", required=True)
+    create.add_argument("--genesis-envelope-fingerprint", required=True)
     status_parser = workspace_sub.add_parser("status")
     status_parser.add_argument("workspace")
+
+    object_command = commands.add_parser("object", help="Upload immutable CAS material.")
+    object_sub = object_command.add_subparsers(dest="subcommand", required=True)
+    upload = object_sub.add_parser("upload")
+    upload.add_argument("workspace")
+    upload.add_argument("path", type=Path)
+    upload.add_argument("--generation", required=True)
 
     audit = commands.add_parser("audit", help="Queue or inspect immutable snapshot audits.")
     audit_sub = audit.add_subparsers(dest="subcommand", required=True)
@@ -222,6 +236,7 @@ def build_parser() -> argparse.ArgumentParser:
         explain,
         create,
         status_parser,
+        upload,
         start,
         job_status,
         onboard,
@@ -370,7 +385,11 @@ def main(argv: list[str] | None = None) -> int:
             return _request(
                 "POST",
                 "/v1/workspaces",
-                body={"workspace_id": args.workspace},
+                body={
+                    "workspace_id": args.workspace,
+                    "root_spki_fingerprint": args.root_spki_fingerprint,
+                    "genesis_envelope_fingerprint": args.genesis_envelope_fingerprint,
+                },
                 mutation=True,
             )
         return _request("GET", f"/v1/workspaces/{args.workspace}")
@@ -384,6 +403,24 @@ def main(argv: list[str] | None = None) -> int:
                 generation=args.generation,
             )
         return _request("GET", f"/v1/jobs/{args.job_id}")
+    if args.command == "object":
+        if not args.path.is_file() or args.path.stat().st_size > 64 * 1024 * 1024:
+            return _emit(
+                _local_response(
+                    status="error",
+                    code="cas_upload_input_invalid",
+                    unknowns=["path_must_be_a_file_not_larger_than_64_mib"],
+                )
+            )
+        content = args.path.read_bytes()
+        digest = hashlib.sha256(content).hexdigest()
+        return _request(
+            "PUT",
+            f"/v1/workspaces/{args.workspace}/cas/sha256/{digest}",
+            content=content,
+            mutation=True,
+            generation=args.generation,
+        )
     if args.command == "agent":
         if args.subcommand == "explain":
             return _explain()

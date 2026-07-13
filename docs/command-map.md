@@ -12,13 +12,14 @@ tree is generated at `docs/reference/generated/cli.json`.
 | `cpcf bundle verify BUNDLE --json` | no | verify content digests | none |
 | `cpcf bundle verify BUNDLE --trust-policy POLICY --json` | no | verify content and supported root attestation | admitted trust policy |
 | `cpcf auth login --json` | no | inspect token boundary | OIDC identity for later remote use |
-| `cpcf workspace create ID --json` | yes | create workspace | bearer token and idempotency key |
+| `cpcf workspace create ID --root-spki-fingerprint DIGEST --genesis-envelope-fingerprint DIGEST --json` | yes | create workspace with both out-of-band genesis pins | bearer token and idempotency key |
 | `cpcf workspace status ID --json` | yes | inspect workspace | workspace read permission |
+| `cpcf object upload ID PATH --generation DIGEST --json` | yes | conditionally upload digest-scoped CAS bytes; authority remains quarantined | object import permission, idempotency key, and generation match |
 | `cpcf audit start ID --generation DIGEST --json` | yes | queue audit | workspace mutation permission and generation match |
 | `cpcf audit status JOB_ID --json` | yes | inspect immutable job | tenant job read permission |
 | `cpcf agent onboard --workspace ID --json` | yes | inspect live onboarding blockers | workspace read permission |
 | `cpcf legacy inspect ...` | local subprocess | read-only legacy inspection | none; v0.1–v0.5 remain non-executable |
 
-Trust admission, projection approval, runner leasing, coordination, trials, interventions, and
+Object admission, projection approval, runner leasing, coordination, trials, interventions, and
 repairs are modelled in the core but do not yet have complete authoritative v0.6 CLI/API workflows.
 They remain stable-release blockers and are not advertised as installed commands.

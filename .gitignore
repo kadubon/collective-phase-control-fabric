@@ -4,11 +4,11 @@
 /.mypy_cache/
 /.pytest_cache/
 /.ruff_cache/
-/.venv/
+/.venv*/
 /coverage*.json
 /coverage*.xml
 /dist*/
-/release-metadata/
+/release-metadata*/
 /build-production-requirements.txt
 /sbom*.json
 /mutation-results*.txt

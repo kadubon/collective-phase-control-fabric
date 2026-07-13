@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import base64
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
@@ -20,6 +20,8 @@ from collective_phase_control_fabric.v6.models import (
     Lifecycle,
     StateAttestation,
     StateSpec,
+    TrustedTimeReceipt,
+    TrustedTimeSpec,
 )
 from collective_phase_control_fabric.v6.registry import (
     document_digest,
@@ -34,6 +36,8 @@ from collective_phase_control_fabric.v6.trust import (
     sign_document,
     validate_policy,
     verify_envelope,
+    verify_policy_update,
+    verify_trusted_time_advance,
 )
 from tests.v6_helpers import NOW, VALID_FROM, VALID_UNTIL, metadata, trust_fixture
 
@@ -219,3 +223,72 @@ def test_kms_raw_ecdsa_normalization_rejects_invalid_and_canonicalizes_high_s() 
     normalized = normalize_p256_raw((1).to_bytes(32, "big") + high_s.to_bytes(32, "big"))
     assert int.from_bytes(normalized[:32], "big") == 1
     assert int.from_bytes(normalized[32:], "big") == 2
+
+
+def test_policy_and_trusted_time_updates_are_monotonic_and_role_separated() -> None:
+    policy, trusted_time, keys = trust_fixture()
+    candidate = policy.model_copy(
+        update={
+            "metadata": metadata("policy-1"),
+            "spec": policy.spec.model_copy(
+                update={
+                    "policy_sequence": 1,
+                    "prior_policy_digest": document_digest(policy),
+                }
+            ),
+        }
+    )
+    envelopes = []
+    for principal, role, key_name in (
+        (policy.spec.principals[0], "workspace_root", "root"),
+        (policy.spec.principals[1], "trust_auditor", "auditor"),
+        (policy.spec.principals[2], "timestamp", "time"),
+    ):
+        header = build_protected_header(
+            candidate,
+            principal=principal,
+            role=role,
+            source_system="fixture-source",
+            scope=["workspace-a"],
+            signing_time=NOW,
+            policy_sequence=0,
+            trusted_time_receipt_digest=document_digest(trusted_time),
+        )
+        envelopes.append(sign_document(candidate, private_key=keys[key_name], protected=header))
+    assert verify_policy_update(policy, candidate, envelopes, trusted_time=trusted_time).valid
+    rollback = candidate.model_copy(
+        update={
+            "spec": candidate.spec.model_copy(
+                update={"policy_sequence": 0, "prior_policy_digest": None}
+            )
+        }
+    )
+    rejected = verify_policy_update(policy, rollback, envelopes, trusted_time=trusted_time)
+    assert not rejected.valid
+    assert "trust_policy_sequence_not_monotonic" in rejected.reasons
+
+    next_time = TrustedTimeReceipt(
+        metadata=metadata("time-2", NOW + timedelta(hours=1)),
+        spec=TrustedTimeSpec(
+            authority_principal_id="time-principal",
+            issued_at=NOW + timedelta(hours=1),
+            valid_until=NOW + timedelta(days=1),
+            nonce="time-nonce-2",
+        ),
+    )
+    header = build_protected_header(
+        next_time,
+        principal=policy.spec.principals[2],
+        role="timestamp",
+        source_system="fixture-source",
+        scope=["workspace-a"],
+        signing_time=next_time.spec.issued_at,
+        policy_sequence=0,
+        trusted_time_receipt_digest=document_digest(next_time),
+    )
+    envelope = sign_document(next_time, private_key=keys["time"], protected=header)
+    advanced, receipt = verify_trusted_time_advance(trusted_time, envelope, policy)
+    assert advanced.valid and receipt == next_time
+    stale, _ = verify_trusted_time_advance(next_time, envelope, policy)
+    assert not stale.valid
+    assert "trusted_time_not_monotonic" in stale.reasons

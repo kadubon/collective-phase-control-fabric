@@ -16,6 +16,11 @@ from cpcf_api.object_store import S3ObjectStore
 
 from collective_phase_control_fabric.v6.canonical import digest_bytes
 
+GENESIS_BODY = {
+    "root_spki_fingerprint": "sha256:" + "1" * 64,
+    "genesis_envelope_fingerprint": "sha256:" + "2" * 64,
+}
+
 
 def principal(*roles: str, tenant: str = "tenant-a") -> PrincipalContext:
     return PrincipalContext(subject="subject-a", tenant_id=tenant, roles=frozenset(roles))
@@ -115,7 +120,7 @@ def test_api_health_schema_auth_validation_and_permission_handlers() -> None:
             "POST",
             "/v1/workspaces",
             headers={"Authorization": "Bearer token", "Idempotency-Key": "a" * 16},
-            json={"workspace_id": "workspace-a"},
+            json={"workspace_id": "workspace-a", **GENESIS_BODY},
         )
     )
     assert denied.status_code == 403 and denied.json()["code"] == "operation_denied_by_default"
@@ -145,7 +150,7 @@ def test_api_workspace_job_status_onboarding_and_idempotency_paths() -> None:
             "POST",
             "/v1/workspaces",
             headers={**auth, "traceparent": f"00-{trace_id}-{'2' * 16}-01"},
-            json={"workspace_id": "workspace-a"},
+            json={"workspace_id": "workspace-a", **GENESIS_BODY},
         )
     )
     assert created.status_code == 201 and created.json()["trace_id"] == trace_id
@@ -156,7 +161,7 @@ def test_api_workspace_job_status_onboarding_and_idempotency_paths() -> None:
             "POST",
             "/v1/workspaces",
             headers={**auth, "Idempotency-Key": "b" * 16},
-            json={"workspace_id": "workspace-a"},
+            json={"workspace_id": "workspace-a", **GENESIS_BODY},
         )
     )
     assert conflict.status_code == 409 and conflict.json()["code"] == "workspace_already_exists"
@@ -197,15 +202,68 @@ def test_api_workspace_job_status_onboarding_and_idempotency_paths() -> None:
     assert missing_job.status_code == 404
 
 
+def test_api_cas_upload_is_digest_scoped_bounded_and_quarantined() -> None:
+    backend = InMemoryBackend()
+    app = create_app(
+        backend=backend,
+        authenticator=StaticAuthenticator(principal("tenant_admin"), "token"),
+    )
+    created = asyncio.run(
+        request(
+            app,
+            "POST",
+            "/v1/workspaces",
+            headers={"Authorization": "Bearer token", "Idempotency-Key": "a" * 16},
+            json={"workspace_id": "cas-workspace", **GENESIS_BODY},
+        )
+    ).json()
+    digest = digest_bytes(b"data")
+    uploaded = asyncio.run(
+        request(
+            app,
+            "PUT",
+            f"/v1/workspaces/cas-workspace/cas/sha256/{digest[7:]}",
+            headers={
+                "Authorization": "Bearer token",
+                "Idempotency-Key": "b" * 16,
+                "If-Match": created["generation_digest"],
+            },
+            content=b"data",
+        )
+    )
+    assert uploaded.status_code == 201
+    assert uploaded.json()["code"] == "cas_object_uploaded_quarantined"
+    assert uploaded.json()["quarantined_objects"] == [digest]
+    mismatch = asyncio.run(
+        request(
+            app,
+            "PUT",
+            f"/v1/workspaces/cas-workspace/cas/sha256/{'0' * 64}",
+            headers={
+                "Authorization": "Bearer token",
+                "Idempotency-Key": "c" * 16,
+                "If-Match": created["generation_digest"],
+            },
+            content=b"data",
+        )
+    )
+    assert mismatch.status_code == 422
+    assert mismatch.json()["code"] == "cas_upload_digest_mismatch"
+
+
 def test_in_memory_backend_cross_tenant_job_and_idempotency_write_collision() -> None:
     backend = InMemoryBackend()
 
     async def exercise() -> None:
         await backend.startup()
-        workspace = await backend.create_workspace("tenant-a", "workspace-a")
+        workspace = await backend.create_workspace(
+            "tenant-a", "workspace-a", "sha256:" + "1" * 64, "sha256:" + "2" * 64
+        )
         assert await backend.workspace("tenant-a", "workspace-a") == workspace
         with pytest.raises(ValueError, match="workspace_already_exists"):
-            await backend.create_workspace("tenant-a", "workspace-a")
+            await backend.create_workspace(
+                "tenant-a", "workspace-a", "sha256:" + "1" * 64, "sha256:" + "2" * 64
+            )
         with pytest.raises(ValueError, match="workspace_not_found"):
             await backend.workspace("tenant-a", "missing")
         job_id = await backend.enqueue("tenant-a", "workspace-a", "analysis")
@@ -259,6 +317,12 @@ class S3Client:
     def __init__(self) -> None:
         self.values: dict[str, bytes] = {}
         self.metadata: dict[str, dict[str, object]] = {}
+        self.tags: dict[str, object] = {}
+        self.versioning = "Enabled"
+        self.encryption: dict[str, object] = {
+            "ServerSideEncryptionConfiguration": {"Rules": [{"Apply": "kms"}]}
+        }
+        self.encryption_error: ClientError | None = None
 
     def head_object(self, *, Bucket: str, Key: str) -> dict[str, object]:
         del Bucket
@@ -266,8 +330,13 @@ class S3Client:
             raise ClientError("NoSuchKey", 404)
         return self.metadata[Key]
 
-    def put_object(self, *, Bucket: str, Key: str, Body: bytes, **_: object) -> None:
+    def put_object(
+        self, *, Bucket: str, Key: str, Body: bytes, IfNoneMatch: str, **_: object
+    ) -> None:
         del Bucket
+        assert IfNoneMatch == "*"
+        if Key in self.values:
+            raise ClientError("PreconditionFailed", 412)
         self.values[Key] = Body
         self.metadata[Key] = {
             "ContentLength": len(Body),
@@ -279,12 +348,27 @@ class S3Client:
         value = self.values[Key]
         return {"ContentLength": len(value), "Body": Body(value)}
 
+    def put_object_tagging(self, *, Bucket: str, Key: str, Tagging: object) -> None:
+        del Bucket
+        self.tags[Key] = Tagging
+
+    def get_bucket_versioning(self, *, Bucket: str) -> dict[str, object]:
+        del Bucket
+        return {"Status": self.versioning}
+
+    def get_bucket_encryption(self, *, Bucket: str) -> dict[str, object]:
+        del Bucket
+        if self.encryption_error is not None:
+            raise self.encryption_error
+        return self.encryption
+
 
 def test_s3_immutable_cas_configuration_put_get_exists_and_integrity_failures() -> None:
     for kwargs in (
         {"bucket": ""},
         {"bucket": "bucket", "prefix": "../bad"},
         {"bucket": "bucket", "maximum_object_bytes": 0},
+        {"bucket": "bucket", "maximum_object_bytes": 64 * 1024 * 1024 + 1},
     ):
         with pytest.raises(ValueError, match="invalid_object_store_configuration"):
             S3ObjectStore(S3Client(), **kwargs)  # type: ignore[arg-type]
@@ -292,15 +376,39 @@ def test_s3_immutable_cas_configuration_put_get_exists_and_integrity_failures() 
     store = S3ObjectStore(client, "bucket", maximum_object_bytes=4)
     with pytest.raises(ValueError, match="invalid_content_digest"):
         store.exists("tenant-a", "invalid")
+    with pytest.raises(ValueError, match="invalid_content_digest"):
+        store.exists("tenant-a", "sha256:" + "G" * 64)
     with pytest.raises(ValueError, match="input_too_large"):
         store.put("tenant-a", b"12345")
+    with pytest.raises(ValueError, match="expected_digest_mismatch"):
+        store.put_expected("tenant-a", "sha256:" + "0" * 64, b"data")
+    with pytest.raises(ValueError, match="input_too_large"):
+        store.put_expected("tenant-a", "sha256:" + "0" * 64, b"12345")
     digest = store.put("tenant-a", b"data")
     assert store.put("tenant-a", b"data") == digest
     assert store.exists("tenant-a", digest)
     assert not store.exists("tenant-a", "sha256:" + "0" * 64)
     assert store.get("tenant-a", digest) == b"data"
-
     key = store._key("tenant-a", digest)
+    store.quarantine_unreferenced("tenant-a", digest, "database_transaction_rolled_back")
+    assert key in client.tags
+    with pytest.raises(ValueError, match="invalid_quarantine_reason"):
+        store.quarantine_unreferenced("tenant-a", digest, "")
+    assert not store.validate_bucket_posture()
+    client.versioning = "Suspended"
+    client.encryption = {"ServerSideEncryptionConfiguration": {"Rules": []}}
+    assert store.validate_bucket_posture() == [
+        "object_store_encryption_not_configured",
+        "object_store_versioning_not_enabled",
+    ]
+    client.versioning = "Enabled"
+    client.encryption_error = ClientError("ServerSideEncryptionConfigurationNotFoundError", 400)
+    assert store.validate_bucket_posture() == ["object_store_encryption_not_configured"]
+    client.encryption_error = ClientError("AccessDenied", 403)
+    with pytest.raises(ClientError):
+        store.validate_bucket_posture()
+    client.encryption_error = None
+
     client.metadata[key]["ContentLength"] = 3
     with pytest.raises(RuntimeError, match="immutable_object_key_collision"):
         store.put("tenant-a", b"data")
@@ -311,6 +419,18 @@ def test_s3_immutable_cas_configuration_put_get_exists_and_integrity_failures() 
     client.values[key] = b"longer"
     with pytest.raises(RuntimeError, match="output_too_large"):
         store.get("tenant-a", digest)
+
+    class NoCloseBody:
+        def read(self, _: int) -> bytes:
+            return b"abc"
+
+    class MismatchedClient(S3Client):
+        def get_object(self, *, Bucket: str, Key: str) -> dict[str, object]:
+            del Bucket, Key
+            return {"ContentLength": 4, "Body": NoCloseBody()}
+
+    with pytest.raises(RuntimeError, match="output_size_mismatch"):
+        S3ObjectStore(MismatchedClient(), "bucket", maximum_object_bytes=4).get("tenant-a", digest)
 
 
 def test_service_entrypoints_fail_stably_and_run_with_explicit_configuration(

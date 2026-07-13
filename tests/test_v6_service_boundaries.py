@@ -59,6 +59,11 @@ from collective_phase_control_fabric.v6.storage import (
 from collective_phase_control_fabric.v6.trials import assess_trial
 from tests.v6_helpers import NOW, VALID_FROM, VALID_UNTIL, metadata
 
+GENESIS_BODY = {
+    "root_spki_fingerprint": "sha256:" + "1" * 64,
+    "genesis_envelope_fingerprint": "sha256:" + "2" * 64,
+}
+
 
 def state_document() -> StateAttestation:
     return StateAttestation(
@@ -411,7 +416,7 @@ def test_api_requires_idempotency_generation_and_tenant_authority() -> None:
             assert missing.json()["code"] == "workspace_not_found"
             created = await client.post(
                 "/v1/workspaces",
-                json={"workspace_id": "workspace-a"},
+                json={"workspace_id": "workspace-a", **GENESIS_BODY},
                 headers={**headers, "traceparent": "attacker-controlled-not-a-trace"},
             )
             assert created.status_code == 201
@@ -420,13 +425,13 @@ def test_api_requires_idempotency_generation_and_tenant_authority() -> None:
             assert set(body["trace_id"]) <= set("0123456789abcdef")
             replay = await client.post(
                 "/v1/workspaces",
-                json={"workspace_id": "workspace-a"},
+                json={"workspace_id": "workspace-a", **GENESIS_BODY},
                 headers=headers,
             )
             assert replay.json() == body
             mismatched_replay = await client.post(
                 "/v1/workspaces",
-                json={"workspace_id": "workspace-b"},
+                json={"workspace_id": "workspace-b", **GENESIS_BODY},
                 headers=headers,
             )
             assert mismatched_replay.status_code == 409
@@ -477,7 +482,9 @@ def test_rls_is_forced_and_s3_keys_reject_traversal() -> None:
             "workspaces",
             "objects",
             "generations",
+            "object_ledger",
             "audit_events",
+            "quarantine",
             "outbox",
             "idempotency_keys",
         )
@@ -504,6 +511,9 @@ def test_s3_store_fails_closed_on_access_denial_and_bounds_downloads() -> None:
         exceptions = Exceptions
 
         def head_object(self, **_: object) -> object:
+            raise ClientError("AccessDenied", 403)
+
+        def put_object(self, **_: object) -> object:
             raise ClientError("AccessDenied", 403)
 
     denied = S3ObjectStore(DeniedClient(), "bucket")

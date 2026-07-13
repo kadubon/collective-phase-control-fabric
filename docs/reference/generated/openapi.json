@@ -173,6 +173,16 @@
       "WorkspaceCreate": {
         "additionalProperties": false,
         "properties": {
+          "genesis_envelope_fingerprint": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Genesis Envelope Fingerprint",
+            "type": "string"
+          },
+          "root_spki_fingerprint": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Root Spki Fingerprint",
+            "type": "string"
+          },
           "workspace_id": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
             "title": "Workspace Id",
@@ -180,7 +190,9 @@
           }
         },
         "required": [
-          "workspace_id"
+          "workspace_id",
+          "root_spki_fingerprint",
+          "genesis_envelope_fingerprint"
         ],
         "title": "WorkspaceCreate",
         "type": "object"
@@ -498,6 +510,80 @@
           }
         ],
         "summary": "Start Analysis"
+      }
+    },
+    "/v1/workspaces/{workspace_id}/cas/sha256/{hex_digest}": {
+      "put": {
+        "description": "Upload bounded immutable bytes; the object remains quarantined until admission.",
+        "operationId": "upload_cas_object_v1_workspaces__workspace_id__cas_sha256__hex_digest__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "hex_digest",
+            "required": true,
+            "schema": {
+              "title": "Hex Digest",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "title": "If-Match",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upload Cas Object"
       }
     },
     "/v1/workspaces/{workspace_id}/onboarding": {

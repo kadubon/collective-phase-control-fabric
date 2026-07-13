@@ -490,6 +490,17 @@ class DsseEnvelope(StrictModel):
     signatures: list[DsseSignature] = Field(min_length=1, max_length=8)
 
 
+class SignedStatementSpec(StrictModel):
+    """A DSSE envelope admitted as a first-class immutable ledger object."""
+
+    envelope: DsseEnvelope
+
+
+class SignedStatement(Document):
+    kind: Literal["signed-statement"] = "signed-statement"
+    spec: SignedStatementSpec
+
+
 class QuorumDecisionSpec(StrictModel):
     decision_type: Identifier
     subject_digest: Digest
@@ -564,6 +575,25 @@ class OperationalProfile(StrictModel):
     solution_class: Literal["exact", "bounded", "incomplete"]
 
 
+class OperationalProfileResultSpec(StrictModel):
+    analysis_snapshot_digest: Digest
+    trusted_time_receipt_digest: Digest
+    profile: OperationalProfile
+    produced_at: datetime
+    operation_count: Annotated[int, Field(ge=0, le=10_000_000)]
+
+    @model_validator(mode="after")
+    def binds_profile_snapshot(self) -> OperationalProfileResultSpec:
+        if self.profile.analysis_snapshot_digest != self.analysis_snapshot_digest:
+            raise ValueError("operational profile snapshot binding mismatch")
+        return self
+
+
+class OperationalProfileResult(Document):
+    kind: Literal["operational-profile-result"] = "operational-profile-result"
+    spec: OperationalProfileResultSpec
+
+
 class PerturbationScenario(StrictModel):
     scenario_id: Identifier
     remove_object_digests: list[Digest] = Field(default_factory=list, max_length=50_000)
@@ -591,6 +621,23 @@ class PerturbationSuiteSpec(StrictModel):
 class PerturbationSuite(Document):
     kind: Literal["perturbation-suite"] = "perturbation-suite"
     spec: PerturbationSuiteSpec
+
+
+class PerturbationResultSpec(StrictModel):
+    suite_digest: Digest
+    scenario_id: Identifier
+    baseline_snapshot_digest: Digest
+    reduced_snapshot_digest: Digest
+    trusted_time_receipt_digest: Digest
+    profile_result_digest: Digest
+    status: ProfileStatus
+    blockers: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    operation_count: Annotated[int, Field(ge=0, le=10_000_000)]
+
+
+class PerturbationResult(Document):
+    kind: Literal["perturbation-result"] = "perturbation-result"
+    spec: PerturbationResultSpec
 
 
 class SiphonAnalysisSpec(StrictModel):
@@ -774,6 +821,31 @@ class ActionDocument(Document):
     spec: ActionSpec
 
 
+class PlannerCounterexample(StrictModel):
+    action_id: Identifier
+    outcome: OutcomeName
+    reason: Identifier
+
+
+class PlannerResultSpec(StrictModel):
+    analysis_snapshot_digest: Digest
+    control_state_digest: Digest
+    horizon: Annotated[int, Field(ge=1, le=3)]
+    status: Literal["ok", "blocked", "unknown", "error"]
+    code: Identifier
+    solution_class: Literal["exact", "approximate", "incomplete", "none"]
+    primary_action_id: Identifier | None = None
+    alternative_action_ids: list[Identifier] = Field(default_factory=list, max_length=3)
+    blocker_frontier: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    counterexamples: list[PlannerCounterexample] = Field(default_factory=list, max_length=256)
+    policy_digest: Digest | None = None
+
+
+class PlannerResult(Document):
+    kind: Literal["planner-result"] = "planner-result"
+    spec: PlannerResultSpec
+
+
 class RunnerJobSpec(StrictModel):
     job_id: Identifier
     action_digest: Digest
@@ -945,6 +1017,28 @@ class CoordinationEventDocument(Document):
     spec: CoordinationEventSpec
 
 
+class CoordinationSessionSpec(StrictModel):
+    session_id: Identifier
+    plan_digest: Digest
+    state: Literal[
+        "CREATED",
+        "COMMIT_OPEN",
+        "COMMIT_CLOSED",
+        "REVEAL_OPEN",
+        "VERIFY",
+        "INTEGRATE",
+        "TERMINATED",
+    ]
+    event_digests: list[Digest] = Field(default_factory=list, max_length=100_000)
+    evaluated_at: datetime
+    integrity: DimensionResult
+
+
+class CoordinationSession(Document):
+    kind: Literal["coordination-session"] = "coordination-session"
+    spec: CoordinationSessionSpec
+
+
 class ArtifactRecordSpec(StrictModel):
     artifact_type: Literal["dataset", "assignment", "analysis-executable"]
     artifact_digest: Digest
@@ -1060,6 +1154,64 @@ class TrialResult(Document):
     spec: TrialResultSpec
 
 
+class TrialAssessmentSpec(StrictModel):
+    protocol_digest: Digest | None = None
+    status: Literal[
+        "unmeasured",
+        "registered_not_observed",
+        "externally_observed_inconclusive",
+        "descriptive_observation",
+        "observational_association_compatible",
+        "quasi_experimental_compatible",
+        "preregistered_randomized_acceleration_bundle_compatible",
+        "external_quality_or_safety_contradiction",
+        "protocol_deviation",
+    ]
+    tier: Literal[
+        "unmeasured",
+        "descriptive_observation",
+        "observational_association_compatible",
+        "quasi_experimental_compatible",
+        "preregistered_randomized_acceleration_bundle_compatible",
+    ]
+    blocker_codes: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    contradiction_codes: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    result_digests: list[Digest] = Field(default_factory=list, max_length=10_000)
+    statistical_method_certified: Literal[False] = False
+    causality_certified: Literal[False] = False
+
+
+class TrialAssessmentDocument(Document):
+    kind: Literal["trial-assessment"] = "trial-assessment"
+    spec: TrialAssessmentSpec
+
+
+class RepairRecordSpec(StrictModel):
+    repair_id: Identifier
+    blocker_code: Identifier
+    status: Literal["open", "unbound", "resolved", "superseded"]
+    effect_class: Literal["inspect", "local_write", "remote_write", "execute", "none"]
+    required_authority: list[Identifier] = Field(default_factory=list, max_length=32)
+    required_document_kinds: list[Identifier] = Field(default_factory=list, max_length=64)
+    action_digest: Digest | None = None
+    next_safe_commands: list[
+        list[Annotated[str, StringConstraints(min_length=1, max_length=2048)]]
+    ] = Field(default_factory=list, max_length=16)
+
+    @model_validator(mode="after")
+    def executable_repairs_are_bound(self) -> RepairRecordSpec:
+        if self.effect_class == "execute" and self.action_digest is None:
+            raise ValueError("executable repair requires a bound action digest")
+        if self.status == "unbound" and self.action_digest is not None:
+            raise ValueError("unbound repair cannot reference an action")
+        return self
+
+
+class RepairRecord(Document):
+    kind: Literal["repair-record"] = "repair-record"
+    spec: RepairRecordSpec
+
+
 type DocumentType = (
     UnitRegistryDocument
     | PhaseContract
@@ -1077,11 +1229,14 @@ type DocumentType = (
     | ExposureLedgerDocument
     | TrustPolicyDocument
     | TrustedTimeReceipt
+    | SignedStatement
     | QuorumDecisionDocument
     | OrganizationWitness
     | PersistencePlan
     | AnalysisSnapshot
+    | OperationalProfileResult
     | PerturbationSuite
+    | PerturbationResult
     | SiphonAnalysisResult
     | FluxCouplingResult
     | CutSetAnalysisResult
@@ -1089,6 +1244,7 @@ type DocumentType = (
     | InterventionPortfolio
     | CapabilityDocument
     | ActionDocument
+    | PlannerResult
     | RunnerJob
     | RunnerReceipt
     | PendingProjection
@@ -1097,10 +1253,13 @@ type DocumentType = (
     | AuditEvent
     | CoordinationPlan
     | CoordinationEventDocument
+    | CoordinationSession
     | ArtifactRecord
     | MeasurementProtocol
     | ProtocolAmendment
     | TrialResult
+    | TrialAssessmentDocument
+    | RepairRecord
 )
 
 DOCUMENT_MODELS: dict[str, type[Document]] = {
@@ -1122,11 +1281,14 @@ DOCUMENT_MODELS: dict[str, type[Document]] = {
         ExposureLedgerDocument,
         TrustPolicyDocument,
         TrustedTimeReceipt,
+        SignedStatement,
         QuorumDecisionDocument,
         OrganizationWitness,
         PersistencePlan,
         AnalysisSnapshot,
+        OperationalProfileResult,
         PerturbationSuite,
+        PerturbationResult,
         SiphonAnalysisResult,
         FluxCouplingResult,
         CutSetAnalysisResult,
@@ -1134,6 +1296,7 @@ DOCUMENT_MODELS: dict[str, type[Document]] = {
         InterventionPortfolio,
         CapabilityDocument,
         ActionDocument,
+        PlannerResult,
         RunnerJob,
         RunnerReceipt,
         PendingProjection,
@@ -1142,10 +1305,13 @@ DOCUMENT_MODELS: dict[str, type[Document]] = {
         AuditEvent,
         CoordinationPlan,
         CoordinationEventDocument,
+        CoordinationSession,
         ArtifactRecord,
         MeasurementProtocol,
         ProtocolAmendment,
         TrialResult,
+        TrialAssessmentDocument,
+        RepairRecord,
     )
 }
 

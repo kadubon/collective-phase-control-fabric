@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 import secrets
 from contextlib import asynccontextmanager
@@ -17,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from collective_phase_control_fabric.v6.canonical import canonical_bytes, digest_bytes
 from collective_phase_control_fabric.v6.models import DOCUMENT_MODELS
 from collective_phase_control_fabric.v6.registry import registry_manifest, schema_for_kind
+from collective_phase_control_fabric.v6.storage import MemoryObjectStore, ObjectStore
 from cpcf_api.auth import Authenticator, PrincipalContext, authorize
 
 
@@ -42,6 +44,8 @@ class ApiResponse(BaseModel):
 class WorkspaceCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     workspace_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+    root_spki_fingerprint: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    genesis_envelope_fingerprint: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
 
 
 @dataclass
@@ -50,13 +54,21 @@ class WorkspaceRecord:
     workspace_id: str
     generation_digest: str
     sequence: int = 0
+    root_spki_fingerprint: str | None = None
+    genesis_envelope_fingerprint: str | None = None
     quarantined: list[str] = field(default_factory=list)
 
 
 class Backend(Protocol):
     async def startup(self) -> None: ...
 
-    async def create_workspace(self, tenant_id: str, workspace_id: str) -> WorkspaceRecord: ...
+    async def create_workspace(
+        self,
+        tenant_id: str,
+        workspace_id: str,
+        root_spki_fingerprint: str,
+        genesis_envelope_fingerprint: str,
+    ) -> WorkspaceRecord: ...
 
     async def workspace(self, tenant_id: str, workspace_id: str) -> WorkspaceRecord: ...
 
@@ -84,7 +96,13 @@ class InMemoryBackend:
     async def startup(self) -> None:
         return None
 
-    async def create_workspace(self, tenant_id: str, workspace_id: str) -> WorkspaceRecord:
+    async def create_workspace(
+        self,
+        tenant_id: str,
+        workspace_id: str,
+        root_spki_fingerprint: str,
+        genesis_envelope_fingerprint: str,
+    ) -> WorkspaceRecord:
         key = (tenant_id, workspace_id)
         if key in self.workspaces:
             raise ValueError("workspace_already_exists")
@@ -94,11 +112,19 @@ class InMemoryBackend:
                     "tenant_id": tenant_id,
                     "workspace_id": workspace_id,
                     "sequence": 0,
+                    "root_spki_fingerprint": root_spki_fingerprint,
+                    "genesis_envelope_fingerprint": genesis_envelope_fingerprint,
                     "created_at": "immutable-genesis",
                 }
             )
         )
-        record = WorkspaceRecord(tenant_id, workspace_id, digest)
+        record = WorkspaceRecord(
+            tenant_id,
+            workspace_id,
+            digest,
+            root_spki_fingerprint=root_spki_fingerprint,
+            genesis_envelope_fingerprint=genesis_envelope_fingerprint,
+        )
         self.workspaces[key] = record
         return record
 
@@ -162,12 +188,19 @@ def create_app(
     *,
     backend: Backend | None = None,
     authenticator: Authenticator | None = None,
+    object_store: ObjectStore | None = None,
 ) -> FastAPI:
     backend_service: Backend = backend or InMemoryBackend()
+    content_store: ObjectStore = object_store or MemoryObjectStore()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> Any:
         await backend_service.startup()
+        validate_posture = getattr(content_store, "validate_bucket_posture", None)
+        if callable(validate_posture):
+            posture_reasons = validate_posture()
+            if posture_reasons:
+                raise RuntimeError("object_store_posture_invalid:" + ",".join(posture_reasons))
         yield
 
     app = FastAPI(
@@ -179,6 +212,7 @@ def create_app(
         lifespan=lifespan,
     )
     app.state.backend = backend_service
+    app.state.object_store = content_store
     app.state.authenticator = authenticator
 
     def trace(request: Request) -> str:
@@ -330,7 +364,12 @@ def create_app(
         if cached is not None:
             return cached
         try:
-            workspace = await backend_service.create_workspace(actor.tenant_id, body.workspace_id)
+            workspace = await backend_service.create_workspace(
+                actor.tenant_id,
+                body.workspace_id,
+                body.root_spki_fingerprint,
+                body.genesis_envelope_fingerprint,
+            )
         except ValueError as error:
             raise HTTPException(409, str(error)) from error
         response = ApiResponse(
@@ -368,6 +407,77 @@ def create_app(
             claims={"generation_sequence": workspace.sequence},
             trace_id=trace(request),
         )
+
+    @app.put("/v1/workspaces/{workspace_id}/cas/sha256/{hex_digest}", status_code=201)
+    async def upload_cas_object(
+        workspace_id: str,
+        hex_digest: str,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        """Upload bounded immutable bytes; the object remains quarantined until admission."""
+
+        authorize(actor, "object:import", actor.tenant_id)
+        if re.fullmatch(r"[0-9a-f]{64}", hex_digest) is None:
+            raise HTTPException(422, "content_digest_invalid")
+        workspace = await require_workspace(actor.tenant_id, workspace_id)
+        if if_match != workspace.generation_digest:
+            raise HTTPException(412, "workspace_generation_changed")
+        maximum = int(getattr(content_store, "maximum_object_bytes", 64 * 1024 * 1024))
+        chunks: list[bytes] = []
+        total = 0
+        content_hash = hashlib.sha256()
+        async for chunk in request.stream():
+            total += len(chunk)
+            if total > maximum:
+                raise HTTPException(413, "cas_upload_too_large")
+            content_hash.update(chunk)
+            chunks.append(chunk)
+        expected_digest = "sha256:" + hex_digest
+        actual_digest = "sha256:" + content_hash.hexdigest()
+        if not secrets.compare_digest(expected_digest, actual_digest):
+            raise HTTPException(422, "cas_upload_digest_mismatch")
+        request_digest = mutation_digest(
+            request,
+            actor,
+            {"expected_digest": expected_digest, "byte_length": total},
+            expected_generation=if_match,
+        )
+        cache_key = (actor.tenant_id, idempotency_key, request_digest)
+        try:
+            cached = await backend_service.idempotency_get(*cache_key)
+        except ValueError as error:
+            raise HTTPException(409, str(error)) from error
+        if cached is not None:
+            return cached
+        data = b"".join(chunks)
+        put_expected = getattr(content_store, "put_expected", None)
+        if callable(put_expected):
+            stored_digest = put_expected(actor.tenant_id, expected_digest, data)
+        else:
+            stored_digest = content_store.put(actor.tenant_id, data)
+            if stored_digest != expected_digest:
+                raise HTTPException(500, "cas_store_digest_invariant_failed")
+        quarantine = getattr(content_store, "quarantine_unreferenced", None)
+        if callable(quarantine):
+            quarantine(actor.tenant_id, stored_digest, "pending_database_admission")
+        response = ApiResponse(
+            status="ok",
+            code="cas_object_uploaded_quarantined",
+            effect_class="remote_write",
+            tenant_id=actor.tenant_id,
+            workspace_id=workspace_id,
+            generation_digest=workspace.generation_digest,
+            objects_written=[stored_digest],
+            quarantined_objects=[stored_digest],
+            authority_required=["evidence_producer", "tenant_admin"],
+            next_safe_commands=[["cpcf", "workspace", "status", workspace_id, "--json"]],
+            trace_id=trace(request),
+        )
+        await backend_service.idempotency_put(*cache_key, response)
+        return response
 
     @app.post("/v1/workspaces/{workspace_id}/analyses", status_code=202)
     async def start_analysis(

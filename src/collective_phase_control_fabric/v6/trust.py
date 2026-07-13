@@ -424,3 +424,74 @@ def inspect_genesis(
         reasons=reasons,
         document_digest=document_digest(document),
     )
+
+
+def verify_policy_update(
+    prior_policy: TrustPolicyDocument,
+    candidate_policy: TrustPolicyDocument,
+    statements: Iterable[DsseEnvelope],
+    *,
+    trusted_time: TrustedTimeReceipt,
+) -> VerificationResult:
+    """Verify one monotonic role-separated policy transition under the prior policy."""
+
+    reasons = validate_policy(candidate_policy)
+    if candidate_policy.spec.policy_sequence != prior_policy.spec.policy_sequence + 1:
+        reasons.append("trust_policy_sequence_not_monotonic")
+    if candidate_policy.spec.prior_policy_digest != document_digest(prior_policy):
+        reasons.append("trust_policy_predecessor_mismatch")
+    quorum = evaluate_quorum(
+        "trust_update",
+        document_digest(candidate_policy),
+        statements,
+        prior_policy,
+        trusted_time=trusted_time,
+    )
+    if not quorum.valid:
+        reasons.extend(quorum.reasons)
+    reasons = sorted(set(reasons))
+    return VerificationResult(
+        valid=not reasons,
+        code="trust_policy_update_verified" if not reasons else "trust_policy_update_rejected",
+        reasons=reasons,
+        document_digest=document_digest(candidate_policy),
+    )
+
+
+def verify_trusted_time_advance(
+    previous: TrustedTimeReceipt,
+    candidate_envelope: DsseEnvelope,
+    policy: TrustPolicyDocument,
+) -> tuple[VerificationResult, TrustedTimeReceipt | None]:
+    """Verify externally signed monotonic time without consulting the local wall clock."""
+
+    preliminary, document = verify_envelope(candidate_envelope, policy, trusted_time=None)
+    if not isinstance(document, TrustedTimeReceipt):
+        reasons = [*preliminary.reasons, "trusted_time_receipt_subject_required"]
+        return (
+            VerificationResult(
+                valid=False,
+                code="trusted_time_advance_rejected",
+                reasons=sorted(set(reasons)),
+            ),
+            None,
+        )
+    bound, verified = verify_envelope(candidate_envelope, policy, trusted_time=document)
+    reasons = [*preliminary.reasons, *bound.reasons]
+    if document.spec.issued_at <= previous.spec.issued_at:
+        reasons.append("trusted_time_not_monotonic")
+    if document.spec.nonce == previous.spec.nonce:
+        reasons.append("trusted_time_nonce_reused")
+    reasons = sorted(set(reasons))
+    return (
+        VerificationResult(
+            valid=not reasons,
+            code="trusted_time_advanced" if not reasons else "trusted_time_advance_rejected",
+            reasons=reasons,
+            document_digest=document_digest(document),
+            principal_id=bound.principal_id,
+            role=bound.role,
+            protected=bound.protected,
+        ),
+        cast(TrustedTimeReceipt, verified) if not reasons else None,
+    )
