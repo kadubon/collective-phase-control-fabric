@@ -4,7 +4,7 @@
       "argv": [
         "agent"
       ],
-      "description": "usage: cpcf agent [-h] {explain,onboard} ...",
+      "description": "Obtain evidence-driven onboarding instructions.",
       "help": "Obtain evidence-driven onboarding instructions."
     },
     {
@@ -12,7 +12,7 @@
         "agent",
         "explain"
       ],
-      "description": "usage: cpcf agent explain [-h]",
+      "description": "Explain CPCF claims, nonclaims, and the first safe offline commands.",
       "help": "Explain CPCF claims, nonclaims, and the first safe offline commands."
     },
     {
@@ -20,14 +20,14 @@
         "agent",
         "onboard"
       ],
-      "description": "usage: cpcf agent onboard [-h] --workspace WORKSPACE",
+      "description": "",
       "help": null
     },
     {
       "argv": [
         "audit"
       ],
-      "description": "usage: cpcf audit [-h] {start,status} ...",
+      "description": "Queue or inspect immutable snapshot audits.",
       "help": "Queue or inspect immutable snapshot audits."
     },
     {
@@ -35,7 +35,7 @@
         "audit",
         "start"
       ],
-      "description": "usage: cpcf audit start [-h] --generation GENERATION workspace",
+      "description": "",
       "help": null
     },
     {
@@ -43,14 +43,14 @@
         "audit",
         "status"
       ],
-      "description": "usage: cpcf audit status [-h] job_id",
+      "description": "",
       "help": null
     },
     {
       "argv": [
         "auth"
       ],
-      "description": "usage: cpcf auth [-h] {login} ...",
+      "description": "Inspect OIDC client configuration.",
       "help": "Inspect OIDC client configuration."
     },
     {
@@ -58,14 +58,14 @@
         "auth",
         "login"
       ],
-      "description": "usage: cpcf auth login [-h]",
+      "description": "Explain the non-persistent bearer-token boundary.",
       "help": "Explain the non-persistent bearer-token boundary."
     },
     {
       "argv": [
         "bundle"
       ],
-      "description": "usage: cpcf bundle [-h] {verify} ...",
+      "description": "Verify a portable bundle without network access.",
       "help": "Verify a portable bundle without network access."
     },
     {
@@ -73,14 +73,14 @@
         "bundle",
         "verify"
       ],
-      "description": "usage: cpcf bundle verify [-h] [--trust-policy TRUST_POLICY] bundle",
+      "description": "Verify bundle content and optional trust.",
       "help": "Verify bundle content and optional trust."
     },
     {
       "argv": [
         "legacy"
       ],
-      "description": "usage: cpcf legacy [-h] {inspect} ...",
+      "description": "Read-only v0.1-v0.5 inspection.",
       "help": "Read-only v0.1-v0.5 inspection."
     },
     {
@@ -88,14 +88,14 @@
         "legacy",
         "inspect"
       ],
-      "description": "usage: cpcf legacy inspect [-h] ...",
+      "description": "",
       "help": null
     },
     {
       "argv": [
         "object"
       ],
-      "description": "usage: cpcf object [-h] {upload} ...",
+      "description": "Upload immutable CAS material.",
       "help": "Upload immutable CAS material."
     },
     {
@@ -103,14 +103,14 @@
         "object",
         "upload"
       ],
-      "description": "usage: cpcf object upload [-h] --generation GENERATION workspace path",
+      "description": "",
       "help": null
     },
     {
       "argv": [
         "schema"
       ],
-      "description": "usage: cpcf schema [-h] {list,show} ...",
+      "description": "Inspect the closed v0.6 schema registry.",
       "help": "Inspect the closed v0.6 schema registry."
     },
     {
@@ -118,7 +118,7 @@
         "schema",
         "list"
       ],
-      "description": "usage: cpcf schema list [-h]",
+      "description": "List locally installed v0.6 schemas.",
       "help": "List locally installed v0.6 schemas."
     },
     {
@@ -126,21 +126,21 @@
         "schema",
         "show"
       ],
-      "description": "usage: cpcf schema show [-h] kind",
+      "description": "Show one locally generated v0.6 schema.",
       "help": "Show one locally generated v0.6 schema."
     },
     {
       "argv": [
         "self-check"
       ],
-      "description": "usage: cpcf self-check [-h]",
+      "description": "Validate the installed offline core without contacting an API.",
       "help": "Validate the installed offline core without contacting an API."
     },
     {
       "argv": [
         "workspace"
       ],
-      "description": "usage: cpcf workspace [-h] {create,status} ...",
+      "description": "Create and inspect tenant workspaces.",
       "help": "Create and inspect tenant workspaces."
     },
     {
@@ -148,7 +148,7 @@
         "workspace",
         "create"
       ],
-      "description": "usage: cpcf workspace create [-h]\n                             --root-spki-fingerprint ROOT_SPKI_FINGERPRINT\n                             --genesis-envelope-fingerprint GENESIS_ENVELOPE_FINGERPRINT\n                             workspace",
+      "description": "Create a workspace with two out-of-band genesis fingerprints.",
       "help": "Create a workspace with two out-of-band genesis fingerprints."
     },
     {
@@ -156,7 +156,7 @@
         "workspace",
         "status"
       ],
-      "description": "usage: cpcf workspace status [-h] workspace",
+      "description": "",
       "help": null
     }
   ],

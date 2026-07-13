@@ -264,6 +264,7 @@ class CommitSession:
         self.workspace = workspace
         self.values = values or {}
         self.added: list[object] = []
+        self.flush_count = 0
         self.execute = AsyncMock()
 
     async def get(
@@ -278,6 +279,9 @@ class CommitSession:
 
     def add(self, value: object) -> None:
         self.added.append(value)
+
+    async def flush(self) -> None:
+        self.flush_count += 1
 
 
 class QuarantiningStore(MemoryObjectStore):
@@ -541,6 +545,7 @@ def test_generation_unit_of_work_commits_all_database_effects_or_quarantines() -
     assert {type(item) for item in session.added}.issuperset(
         {ObjectRow, GenerationRow, LedgerRow, AuditEventRow, OutboxRow, IdempotencyRow}
     )
+    assert session.flush_count == 2
     assert not store.quarantined
 
     failed = backend_with(session, RuntimeError("transaction_interrupted"))

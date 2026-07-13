@@ -26,14 +26,14 @@ def _commands(
             continue
         choice_help = {
             item.dest: item.help
-            for item in action._choices_actions  # type: ignore[attr-defined]
+            for item in action._choices_actions
         }
         for name, child in sorted(action.choices.items()):
             command = (*prefix, name)
             result.append(
                 {
                     "argv": list(command),
-                    "description": child.description or child.format_usage().strip(),
+                    "description": child.description or choice_help.get(name) or "",
                     "help": choice_help.get(name),
                 }
             )
