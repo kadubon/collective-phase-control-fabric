@@ -2,9 +2,14 @@ name: Security analysis
 
 on:
   push:
+    branches: [main]
   pull_request:
   schedule:
     - cron: "17 4 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -21,6 +26,7 @@ jobs:
         env:
           GITLEAKS_CONFIG: .gitleaks.toml
           GITLEAKS_ENABLE_SUMMARY: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   semgrep:
     runs-on: ubuntu-latest
