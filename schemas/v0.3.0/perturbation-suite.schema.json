@@ -1,0 +1,138 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/perturbation-suite.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "acceptance": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_cascade_depth": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "maximum_lost_targets": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "support_core_must_survive": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "maximum_lost_targets",
+        "maximum_cascade_depth",
+        "support_core_must_survive"
+      ],
+      "type": "object"
+    },
+    "cases": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+            "type": "string"
+          },
+          "remove_refs": {
+            "items": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "resource_reductions": {
+            "additionalProperties": {
+              "additionalProperties": false,
+              "properties": {
+                "quantity": {
+                  "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                  "type": "string"
+                },
+                "unit": {
+                  "maxLength": 1024,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "quantity",
+                "unit"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "case_id",
+          "remove_refs",
+          "resource_reductions"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    },
+    "source_refs": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "suite_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "suite_id",
+    "cases",
+    "acceptance",
+    "source_refs"
+  ],
+  "title": "CPCF Declared Perturbation Suite v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}

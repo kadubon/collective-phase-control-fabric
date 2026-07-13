@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.2.0/pic-canonical-readiness-report.schema.json","title":"PIC 1.1.0 CanonicalReadiness Report","type":"object","additionalProperties":true,"required":["accepted","profile"],"properties":{"accepted":{},"profile":{"type":"string"}}}

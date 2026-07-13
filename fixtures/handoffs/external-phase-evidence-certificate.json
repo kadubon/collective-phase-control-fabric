@@ -1,0 +1,13 @@
+{
+  "certificate_id": "certificate:phase-evidence-demo",
+  "certificate_kind": "phase_evidence",
+  "preregistered_control_parameter": "synthetic-control",
+  "system_sizes": ["small", "medium", "large"],
+  "resource_matched_protocol": "synthetic-resource-envelope-v1",
+  "declared_order_parameter_vector": ["coordinate-a", "coordinate-b"],
+  "perturbation_or_robustness_evidence": ["fixture:perturbation-a"],
+  "evaluator_and_method": "external-evaluator-fixture:synthetic-method",
+  "uncertainty_representation": "interval",
+  "source_artifact_refs": ["fixture:external-phase-evidence"],
+  "measurement_reproved_by_cpcf": false
+}

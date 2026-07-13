@@ -1,0 +1,159 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/projection-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "cached_validation": {
+      "additionalProperties": {
+        "enum": [
+          "true",
+          "false",
+          "unknown",
+          "not_applicable"
+        ]
+      },
+      "type": "object"
+    },
+    "envelope_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evaluation_time": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "executable_digest": {
+      "oneOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "invocation_digest": {
+      "oneOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "projected_objects": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "schema_ref": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "source_pointer": {
+            "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "digest",
+          "schema_ref",
+          "source_pointer"
+        ],
+        "type": "object"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "raw_artifact_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "receipt_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "return_code": {
+      "oneOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    },
+    "stderr_truncated": {
+      "type": "boolean"
+    },
+    "stdout_truncated": {
+      "type": "boolean"
+    },
+    "timed_out": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "envelope_digest",
+    "raw_artifact_digest",
+    "invocation_digest",
+    "executable_digest",
+    "return_code",
+    "timed_out",
+    "stdout_truncated",
+    "stderr_truncated",
+    "projected_objects",
+    "cached_validation",
+    "evaluation_time"
+  ],
+  "title": "CPCF Recomputable Projection Receipt v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,1 @@
+{"fixture_name":"sequential_task_guard","generator":"collective_phase_control_fabric.fixtures:fixture","expected":{"parallel_fan_out_allowed":false},"synthetic":true}

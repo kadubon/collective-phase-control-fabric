@@ -1,0 +1,1 @@
+{"$id":"https://example.org/cpcf/schemas/v0.5.0/minimal-cut-set-result.schema.json","$ref":"analysis-record.schema.json","$schema":"https://json-schema.org/draft/2020-12/schema","title":"CPCF Minimal Cut Set Result v0.5"}

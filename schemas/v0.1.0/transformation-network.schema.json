@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/transformation-network.schema.json",
+  "title": "CapabilityTransformationNetwork",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["network_id", "nodes", "transformations"],
+  "properties": {
+    "network_id": {"type": "string", "minLength": 1},
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["node_id", "type"],
+        "properties": {
+          "node_id": {"type": "string", "minLength": 1},
+          "type": {
+            "enum": [
+              "artifact", "claim", "evidence", "verifier_report", "residual", "obligation",
+              "task_reference", "authority_record", "hazard_record", "resource_record",
+              "skill_candidate", "structural_enabler", "certified_catalyst", "capability_candidate",
+              "admitted_capability", "memory_candidate", "admitted_memory", "lifecycle_record",
+              "observation", "external_certificate", "target_state"
+            ]
+          }
+        }
+      }
+    },
+    "transformations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "transformation_id", "source_system", "source_operation", "required_inputs",
+          "read_enablers", "reusable_enablers", "consumed_coordinates", "produced_coordinates",
+          "produced_outputs", "inhibitors", "required_evidence", "required_verifier_roles",
+          "required_authority_refs", "resource_upper_bounds", "lifecycle_requirements",
+          "rollback_requirements", "effect_class", "output_contract", "postcondition_contract",
+          "scope", "source_refs"
+        ],
+        "properties": {
+          "transformation_id": {"type": "string", "minLength": 1},
+          "effect_class": {"enum": ["inspect", "validate", "plan", "local_write", "external_effect"]},
+          "required_inputs": {"type": "array", "items": {"type": "string"}},
+          "read_enablers": {"type": "array", "items": {"type": "string"}},
+          "produced_outputs": {"type": "array", "items": {"type": "string"}},
+          "required_evidence": {"type": "array", "items": {"type": "string"}},
+          "required_verifier_roles": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

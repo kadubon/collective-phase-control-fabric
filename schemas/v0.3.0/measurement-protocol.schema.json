@@ -1,0 +1,188 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/measurement-protocol.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "analysis_method": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "assignment": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "comparison": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "evaluator_key_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "missing_data_policy": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "observation_window": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "start": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "type": "object"
+    },
+    "outcomes": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "direction": {
+            "enum": [
+              "minimize",
+              "maximize"
+            ]
+          },
+          "metric": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "metric",
+          "direction",
+          "unit"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "protocol_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "quality_floors": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity",
+          "unit"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "registered_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    },
+    "source_refs": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "stopping_rule": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "target_refs": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "protocol_id",
+    "registered_at",
+    "target_refs",
+    "comparison",
+    "assignment",
+    "observation_window",
+    "outcomes",
+    "quality_floors",
+    "stopping_rule",
+    "missing_data_policy",
+    "analysis_method",
+    "evaluator_key_id",
+    "source_refs",
+    "signature"
+  ],
+  "title": "CPCF Preregistered Measurement Protocol v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}

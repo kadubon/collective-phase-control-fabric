@@ -1,0 +1,134 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/adapter-capability.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "adapter": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "argv_prefix": {
+      "items": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "branch_effect_ref": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "capability_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "effect_class": {
+      "enum": [
+        "inspect",
+        "validate",
+        "plan",
+        "local_write"
+      ]
+    },
+    "executable": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "executable_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "operation": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "outcome_selector": {
+      "additionalProperties": false,
+      "properties": {
+        "mapping": {
+          "additionalProperties": {
+            "enum": [
+              "success",
+              "partial",
+              "failure",
+              "timeout"
+            ]
+          },
+          "type": "object"
+        },
+        "source_pointer": {
+          "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_pointer",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "output_schema_ref": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "capability_id",
+    "adapter",
+    "operation",
+    "effect_class",
+    "executable",
+    "executable_digest",
+    "argv_prefix",
+    "output_schema_ref",
+    "outcome_selector",
+    "branch_effect_ref",
+    "signature"
+  ],
+  "title": "CPCF Signed Adapter Capability v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}

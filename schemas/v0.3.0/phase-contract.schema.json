@@ -1,0 +1,364 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/phase-contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "analysis_limits": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_json_depth": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maximum_nodes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maximum_rational_bits": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maximum_raw_bytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maximum_siphon_species": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maximum_transformations": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maximum_raw_bytes",
+        "maximum_json_depth",
+        "maximum_nodes",
+        "maximum_transformations",
+        "maximum_rational_bits",
+        "maximum_siphon_species"
+      ],
+      "type": "object"
+    },
+    "collective_policy": {
+      "additionalProperties": {
+        "type": [
+          "string",
+          "integer",
+          "boolean",
+          "null"
+        ]
+      },
+      "type": "object"
+    },
+    "contract_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "control_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "beam_width": {
+          "maximum": 32,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "candidate_cap": {
+          "maximum": 64,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "planning_horizon": {
+          "maximum": 3,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "retry_limit": {
+          "maximum": 16,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "planning_horizon",
+        "beam_width",
+        "candidate_cap",
+        "retry_limit"
+      ],
+      "type": "object"
+    },
+    "evaluation_time": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "formation_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_layer_count": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maximum_layer_count"
+      ],
+      "type": "object"
+    },
+    "initial_available_states": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "measurement_protocol_refs": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "non_claims": {
+      "items": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "phase_label": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "protected_floors": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity",
+          "unit"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "rate_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "levels_requiring_evidence": {
+          "items": {
+            "enum": [
+              "L3",
+              "L4",
+              "L5"
+            ]
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "levels_requiring_evidence"
+      ],
+      "type": "object"
+    },
+    "resource_envelope": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity",
+          "unit"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "scope": {
+      "additionalProperties": {
+        "type": [
+          "string",
+          "integer",
+          "boolean",
+          "null"
+        ]
+      },
+      "type": "object"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    },
+    "state_coordinate_registry": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "proxy_only": {
+            "type": "boolean"
+          },
+          "unit": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "unit",
+          "proxy_only"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "support_core_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_support_domains": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "minimum_verifier_domains": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "perturbation_suite_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "minimum_support_domains",
+        "minimum_verifier_domains",
+        "perturbation_suite_refs"
+      ],
+      "type": "object"
+    },
+    "target_states": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "termination_policy": {
+      "additionalProperties": {
+        "type": [
+          "string",
+          "integer",
+          "boolean",
+          "null"
+        ]
+      },
+      "type": "object"
+    },
+    "unit_registry": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "canonical_unit": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "factor": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "canonical_unit",
+          "factor"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_id",
+    "phase_label",
+    "scope",
+    "evaluation_time",
+    "target_states",
+    "initial_available_states",
+    "state_coordinate_registry",
+    "protected_floors",
+    "resource_envelope",
+    "control_policy",
+    "formation_policy",
+    "support_core_policy",
+    "rate_policy",
+    "analysis_limits",
+    "non_claims"
+  ],
+  "title": "CPCF Phase Contract v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}

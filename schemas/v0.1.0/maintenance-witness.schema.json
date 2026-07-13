@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/maintenance-witness.schema.json",
+  "title": "MaintenanceWitness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "validity_horizon", "renewal_obligations", "expiry_refresh_refs", "resource_supply_refs",
+    "verifier_capacity_refs", "rollback_refs", "maintenance_cost_refs", "failure_response_refs", "source_refs"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "witness_id": {"type": "string"},
+    "validity_horizon": {"type": "string"},
+    "renewal_obligations": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "expiry_refresh_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "resource_supply_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "verifier_capacity_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "rollback_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "maintenance_cost_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "failure_response_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "source_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+  }
+}

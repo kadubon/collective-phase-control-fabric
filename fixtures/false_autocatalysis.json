@@ -1,0 +1,1 @@
+{"fixture_name":"false_autocatalysis","generator":"collective_phase_control_fabric.fixtures:fixture","expected":{"detectors":["self_certifying_cycle","nonproductive_cycle"],"positive_promotion":false},"synthetic":true}

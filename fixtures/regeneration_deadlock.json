@@ -1,0 +1,1 @@
+{"fixture_name":"regeneration_deadlock","generator":"collective_phase_control_fabric.fixtures:fixture","expected":{"deadlock_exactness":"singleton_exact","external_handoff_only":true},"synthetic":true}

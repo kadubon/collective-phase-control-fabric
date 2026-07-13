@@ -1,0 +1,23 @@
+{
+  "manifest_version": "0.4.0",
+  "execution_policy": "signed capability, pinned Ed25519 principal, pinned executable digest, one local action",
+  "projection_mapping_policy": "exact_source_json_pointer_to_named_target_schema; no inferred fields",
+  "adapters": [
+    {
+      "adapter": "ccr",
+      "supported_source_version": "1.6.0",
+      "operations": ["agent_explain"],
+      "effect_classes": ["inspect"],
+      "external_effect_supported": false,
+      "projection_registry": "collective_phase_control_fabric.adapters.PROJECTION_MAPPINGS"
+    },
+    {
+      "adapter": "pic",
+      "supported_source_version": "1.1.0",
+      "operations": ["agent_explain", "agent_check", "phase_plan", "canonical_readiness"],
+      "effect_classes": ["inspect", "validate", "plan"],
+      "external_effect_supported": false,
+      "projection_registry": "collective_phase_control_fabric.adapters.PROJECTION_MAPPINGS"
+    }
+  ]
+}

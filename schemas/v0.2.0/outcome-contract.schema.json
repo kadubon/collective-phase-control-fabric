@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.2.0/outcome-contract.schema.json","title":"OutcomeContract","type":"object","additionalProperties":false,
+  "required":["receipt_schema_ref","source_pointers","projection_targets","debt","rollback_obligations","resource_upper_bounds","protected_floor_status","authority_status","hazard_status"],
+  "properties":{"receipt_schema_ref":{"type":"string"},"source_pointers":{"type":"array","items":{"type":"string","pattern":"^/"},"uniqueItems":true},"projection_targets":{"type":"array","items":{"type":"object","required":["source_pointer","target_schema"],"properties":{"source_pointer":{"type":"string","pattern":"^/"},"target_schema":{"type":"string"}}}},"debt":{"type":"array","items":{"type":"string"},"uniqueItems":true},"rollback_obligations":{"type":"array","items":{"type":"string"},"uniqueItems":true},"resource_upper_bounds":{"type":"object"},"protected_floor_status":{"enum":["true","false","unknown"]},"authority_status":{"enum":["true","false","unknown"]},"hazard_status":{"enum":["true","false","unknown"]},"forecast":{"type":"object"}}
+}

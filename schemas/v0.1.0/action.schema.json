@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/action.schema.json",
+  "title": "CPCFAction",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "action_id", "purpose", "priority_class", "targeted_barrier_ids", "targeted_seed_ids",
+    "targeted_target_paths", "required_role", "coordination_recommendation",
+    "independence_requirement", "adapter", "operation", "exact_argv", "effect_class",
+    "network_class", "input_refs", "required_authority_refs", "resource_upper_bounds",
+    "output_contract", "postcondition_contract", "conditional_impact_projection", "local_writes",
+    "required_flag", "reason_refs", "alternative_action_ids"
+  ],
+  "properties": {
+    "action_id": {"type": "string"},
+    "priority_class": {"type": "integer", "minimum": 1, "maximum": 10},
+    "action_kind": {"enum": ["affordance_repair", "formation", "evidence", "maintenance", "robustness"]},
+    "affordance_repair_kind": {
+      "enum": [
+        "missing_typed_input", "missing_typed_output", "ambiguous_tool_schema",
+        "missing_observable_precondition", "missing_receipt", "missing_deterministic_reducer",
+        "missing_failure_code", "missing_digest", "missing_timeout", "missing_resource_bound",
+        "repeated_common_computation", "verifier_overload"
+      ]
+    },
+    "exact_argv": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1},
+    "effect_class": {"enum": ["inspect", "validate", "plan", "local_write", "external_effect"]},
+    "conditional_impact_projection": {"type": ["object", "null"]}
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/verification-network-witness.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "means_established": {
+      "type": "boolean"
+    },
+    "observation_window": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "start": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "type": "object"
+    },
+    "routing": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "fanout_upper": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "from": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+            "type": "string"
+          },
+          "to": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "fanout_upper"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    },
+    "source_refs": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "stages": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "arrival_lower": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "arrival_upper": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "backlog": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "independence_domain": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+            "type": "string"
+          },
+          "service_lower": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "service_upper": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "source_refs": {
+            "items": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "stage_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage_id",
+          "arrival_lower",
+          "arrival_upper",
+          "service_lower",
+          "service_upper",
+          "backlog",
+          "independence_domain",
+          "source_refs"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "stationarity_established": {
+      "type": "boolean"
+    },
+    "time_unit": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "witness_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "witness_id",
+    "time_unit",
+    "observation_window",
+    "stages",
+    "routing",
+    "source_refs"
+  ],
+  "title": "CPCF Verification Network Witness v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}

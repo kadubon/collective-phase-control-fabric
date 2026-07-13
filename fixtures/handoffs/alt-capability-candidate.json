@@ -1,0 +1,9 @@
+{
+  "handoff_id": "handoff:alt-capability-demo",
+  "source_system": "ALT-fixture",
+  "kind": "capability_admission_candidate",
+  "scope": {"domain": "synthetic-demo"},
+  "digest": "sha256:synthetic-alt-candidate",
+  "downstream_accepted": "unknown",
+  "source_refs": ["fixture:alt-capability-candidate"]
+}

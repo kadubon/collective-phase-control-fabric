@@ -1,0 +1,1 @@
+{"fixture_name":"external_claim_bundle","generator":"collective_phase_control_fabric.fixtures:fixture","expected":{"external_claim_bundle_compatible":false,"forbidden_fields":["asi_proven","superintelligence_proven","real_phase_proven","globally_settled"]},"synthetic":true}

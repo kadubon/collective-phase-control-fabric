@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/source-decision.schema.json",
+  "title": "SourceDecision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_system", "source_ref", "accepted", "settled", "authorized", "operationally_usable",
+    "executed", "physical_outcome_verified", "source_json_pointers", "raw_artifact_ref"
+  ],
+  "properties": {
+    "source_system": {"type": "string"},
+    "source_ref": {"type": "string"},
+    "accepted": {"enum": [true, false, "unknown", "not_applicable"]},
+    "settled": {"enum": [true, false, "unknown", "not_applicable"]},
+    "authorized": {"enum": [true, false, "unknown", "not_applicable"]},
+    "operationally_usable": {"enum": [true, false, "unknown", "not_applicable"]},
+    "executed": {"enum": [true, false, "unknown", "not_applicable"]},
+    "physical_outcome_verified": {"enum": [true, false, "unknown", "not_applicable"]},
+    "source_json_pointers": {"type": "array", "items": {"type": "string"}},
+    "raw_artifact_ref": {"type": "string"}
+  }
+}

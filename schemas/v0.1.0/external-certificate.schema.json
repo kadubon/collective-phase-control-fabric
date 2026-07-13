@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/external-certificate.schema.json",
+  "title": "ExternalCertificateProjection",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "node_id", "type", "certificate_kind", "schema_valid", "digest_valid", "scope_compatible",
+    "resource_compatible", "baseline_compatible", "not_expired", "non_claims_present", "source_system",
+    "evaluator_identity", "source_refs"
+  ],
+  "properties": {
+    "node_id": {"type": "string"},
+    "type": {"const": "external_certificate"},
+    "certificate_kind": {"enum": ["collective_advantage", "frontier_exceedance", "phase_evidence"]}
+  }
+}

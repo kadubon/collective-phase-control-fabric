@@ -1,0 +1,124 @@
+{
+  "audit_version": "0.6.0-pre-release",
+  "audited_version": "0.6.0",
+  "claim": "Known findings only; undiscovered defects remain possible.",
+  "findings": [
+    {
+      "id": "V6-001",
+      "severity": "high",
+      "exploit": "Consumers can resolve unpublished internal distributions or receive a wheel missing import packages.",
+      "affected_claim": "Installable public package",
+      "correction": "One root distribution contains all five import packages and has no unpublished cpcf-* dependencies.",
+      "regression_test": "tests/test_v6_release_surface.py::test_root_distribution_is_single_and_complete",
+      "status": "closed"
+    },
+    {
+      "id": "V6-002",
+      "severity": "high",
+      "exploit": "A first-time agent requires an API before it can discover CPCF semantics or schemas.",
+      "affected_claim": "Offline first use",
+      "correction": "Offline explain, self-check, schema list/show, and bundle verification are installed in the base wheel.",
+      "regression_test": "tests/test_v6_release_surface.py::test_offline_cli_orientation_and_schema_registry",
+      "status": "closed"
+    },
+    {
+      "id": "V6-003",
+      "severity": "critical",
+      "exploit": "Local paths, credentials, caches, or generated artifacts can be committed or packaged.",
+      "affected_claim": "Publication safety",
+      "correction": "Explicit source manifest, staged/archive hygiene scanner, narrow Gitleaks allowlist, and expanded ignores.",
+      "regression_test": "tests/test_v6_release_surface.py::test_publication_hygiene_rejects_sensitive_and_local_content",
+      "status": "closed"
+    },
+    {
+      "id": "V6-004",
+      "severity": "critical",
+      "exploit": "A manual workflow or mismatched tag can upload an unreviewed distribution.",
+      "affected_claim": "PyPI release integrity",
+      "correction": "Release-only trusted-publishing job, exact artifact contract, version match, protected pypi environment, and disabled publication variable.",
+      "regression_test": "tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
+      "status": "partial"
+    },
+    {
+      "id": "V6-005",
+      "severity": "critical",
+      "exploit": "Previously admitted records can be used without recomputing signatures, time, source, lifecycle, and projection authority.",
+      "affected_claim": "Authoritative evidence control",
+      "correction": "Kernel validators exist; complete authoritative-read integration remains required.",
+      "regression_test": "release gate: authoritative read integration suite",
+      "status": "open"
+    },
+    {
+      "id": "V6-006",
+      "severity": "critical",
+      "exploit": "A crash can separate CAS references, ledger state, idempotency, outbox, audit, and current generation.",
+      "affected_claim": "Serializable immutable generation",
+      "correction": "Complete one-transaction domain commit and crash injection remain required.",
+      "regression_test": "release gate: PostgreSQL generation crash matrix",
+      "status": "open"
+    },
+    {
+      "id": "V6-007",
+      "severity": "critical",
+      "exploit": "A stale or replayed runner lease can submit unbound output or hide incomplete cleanup.",
+      "affected_claim": "Customer-controlled runner protocol",
+      "correction": "Closed models and conformance checks exist; outbound mTLS lease transport remains required.",
+      "regression_test": "release gate: mTLS lease replay and artifact integrity suite",
+      "status": "open"
+    },
+    {
+      "id": "V6-008",
+      "severity": "critical",
+      "exploit": "Incomplete siphon, coupling, cut, service-curve, or occurrence analysis can be mistaken for a negative result.",
+      "affected_claim": "Exact bounded scientific profile",
+      "correction": "Closed result kinds and bounded exact reference algorithms now preserve exhaustion; large-network and mutation/differential release evidence remains required.",
+      "regression_test": "tests/test_v6_structural_analysis.py",
+      "status": "partial"
+    },
+    {
+      "id": "V6-009",
+      "severity": "critical",
+      "exploit": "A perturbation can reuse baseline facts after expiry, revocation, or a typed value change.",
+      "affected_claim": "Perturbation robustness",
+      "correction": "Object-removal replay exists; complete reduced-snapshot transformation classes remain required.",
+      "regression_test": "release gate: fresh-audit equivalence for every perturbation class",
+      "status": "open"
+    },
+    {
+      "id": "V6-010",
+      "severity": "critical",
+      "exploit": "An abstract planner successor can retain science, authority, trial, or independence that an outcome removed.",
+      "affected_claim": "Strong contingent control",
+      "correction": "Every branch must invoke the shared audit kernel over a complete successor snapshot.",
+      "regression_test": "release gate: full-snapshot AND-OR differential suite",
+      "status": "open"
+    },
+    {
+      "id": "V6-011",
+      "severity": "critical",
+      "exploit": "Unsigned coordination or trial records can be treated as admitted upstream state.",
+      "affected_claim": "Coordination and empirical evidence integrity",
+      "correction": "Authoritative admission must recompute every event and trial quorum.",
+      "regression_test": "release gate: coordination and trial quorum admission suite",
+      "status": "open"
+    },
+    {
+      "id": "V6-012",
+      "severity": "high",
+      "exploit": "Onboarding can present static blockers that omit or misstate live workspace state.",
+      "affected_claim": "First-agent remote onboarding",
+      "correction": "Aggregate every trust, time, ledger, science, planner, runner, projection, coordination, trial, quota, and repair subsystem.",
+      "regression_test": "release gate: installed-wheel live onboarding conformance",
+      "status": "open"
+    },
+    {
+      "id": "V6-013",
+      "severity": "high",
+      "exploit": "Passing regression counts can conceal weak branch or mutation assurance.",
+      "affected_claim": "Commercial release readiness",
+      "correction": "95 percent critical branch, 90 percent overall, 85 percent mutation, integration, load, chaos, restore, soak, threat-model, and penetration gates remain blocking.",
+      "regression_test": ".github/workflows/ci.yml and external release evidence",
+      "status": "open"
+    }
+  ]
+}

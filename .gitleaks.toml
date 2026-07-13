@@ -1,0 +1,17 @@
+title = "CPCF publication scan"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Anchored disposable PostgreSQL credentials used only by isolated CI services"
+paths = ['''^\.github/workflows/ci\.yml$''']
+regexes = [
+  '''postgresql\+psycopg://cpcf_owner:cpcf-test@localhost:5432/cpcf''',
+  '''postgresql\+psycopg://cpcf_app_test:cpcf-app-test@localhost:5432/cpcf''',
+]
+
+[[allowlists]]
+description = "Anchored non-secret bearer-token test fixture"
+paths = ['''^tests/test_v6_package_interfaces\.py$''']
+regexes = ['''Bearer ephemeral-token''']

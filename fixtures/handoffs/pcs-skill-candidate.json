@@ -1,0 +1,9 @@
+{
+  "handoff_id": "handoff:pcs-skill-demo",
+  "source_system": "PCS-fixture",
+  "kind": "proof_carrying_skill_candidate",
+  "receipt_status": "candidate",
+  "digest": "sha256:synthetic-pcs-skill",
+  "downstream_accepted": "unknown",
+  "source_refs": ["fixture:pcs-skill-candidate"]
+}

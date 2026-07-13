@@ -1,0 +1,125 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/rate-feasibility-witness.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "canonical_unit": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "feasible_flux": {
+      "additionalProperties": {
+        "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "network_ref": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "observation_window": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "start": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "type": "object"
+    },
+    "rate_intervals": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "lower": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          },
+          "upper": {
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lower",
+          "upper"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    },
+    "source_refs": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "witness_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "witness_id",
+    "network_ref",
+    "observation_window",
+    "canonical_unit",
+    "rate_intervals",
+    "feasible_flux",
+    "source_refs"
+  ],
+  "title": "CPCF Exact Interval Rate Feasibility Witness v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}

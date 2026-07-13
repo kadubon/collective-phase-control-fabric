@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/phase-evidence-certificate.schema.json",
+  "title": "PhaseEvidenceCertificateProjection",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "preregistered_control_parameter", "system_sizes", "resource_matched_protocol",
+    "declared_order_parameter_vector", "perturbation_or_robustness_evidence",
+    "evaluator_and_method", "uncertainty_representation", "source_artifact_refs"
+  ],
+  "properties": {
+    "preregistered_control_parameter": {"type": "string", "minLength": 1},
+    "system_sizes": {"type": "array", "items": {"type": "string"}, "minItems": 2},
+    "resource_matched_protocol": {"type": "string", "minLength": 1},
+    "declared_order_parameter_vector": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "perturbation_or_robustness_evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "evaluator_and_method": {"type": "string", "minLength": 1},
+    "uncertainty_representation": {"type": "string", "minLength": 1},
+    "source_artifact_refs": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+  }
+}

@@ -1,0 +1,187 @@
+name: Release gate
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.11.28"
+
+jobs:
+  build:
+    name: Build and verify distributions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+          enable-cache: true
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - run: uv run --frozen ruff format --check .
+      - run: uv run --frozen ruff check .
+      - run: uv run --frozen mypy src packages/cpcf-api/src packages/cpcf-cli/src packages/cpcf-worker/src packages/cpcf-runner-protocol/src
+      - run: uv run --frozen pytest
+      - name: Overall branch coverage
+        run: >-
+          uv run --frozen pytest
+          --cov=collective_phase_control_fabric --cov=cpcf_api --cov=cpcf_cli
+          --cov=cpcf_worker --cov=cpcf_runner_protocol --cov-branch
+          --cov-report=term-missing --cov-fail-under=90
+      - name: Critical subsystem branch coverage
+        run: >-
+          uv run --frozen pytest
+          tests/test_v6_models_trust.py tests/test_v6_science_planner.py
+          tests/test_v6_service_boundaries.py tests/test_v6_package_interfaces.py
+          tests/test_v6_release_surface.py tests/test_v6_structural_analysis.py
+          --cov=collective_phase_control_fabric.v6 --cov=cpcf_api --cov=cpcf_cli
+          --cov=cpcf_worker --cov=cpcf_runner_protocol --cov-branch
+          --cov-report=term-missing --cov-fail-under=95
+      - run: uv run --frozen python scripts/check_schemas.py
+      - run: uv run --frozen python scripts/check_fixtures.py
+      - run: uv run --frozen python scripts/generate_references.py --check
+      - run: uv run --frozen python scripts/check_publication_hygiene.py --source-tree
+      - run: uv run --frozen bandit -c pyproject.toml -r src packages
+      - run: >-
+          uv run --frozen pip-audit --local --cache-dir .cache/pip-audit
+          --vulnerability-service osv --timeout 60
+      - run: uv build
+      - name: Validate artifact count, names, tag, and checksums
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || '' }}
+        run: >-
+          uv run --frozen python scripts/check_release_artifacts.py
+          --dist dist --metadata-out release-metadata --tag "$RELEASE_TAG"
+      - run: uv run --frozen twine check dist/*
+      - run: uv run --frozen python scripts/generate_sbom.py uv.lock release-metadata/cpcf-sbom.cdx.json
+      - run: >-
+          uv run --frozen python scripts/check_publication_hygiene.py
+          --archive dist/*.whl --archive dist/*.tar.gz
+      - name: Clean installed-wheel smoke test
+        run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf self-check --json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: python-distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-metadata
+          path: release-metadata/*
+          if-no-files-found: error
+          retention-days: 14
+
+  provenance:
+    name: Attest build artifacts
+    needs: build
+    if: >-
+      github.event_name == 'release' &&
+      github.event.release.draft == false &&
+      github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
+        with:
+          name: python-distributions
+          path: dist
+      - id: attest
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373
+        with:
+          subject-path: dist/*
+      - name: Collect provenance bundle
+        run: |
+          mkdir provenance
+          cp "${{ steps.attest.outputs.bundle-path }}" provenance/slsa-provenance.jsonl
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-provenance
+          path: provenance/*
+          if-no-files-found: error
+          retention-days: 14
+
+  mutation:
+    name: Mutation assurance
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+          enable-cache: true
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - run: uv run --frozen mutmut run
+      - run: uv run --frozen mutmut results --all > mutation-results.txt
+      - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
+
+  release-assets:
+    name: Attach verified release assets
+    needs: [build, provenance, mutation]
+    if: >-
+      github.event_name == 'release' &&
+      github.event.release.draft == false &&
+      github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
+        with:
+          name: python-distributions
+          path: dist
+      - uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
+        with:
+          name: release-metadata
+          path: release-metadata
+      - uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
+        with:
+          name: release-provenance
+          path: provenance
+      - name: Attach distributions, checksums, SBOM, and provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" dist/* release-metadata/* provenance/* --clobber
+
+  publish:
+    name: Publish to PyPI with trusted publishing
+    needs: [build, provenance, release-assets]
+    if: >-
+      github.event_name == 'release' &&
+      github.event.release.draft == false &&
+      github.event.release.prerelease == false &&
+      vars.PYPI_PUBLISH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
+        with:
+          name: python-distributions
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247
+        with:
+          packages-dir: dist/
+          print-hash: true

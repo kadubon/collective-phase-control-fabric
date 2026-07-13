@@ -1,0 +1,142 @@
+{
+  "audit_version": "0.6.0",
+  "audited_version": "0.5.0",
+  "claim": "Known findings only; undiscovered defects remain possible.",
+  "findings": [
+    {
+      "id": "V5-001",
+      "severity": "critical",
+      "exploit": "A permissive generic payload can bypass kind-specific schema intent.",
+      "affected_claim": "Closed native v0.5 schemas",
+      "correction": "Exhaustive v0.6 kind-to-Pydantic-to-schema registry with immutable schema digests.",
+      "regression_test": "tests/test_v6_models_trust.py::test_registry_is_closed_and_runtime_bound",
+      "status": "closed"
+    },
+    {
+      "id": "V5-002",
+      "severity": "critical",
+      "exploit": "A projected object can lack an authenticated source identity or exact raw pointer chain.",
+      "affected_claim": "Receipt-backed projection",
+      "correction": "Typed reconstruction exists; API persistence and authoritative revalidation of the complete source chain remain open.",
+      "regression_test": "tests/test_v6_service_boundaries.py::test_projection_reconstructs_exact_pointer_and_independent_approval",
+      "status": "partial"
+    },
+    {
+      "id": "V5-003",
+      "severity": "critical",
+      "exploit": "Current wall time or later key expiry can invalidate or admit the wrong historical statement.",
+      "affected_claim": "Historical signature validity",
+      "correction": "Trusted signing-time evaluation and explicit revocation/compromise semantics.",
+      "regression_test": "tests/test_v6_models_trust.py::test_historical_signature_survives_later_key_expiry",
+      "status": "closed"
+    },
+    {
+      "id": "V5-004",
+      "severity": "high",
+      "exploit": "A local CAS link or tenant path can redirect authoritative bytes.",
+      "affected_claim": "Workspace containment",
+      "correction": "Tenant-bound S3 keys, digest recheck, and link-rejected read-only legacy roots.",
+      "regression_test": "tests/test_v6_service_boundaries.py::test_rls_is_forced_and_s3_keys_reject_traversal",
+      "status": "partial"
+    },
+    {
+      "id": "V5-005",
+      "severity": "critical",
+      "exploit": "Local child processes can escape incomplete dependency and descendant accounting.",
+      "affected_claim": "Bounded adapter execution",
+      "correction": "No API/worker subprocess path and lease-bound receipt validation exist; mTLS lease transport and deployed identity checks remain open.",
+      "regression_test": "tests/test_v6_service_boundaries.py::test_runner_rejects_replay_timeout_and_unattested_cleanup",
+      "status": "partial"
+    },
+    {
+      "id": "V5-006",
+      "severity": "critical",
+      "exploit": "A witness can invent food, resources, supply, or independence and raise status.",
+      "affected_claim": "Exact scientific profile",
+      "correction": "The typed audit kernel exists; authoritative reads must still recompute every DSSE and quorum chain before admitting its inputs.",
+      "regression_test": "tests/test_v6_science_planner.py::test_shared_kernel_and_fresh_perturbation_replay",
+      "status": "partial"
+    },
+    {
+      "id": "V5-007",
+      "severity": "critical",
+      "exploit": "Perturbation replay can report baseline science after removing its support.",
+      "affected_claim": "Perturbation robustness",
+      "correction": "Object-removal replay creates a new basis and shared-kernel audit; expiry, revocation, and value-modification perturbations remain open.",
+      "regression_test": "tests/test_v6_science_planner.py::test_shared_kernel_and_fresh_perturbation_replay",
+      "status": "partial"
+    },
+    {
+      "id": "V5-008",
+      "severity": "critical",
+      "exploit": "Unsafe or inferior candidates can be selected by count-based or incorrectly directed dominance.",
+      "affected_claim": "Strong branch-safe planning",
+      "correction": "Hard filtering, semantic deduplication, Pareto directions, overflow unknown, and four-outcome trees exist; full-kernel successor recomputation remains open.",
+      "regression_test": "tests/test_v6_science_planner.py::test_planner_filters_before_dedup_and_uses_correct_pareto_direction",
+      "status": "open"
+    },
+    {
+      "id": "V5-009",
+      "severity": "high",
+      "exploit": "Unsigned routing or missing exposure events can fabricate coordination integrity.",
+      "affected_claim": "Coordination protocol integrity",
+      "correction": "Hash-chain and state-machine validation exist; per-event DSSE admission and authenticated routing APIs remain open.",
+      "regression_test": "tests/test_v6_science_planner.py::test_shared_kernel_and_fresh_perturbation_replay",
+      "status": "partial"
+    },
+    {
+      "id": "V5-010",
+      "severity": "critical",
+      "exploit": "An unfavorable duplicate primary result can be rejected instead of retained as contradiction.",
+      "affected_claim": "External acceleration compatibility",
+      "correction": "Duplicate-result and binding contradictions are retained; registration and amendment DSSE quorum recomputation remains open.",
+      "regression_test": "tests/test_v6_service_boundaries.py::test_trial_retains_duplicate_primary_results_as_contradiction",
+      "status": "partial"
+    },
+    {
+      "id": "V5-011",
+      "severity": "high",
+      "exploit": "A first-time agent receives optimistic commands that do not reflect workspace authority state.",
+      "affected_claim": "Native onboarding",
+      "correction": "The response envelope is stable, but onboarding still returns a conservative static blocker set rather than live subsystem aggregation.",
+      "regression_test": "tests/test_v6_service_boundaries.py::test_api_requires_idempotency_generation_and_tenant_authority",
+      "status": "open"
+    },
+    {
+      "id": "V5-012",
+      "severity": "high",
+      "exploit": "The declared Python range cannot be universally resolved and CI checks stale modules.",
+      "affected_claim": "Reproducible supported installation",
+      "correction": "uv 0.11.28, Python 3.14.6, and a universal lock are implemented; the v0.6 coverage and security-tool matrix gates remain open.",
+      "regression_test": ".github/workflows/ci.yml::core-platform",
+      "status": "open"
+    },
+    {
+      "id": "V6-AUD-001",
+      "severity": "critical",
+      "exploit": "A caller can reuse one idempotency key for a different mutation and receive an unrelated cached response.",
+      "affected_claim": "Mutation replay safety",
+      "correction": "Bind cached responses to a canonical method, path, tenant, subject, expected-generation, and body digest; full transaction coupling remains open.",
+      "regression_test": "tests/test_v6_service_boundaries.py::test_api_requires_idempotency_generation_and_tenant_authority",
+      "status": "partial"
+    },
+    {
+      "id": "V6-AUD-002",
+      "severity": "medium",
+      "exploit": "A first-time client cannot inspect the public immutable schema registry without first provisioning a bearer token.",
+      "affected_claim": "First-agent schema discovery",
+      "correction": "Permit unauthenticated CLI requests only for the public schema registry while retaining authentication on tenant operations.",
+      "regression_test": "tests/test_v6_package_interfaces.py::test_cli_parser_and_environment_only_authentication",
+      "status": "closed"
+    },
+    {
+      "id": "V6-AUD-003",
+      "severity": "high",
+      "exploit": "A clean source checkout can omit the reviewed universal lock and resolve a different dependency graph.",
+      "affected_claim": "Frozen uv reproducibility",
+      "correction": "Remove the uv.lock ignore rule and ignore only ephemeral verification exports.",
+      "regression_test": "tests/test_v6_package_interfaces.py::test_uv_lock_is_present_and_not_ignored",
+      "status": "closed"
+    }
+  ]
+}

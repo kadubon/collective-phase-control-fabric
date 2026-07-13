@@ -1,0 +1,9 @@
+{
+  "handoff_id": "handoff:cmgl-memory-demo",
+  "source_system": "CMGL-fixture",
+  "kind": "governed_memory_candidate",
+  "write_performed": false,
+  "digest": "sha256:synthetic-cmgl-memory",
+  "downstream_accepted": "unknown",
+  "source_refs": ["fixture:cmgl-memory-candidate"]
+}

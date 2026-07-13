@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/phase-contract.schema.json",
+  "title": "PhaseContract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "contract_id", "phase_label", "scope", "target_states", "target_paths",
+    "initial_available_states", "primitive_transformations", "state_coordinate_registry",
+    "required_evidence_classes", "required_verifier_roles", "collective_policy",
+    "task_structure", "work_graph", "resource_envelope", "authority_envelope_refs",
+    "hazard_envelope_refs", "protected_floors", "lifecycle_policy",
+    "recursive_reuse_policy", "robustness_policy", "external_measurement_policy",
+    "termination_policy", "non_claims", "created_at"
+  ],
+  "properties": {
+    "contract_id": {"type": "string", "minLength": 1},
+    "phase_label": {"type": "string", "minLength": 1},
+    "scope": {"type": "object"},
+    "target_states": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "target_paths": {"type": "array", "items": {"type": "object"}},
+    "initial_available_states": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "primitive_transformations": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "state_coordinate_registry": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["unit", "proxy_only"],
+        "properties": {"unit": {"type": "string"}, "proxy_only": {"type": "boolean"}}
+      }
+    },
+    "required_evidence_classes": {"type": "array", "items": {"type": "string"}},
+    "required_verifier_roles": {"type": "array", "items": {"type": "string"}},
+    "collective_policy": {
+      "type": "object",
+      "required": [
+        "minimum_independent_contribution_groups", "required_integration_roles",
+        "required_independent_verifier_groups", "correlation_policy", "communication_policy"
+      ],
+      "properties": {
+        "minimum_independent_contribution_groups": {"type": "integer", "minimum": 1},
+        "required_integration_roles": {"type": "array", "items": {"type": "string"}},
+        "required_independent_verifier_groups": {"type": "integer", "minimum": 1},
+        "correlation_policy": {"type": "string"},
+        "communication_policy": {"type": "string"}
+      }
+    },
+    "task_structure": {
+      "enum": ["sequential", "parallel_decomposable", "dynamic_exploration", "mixed", "unknown"]
+    },
+    "work_graph": {"type": "object"},
+    "resource_envelope": {"type": "object"},
+    "authority_envelope_refs": {"type": "array", "items": {"type": "string"}},
+    "hazard_envelope_refs": {"type": "array", "items": {"type": "string"}},
+    "protected_floors": {"type": "object"},
+    "lifecycle_policy": {"type": "object"},
+    "recursive_reuse_policy": {"type": "object"},
+    "robustness_policy": {"type": "object"},
+    "external_measurement_policy": {"type": "object"},
+    "termination_policy": {"type": "object"},
+    "non_claims": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

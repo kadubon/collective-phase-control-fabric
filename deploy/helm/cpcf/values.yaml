@@ -1,0 +1,27 @@
+replicaCount:
+  api: 3
+  worker: 3
+image:
+  api:
+    repository: cpcf-api
+    digest: ""
+  worker:
+    repository: cpcf-worker
+    digest: ""
+oidc:
+  issuer: ""
+  audience: "cpcf-api"
+  jwksUrl: ""
+objectStore:
+  bucket: ""
+secretName: cpcf-runtime
+resources:
+  api:
+    requests: {cpu: 250m, memory: 256Mi}
+    limits: {cpu: "1", memory: 1Gi}
+  worker:
+    requests: {cpu: "1", memory: 1Gi}
+    limits: {cpu: "4", memory: 4Gi}
+networkPolicy:
+  enabled: true
+  allowedEgressCidrs: []

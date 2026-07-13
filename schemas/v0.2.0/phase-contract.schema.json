@@ -1,0 +1,15 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.2.0/phase-contract.schema.json","title":"PhaseContract v0.2","type":"object","additionalProperties":true,
+  "required":["schema_version","contract_id","phase_label","scope","evaluation_time","target_states","initial_available_states","state_coordinate_registry","protected_floors","resource_envelope","control_policy","formation_policy","support_core_policy","rate_policy","non_claims"],
+  "properties":{
+    "schema_version":{"const":"0.2.0"},"contract_id":{"type":"string","minLength":1},"phase_label":{"type":"string","minLength":1},"scope":{"type":"object"},"evaluation_time":{"type":"string","format":"date-time"},
+    "target_states":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"initial_available_states":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},
+    "state_coordinate_registry":{"type":"object","additionalProperties":{"type":"object","required":["unit","proxy_only"],"properties":{"unit":{"type":"string","minLength":1},"proxy_only":{"type":"boolean"}}}},
+    "protected_floors":{"type":"object"},"resource_envelope":{"type":"object"},
+    "control_policy":{"type":"object","required":["planning_horizon","beam_width","candidate_cap","retry_policy"],"properties":{"planning_horizon":{"type":"integer","minimum":1,"maximum":3},"beam_width":{"type":"integer","minimum":1,"maximum":32},"candidate_cap":{"type":"integer","minimum":1,"maximum":64},"retry_policy":{"type":"object"}}},
+    "formation_policy":{"type":"object","required":["causal_sequence_required","maximum_layer_count"],"properties":{"causal_sequence_required":{"const":true},"maximum_layer_count":{"type":"integer","minimum":1}}},
+    "support_core_policy":{"type":"object","required":["minimum_independent_support_groups","minimum_independent_verifier_groups","perturbation_suite_refs"],"properties":{"minimum_independent_support_groups":{"type":"integer","minimum":1},"minimum_independent_verifier_groups":{"type":"integer","minimum":1},"perturbation_suite_refs":{"type":"array","items":{"type":"string"},"uniqueItems":true}}},
+    "rate_policy":{"type":"object","required":["levels_requiring_external_rate_evidence"],"properties":{"levels_requiring_external_rate_evidence":{"type":"array","items":{"enum":["L3","L4","L5"]},"uniqueItems":true}}},
+    "non_claims":{"type":"array","items":{"type":"string"},"minItems":1}
+  }
+}

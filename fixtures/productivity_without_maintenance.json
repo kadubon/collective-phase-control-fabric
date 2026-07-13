@@ -1,0 +1,1 @@
+{"fixture_name":"productivity_without_maintenance","generator":"collective_phase_control_fabric.fixtures:fixture","expected":{"ladder_level":"L2","maintenance":"unknown"},"synthetic":true}

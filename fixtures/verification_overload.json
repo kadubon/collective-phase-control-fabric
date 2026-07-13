@@ -1,0 +1,1 @@
+{"fixture_name":"verification_overload","generator":"collective_phase_control_fabric.fixtures:fixture","expected":{"verification_load":"verification_overload","fan_out":false},"synthetic":true}

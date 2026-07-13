@@ -1,0 +1,1 @@
+{"$id":"https://example.org/cpcf/schemas/v0.5.0/organization-witness.schema.json","$ref":"analysis-record.schema.json","$schema":"https://json-schema.org/draft/2020-12/schema","title":"CPCF Organization Witness v0.5"}

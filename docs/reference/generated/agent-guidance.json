@@ -1,0 +1,37 @@
+{
+  "acceleration_authority": "externally_registered_evidence_only",
+  "api_version": "cpcf.io/v0.6",
+  "first_safe_commands": [
+    [
+      "cpcf",
+      "agent",
+      "explain",
+      "--json"
+    ],
+    [
+      "cpcf",
+      "self-check",
+      "--json"
+    ],
+    [
+      "cpcf",
+      "schema",
+      "list",
+      "--json"
+    ]
+  ],
+  "native_result": "operational_organization_profile",
+  "nonclaims": [
+    "collective-superintelligence phase detection or creation",
+    "causality or statistical validity",
+    "thermodynamic feasibility or physical phase behavior",
+    "local process sandboxing",
+    "production readiness without completed release gates"
+  ],
+  "offline_capabilities": [
+    "schema inspection",
+    "installation self-check",
+    "portable bundle verification",
+    "read-only legacy inspection"
+  ]
+}

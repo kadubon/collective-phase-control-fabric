@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.4.0/open-system-resource-witness.schema.json","title":"CPCF Open System Resource Witness v0.4","$ref":"analysis-record.schema.json"}

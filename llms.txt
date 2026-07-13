@@ -1,0 +1,25 @@
+# CPCF v0.6
+
+Purpose: evidence-bound analysis and control of finite collective workflows.
+Distribution: collective-phase-control-fabric
+Development: uv sync --frozen --all-extras --group dev --group security
+CLI: cpcf
+First offline commands: cpcf agent explain --json; cpcf self-check --json; cpcf schema list --json
+First remote command: cpcf agent onboard --workspace WORKSPACE --json
+
+Critical semantics:
+- unknown and unknown_due_to_budget are never favorable;
+- v0.6 kinds are closed and map one-to-one to runtime models and schema digests;
+- DSSE envelope key IDs are hints; protected payload identity and pinned keys establish authority;
+- key validity is evaluated at trusted signing time with explicit revocation semantics;
+- initial resources, supplies, food, verifier capacity, and independence come from typed live attestations;
+- witnesses bind one immutable analysis basis and cannot compose across snapshots;
+- perturbations construct reduced snapshots and rerun the shared kernel;
+- every action outcome preserves protected constraints; optional output receives no progress credit;
+- the API and analysis worker never execute adapters;
+- external runner receipts do not prove isolation without independent attestation;
+- trial bindings are validated, but causality and statistical methods are not certified;
+- v0.1-v0.5 authority is quarantined and inspection-only;
+- CPCF does not create, detect, or certify collective superintelligence or a physical phase.
+
+Documentation: README.md, SPEC.md, FORMAL_MODEL.md, SECURITY.md, docs/research-basis.md.

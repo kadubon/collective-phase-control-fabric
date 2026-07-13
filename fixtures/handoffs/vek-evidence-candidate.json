@@ -1,0 +1,9 @@
+{
+  "handoff_id": "handoff:vek-evidence-demo",
+  "source_system": "VEK-fixture",
+  "kind": "residual_evidence_candidate",
+  "residual_refs": ["residual:synthetic-unresolved"],
+  "digest": "sha256:synthetic-vek-evidence",
+  "downstream_accepted": "unknown",
+  "source_refs": ["fixture:vek-evidence-candidate"]
+}

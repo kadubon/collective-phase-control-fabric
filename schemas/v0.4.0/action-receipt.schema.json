@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.4.0/action-receipt.schema.json","title":"CPCF Action Receipt v0.4","$ref":"analysis-record.schema.json"}

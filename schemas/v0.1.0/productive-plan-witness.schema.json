@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cpcf/schemas/v0.1.0/productive-plan-witness.schema.json",
+  "title": "ProductivePlanWitness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "witness_id", "transformation_coefficients", "external_supplies", "expected_net_balances",
+    "target_positive_coordinates", "protected_nonnegative_coordinates", "scope", "horizon", "source_refs"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "witness_id": {"type": "string"},
+    "transformation_coefficients": {"type": "object", "additionalProperties": {"type": "string"}},
+    "external_supplies": {"type": "object"},
+    "expected_net_balances": {"type": "object", "additionalProperties": {"type": "string"}},
+    "target_positive_coordinates": {"type": "array", "items": {"type": "string"}},
+    "protected_nonnegative_coordinates": {"type": "array", "items": {"type": "string"}},
+    "scope": {"type": "object"},
+    "horizon": {"type": "string"},
+    "source_refs": {"type": "array", "items": {"type": "string"}}
+  }
+}

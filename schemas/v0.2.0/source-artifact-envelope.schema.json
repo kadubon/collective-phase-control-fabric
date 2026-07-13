@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.2.0/source-artifact-envelope.schema.json","title":"SourceArtifactEnvelope","type":"object","additionalProperties":false,
+  "required":["schema_version","envelope_id","source_system","schema_ref","raw_artifact_digest","raw_size","scope","lifecycle","lineage","source_pointers","imported_at"],
+  "properties":{"schema_version":{"const":"0.2.0"},"envelope_id":{"type":"string","minLength":1},"source_system":{"type":"string","minLength":1},"schema_ref":{"type":"string","minLength":1},"raw_artifact_digest":{"pattern":"^sha256:[0-9a-f]{64}$"},"raw_size":{"type":"integer","minimum":0},"scope":{"type":"object"},"lifecycle":{"type":"object"},"lineage":{"type":"array","items":{"type":"string"},"uniqueItems":true},"source_pointers":{"type":"array","items":{"type":"string","pattern":"^/"},"minItems":1,"uniqueItems":true},"imported_at":{"type":"string","format":"date-time"},"signature":{"type":["object","null"]}}
+}

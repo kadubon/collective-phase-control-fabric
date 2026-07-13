@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-cpcf-api
+spec:
+  replicas: {{ .Values.replicaCount.api }}
+  selector:
+    matchLabels: {app.kubernetes.io/name: cpcf-api}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: cpcf-api}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-cpcf
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 65532, fsGroup: 65532}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: {app.kubernetes.io/name: cpcf-api}
+      containers:
+        - name: api
+          image: "{{ .Values.image.api.repository }}@{{ required "API image digest is required" .Values.image.api.digest }}"
+          imagePullPolicy: IfNotPresent
+          ports: [{name: http, containerPort: 8080}]
+          env:
+            - {name: CPCF_BIND_HOST, value: "0.0.0.0"}
+            - {name: CPCF_OIDC_ISSUER, value: {{ .Values.oidc.issuer | quote }}}
+            - {name: CPCF_OIDC_AUDIENCE, value: {{ .Values.oidc.audience | quote }}}
+            - {name: CPCF_OIDC_JWKS_URL, value: {{ .Values.oidc.jwksUrl | quote }}}
+            - {name: CPCF_OBJECT_BUCKET, value: {{ .Values.objectStore.bucket | quote }}}
+            - name: CPCF_DATABASE_URL
+              valueFrom: {secretKeyRef: {name: {{ .Values.secretName }}, key: database-url}}
+          readinessProbe: {httpGet: {path: /health/ready, port: http}, periodSeconds: 10}
+          livenessProbe: {httpGet: {path: /health/live, port: http}, periodSeconds: 10}
+          resources: {{ toYaml .Values.resources.api | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+            seccompProfile: {type: RuntimeDefault}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-cpcf-api
+spec:
+  selector: {app.kubernetes.io/name: cpcf-api}
+  ports: [{name: http, port: 80, targetPort: http}]

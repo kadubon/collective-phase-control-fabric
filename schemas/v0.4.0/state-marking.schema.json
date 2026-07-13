@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.4.0/state-marking.schema.json","title":"CPCF State Marking v0.4","$ref":"analysis-record.schema.json"}

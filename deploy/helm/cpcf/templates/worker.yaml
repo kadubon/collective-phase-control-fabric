@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-cpcf-worker
+spec:
+  replicas: {{ .Values.replicaCount.worker }}
+  selector:
+    matchLabels: {app.kubernetes.io/name: cpcf-worker}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: cpcf-worker}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-cpcf
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 65532, fsGroup: 65532}
+      containers:
+        - name: worker
+          image: "{{ .Values.image.worker.repository }}@{{ required "Worker image digest is required" .Values.image.worker.digest }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CPCF_DATABASE_URL
+              valueFrom: {secretKeyRef: {name: {{ .Values.secretName }}, key: database-url}}
+          resources: {{ toYaml .Values.resources.worker | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+            seccompProfile: {type: RuntimeDefault}

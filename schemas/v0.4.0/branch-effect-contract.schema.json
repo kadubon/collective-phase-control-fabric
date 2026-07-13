@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.org/cpcf/schemas/v0.4.0/branch-effect-contract.schema.json","title":"CPCF Branch Effect Contract v0.4","$ref":"analysis-record.schema.json"}

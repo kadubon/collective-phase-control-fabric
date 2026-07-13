@@ -1,0 +1,10 @@
+{
+  "certificate_id": "certificate:collective-advantage-demo",
+  "certificate_kind": "collective_advantage",
+  "evaluator": "external-evaluator-fixture",
+  "scope": {"domain": "synthetic-demo"},
+  "resource_matched": true,
+  "baseline_kind": "best_solo_or_best_of_n",
+  "measurement_reproved_by_cpcf": false,
+  "source_refs": ["fixture:external-collective-advantage"]
+}

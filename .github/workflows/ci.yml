@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.11.28"
+
+jobs:
+  core-platform:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.12", "3.13", "3.14.6"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - run: uv run --frozen pytest
+      - run: uv run --frozen python scripts/check_schemas.py
+      - run: uv run --frozen python scripts/check_fixtures.py
+      - run: uv run --frozen python scripts/generate_references.py --check
+      - run: uv run --frozen python scripts/check_publication_hygiene.py --source-tree
+      - run: uv run --frozen cpcf agent explain --json
+      - run: uv run --frozen cpcf self-check --json
+      - run: uv run --frozen cpcf schema list --json
+
+  quality-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+          enable-cache: true
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - run: uv run --frozen ruff format --check .
+      - run: uv run --frozen ruff check .
+      - run: uv run --frozen mypy src packages/cpcf-api/src packages/cpcf-cli/src packages/cpcf-worker/src packages/cpcf-runner-protocol/src
+      - name: Overall branch coverage
+        run: >-
+          uv run --frozen pytest
+          --cov=collective_phase_control_fabric --cov=cpcf_api --cov=cpcf_cli
+          --cov=cpcf_worker --cov=cpcf_runner_protocol --cov-branch
+          --cov-report=term-missing --cov-fail-under=90
+      - name: Critical subsystem branch coverage
+        run: >-
+          uv run --frozen pytest
+          tests/test_v6_models_trust.py tests/test_v6_science_planner.py
+          tests/test_v6_service_boundaries.py tests/test_v6_package_interfaces.py
+          --cov=collective_phase_control_fabric.v6 --cov=cpcf_api --cov=cpcf_cli
+          --cov=cpcf_worker --cov=cpcf_runner_protocol --cov-branch
+          --cov-report=term-missing --cov-fail-under=95
+      - run: uv run --frozen bandit -c pyproject.toml -r src packages
+      - run: >-
+          uv run --frozen pip-audit --local --cache-dir .cache/pip-audit
+          --vulnerability-service osv --timeout 60
+      - run: uv build
+      - run: uv run --frozen python scripts/check_release_artifacts.py --dist dist --metadata-out release-metadata
+      - run: uv run --frozen twine check dist/*
+      - run: uv run --frozen python scripts/generate_sbom.py uv.lock release-metadata/cpcf-sbom.cdx.json
+      - run: uv run --frozen python scripts/check_publication_hygiene.py --archive dist/*.whl --archive dist/*.tar.gz
+
+  postgres-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.4
+        env:
+          POSTGRES_PASSWORD: cpcf-test
+          POSTGRES_USER: cpcf_owner
+          POSTGRES_DB: cpcf
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U cpcf_owner -d cpcf"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - run: uv run --frozen alembic -c deploy/alembic.ini upgrade head
+        env:
+          CPCF_DATABASE_URL: postgresql+psycopg://cpcf_owner:cpcf-test@localhost:5432/cpcf
+      - run: uv run --frozen python scripts/configure_test_database.py
+        env:
+          CPCF_DATABASE_OWNER_URL: postgresql+psycopg://cpcf_owner:cpcf-test@localhost:5432/cpcf
+          CPCF_DATABASE_APP_PASSWORD: cpcf-app-test
+      - run: uv run --frozen pytest -m postgres
+        env:
+          CPCF_TEST_DATABASE_URL: postgresql+psycopg://cpcf_app_test:cpcf-app-test@localhost:5432/cpcf
+          CPCF_TEST_OWNER_DATABASE_URL: postgresql+psycopg://cpcf_owner:cpcf-test@localhost:5432/cpcf
+
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+          enable-cache: true
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - run: uv run --frozen mutmut run
+      - run: uv run --frozen mutmut results --all > mutation-results.txt
+      - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85

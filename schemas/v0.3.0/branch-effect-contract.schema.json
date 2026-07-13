@@ -1,0 +1,525 @@
+{
+  "$id": "https://example.org/cpcf/schemas/v0.3.0/branch-effect-contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "branches": {
+      "additionalProperties": false,
+      "properties": {
+        "failure": {
+          "additionalProperties": false,
+          "properties": {
+            "debt": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "projection_possibilities": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "source_pointer": {
+                    "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$",
+                    "type": "string"
+                  },
+                  "target_schema": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "source_pointer",
+                  "target_schema"
+                ],
+                "type": "object"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "resource_intervals": {
+              "additionalProperties": {
+                "additionalProperties": false,
+                "properties": {
+                  "lower": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  },
+                  "unit": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "upper": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "lower",
+                  "upper",
+                  "unit"
+                ],
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "rollback_obligations": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "must_add",
+            "may_add",
+            "must_remove",
+            "may_remove",
+            "resource_intervals",
+            "debt",
+            "rollback_obligations",
+            "projection_possibilities"
+          ],
+          "type": "object"
+        },
+        "partial": {
+          "additionalProperties": false,
+          "properties": {
+            "debt": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "projection_possibilities": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "source_pointer": {
+                    "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$",
+                    "type": "string"
+                  },
+                  "target_schema": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "source_pointer",
+                  "target_schema"
+                ],
+                "type": "object"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "resource_intervals": {
+              "additionalProperties": {
+                "additionalProperties": false,
+                "properties": {
+                  "lower": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  },
+                  "unit": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "upper": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "lower",
+                  "upper",
+                  "unit"
+                ],
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "rollback_obligations": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "must_add",
+            "may_add",
+            "must_remove",
+            "may_remove",
+            "resource_intervals",
+            "debt",
+            "rollback_obligations",
+            "projection_possibilities"
+          ],
+          "type": "object"
+        },
+        "success": {
+          "additionalProperties": false,
+          "properties": {
+            "debt": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "projection_possibilities": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "source_pointer": {
+                    "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$",
+                    "type": "string"
+                  },
+                  "target_schema": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "source_pointer",
+                  "target_schema"
+                ],
+                "type": "object"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "resource_intervals": {
+              "additionalProperties": {
+                "additionalProperties": false,
+                "properties": {
+                  "lower": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  },
+                  "unit": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "upper": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "lower",
+                  "upper",
+                  "unit"
+                ],
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "rollback_obligations": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "must_add",
+            "may_add",
+            "must_remove",
+            "may_remove",
+            "resource_intervals",
+            "debt",
+            "rollback_obligations",
+            "projection_possibilities"
+          ],
+          "type": "object"
+        },
+        "timeout": {
+          "additionalProperties": false,
+          "properties": {
+            "debt": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "may_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_add": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "must_remove": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "projection_possibilities": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "source_pointer": {
+                    "pattern": "^(?:/(?:[^~/]|~0|~1)*)*$",
+                    "type": "string"
+                  },
+                  "target_schema": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "source_pointer",
+                  "target_schema"
+                ],
+                "type": "object"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "resource_intervals": {
+              "additionalProperties": {
+                "additionalProperties": false,
+                "properties": {
+                  "lower": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  },
+                  "unit": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "upper": {
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "lower",
+                  "upper",
+                  "unit"
+                ],
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "rollback_obligations": {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "must_add",
+            "may_add",
+            "must_remove",
+            "may_remove",
+            "resource_intervals",
+            "debt",
+            "rollback_obligations",
+            "projection_possibilities"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "success",
+        "partial",
+        "failure",
+        "timeout"
+      ],
+      "type": "object"
+    },
+    "effect_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+      "type": "string"
+    },
+    "extensions": {
+      "additionalProperties": true,
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+      },
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "signature": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$",
+          "type": "string"
+        },
+        "payload_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "signature_base64": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        "signed_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "signature_base64",
+        "signed_at",
+        "payload_digest"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "effect_id",
+    "branches"
+  ],
+  "title": "CPCF Four-Branch Effect Contract v0.3",
+  "type": "object",
+  "unevaluatedProperties": false
+}
