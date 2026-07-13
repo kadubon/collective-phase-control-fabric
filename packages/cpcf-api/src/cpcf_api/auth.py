@@ -81,6 +81,10 @@ ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
             "projection:approve",
             "coordination:write",
             "trial:write",
+            "trust:write",
+            "time:write",
+            "quarantine:write",
+            "repair:write",
         }
     ),
     "auditor": frozenset({"workspace:read", "analysis:start"}),

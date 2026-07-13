@@ -533,8 +533,12 @@ def test_coordination_invalid_transitions_and_deadline_are_reported() -> None:
         metadata=metadata("plan"),
         spec=CoordinationPlanSpec(
             session_id="session-1",
+            plan_principal_id="one",
+            integration_principal_id="one",
             participant_principals=["one", "two"],
             verifier_principals=["two"],
+            verifier_capacity={"two": 1},
+            required_proposal_count=1,
             commit_deadline=NOW - timedelta(hours=2),
             reveal_deadline=NOW - timedelta(hours=1),
             termination_deadline=NOW - timedelta(minutes=1),
@@ -543,12 +547,15 @@ def test_coordination_invalid_transitions_and_deadline_are_reported() -> None:
     )
     invalid = CoordinationEventDocument(
         metadata=metadata("invalid"),
-        spec=CoordinationEventSpec(
+        spec=CoordinationEventSpec.model_construct(
             session_id="session-1",
             event_id="invalid",
             event_type="reveal",
             actor_principal_id="one",
             occurred_at=NOW,
+            proposal_id="proposal-1",
+            commitment_digest="sha256:" + "1" * 64,
+            artifact_digest="sha256:" + "2" * 64,
             prior_event_digest="sha256:" + "0" * 64,
         ),
     )
@@ -557,8 +564,7 @@ def test_coordination_invalid_transitions_and_deadline_are_reported() -> None:
     )
     assert result.status == "violated"
     assert {
-        "coordination_event_chain_broken:invalid",
-        "invalid_coordination_transition:CREATED:reveal",
+        "coordination_event_chain_root_not_unique",
         "coordination_not_terminated",
         "coordination_termination_deadline_missed",
     }.issubset(result.blockers)
@@ -592,6 +598,7 @@ def test_trial_assessment_separates_provenance_and_outcome_contradictions() -> N
         metadata=metadata("amendment"),
         spec=ProtocolAmendmentSpec(
             protocol_digest=document_digest(protocol),
+            author_principal_id=protocol.spec.author_principal_id,
             prior_amendment_digest="sha256:" + "9" * 64,
             sequence=2,
             amended_at=protocol.spec.time_zero,
@@ -1045,7 +1052,23 @@ def test_trial_registration_timing_missing_results_and_all_design_tiers() -> Non
         )
         selected = dict(objects)
         selected.pop(result_digest)
+        old_quorum_digest, old_quorum = next(
+            (digest, item)
+            for digest, item in selected.items()
+            if item.kind == "quorum-decision"  # type: ignore[attr-defined]
+            and item.spec.decision_type == "acceleration_compatibility"  # type: ignore[attr-defined]
+        )
+        selected.pop(old_quorum_digest)
         selected[document_digest(designed)] = designed
+        designed_quorum = old_quorum.model_copy(  # type: ignore[attr-defined]
+            update={
+                "metadata": metadata(f"result-quorum-{design}"),
+                "spec": old_quorum.spec.model_copy(  # type: ignore[attr-defined]
+                    update={"subject_digest": document_digest(designed)}
+                ),
+            }
+        )
+        selected[document_digest(designed_quorum)] = designed_quorum
         assert assess_trial(protocol, selected).tier == tier  # type: ignore[arg-type]
 
 
@@ -1297,8 +1320,12 @@ def test_coordination_reports_commit_reveal_exposure_and_integration_evidence_fa
         metadata=metadata("coordination-assurance-plan"),
         spec=CoordinationPlanSpec(
             session_id="session-assurance",
+            plan_principal_id="one",
+            integration_principal_id="one",
             participant_principals=["one", "two"],
             verifier_principals=["two"],
+            verifier_capacity={"two": 1},
+            required_proposal_count=1,
             commit_deadline=NOW + timedelta(minutes=1),
             reveal_deadline=NOW + timedelta(minutes=2),
             termination_deadline=NOW + timedelta(minutes=3),
@@ -1308,17 +1335,80 @@ def test_coordination_reports_commit_reveal_exposure_and_integration_evidence_fa
     objects: dict[str, object] = {document_digest(plan): plan}
     prior: str | None = None
     rows = (
-        ("open", "open_commit", None, None),
-        ("commit", "commit", None, None),
-        ("close", "close_commit", None, None),
-        ("reveal-open", "open_reveal", None, None),
-        ("reveal", "reveal", "sha256:" + "1" * 64, None),
-        ("exposure", "exposure", None, "sha256:" + "2" * 64),
-        ("verify", "verification", None, "sha256:" + "3" * 64),
-        ("integrate", "integration", None, None),
-        ("terminate", "terminate", None, None),
+        ("open", "open_commit", None, None, None, None, None, None),
+        (
+            "commit",
+            "commit",
+            "sha256:" + "0" * 64,
+            None,
+            "proposal-1",
+            None,
+            None,
+            None,
+        ),
+        ("close", "close_commit", None, None, None, None, None, None),
+        ("reveal-open", "open_reveal", None, None, None, None, None, None),
+        (
+            "reveal",
+            "reveal",
+            "sha256:" + "1" * 64,
+            "sha256:" + "2" * 64,
+            "proposal-1",
+            None,
+            None,
+            None,
+        ),
+        (
+            "exposure",
+            "exposure",
+            None,
+            "sha256:" + "2" * 64,
+            None,
+            "two",
+            None,
+            None,
+        ),
+        (
+            "verify",
+            "verification",
+            None,
+            "sha256:" + "3" * 64,
+            None,
+            None,
+            "passed",
+            None,
+        ),
+        (
+            "integrate",
+            "integration",
+            None,
+            "sha256:" + "4" * 64,
+            None,
+            None,
+            None,
+            None,
+        ),
+        (
+            "terminate",
+            "terminate",
+            None,
+            None,
+            None,
+            None,
+            None,
+            "all_verified",
+        ),
     )
-    for index, (event_id, event_type, commitment, artifact) in enumerate(rows):
+    for index, (
+        event_id,
+        event_type,
+        commitment,
+        artifact,
+        proposal,
+        recipient,
+        verification_status,
+        termination_reason,
+    ) in enumerate(rows):
         item = CoordinationEventDocument(
             metadata=metadata(f"coordination-{event_id}"),
             spec=CoordinationEventSpec(
@@ -1327,18 +1417,21 @@ def test_coordination_reports_commit_reveal_exposure_and_integration_evidence_fa
                 event_type=event_type,  # type: ignore[arg-type]
                 actor_principal_id="one",
                 occurred_at=NOW + timedelta(seconds=index),
+                proposal_id=proposal,
+                recipient_principal_id=recipient,
                 artifact_digest=artifact,
                 commitment_digest=commitment,
+                verification_status=verification_status,  # type: ignore[arg-type]
+                termination_reason=termination_reason,  # type: ignore[arg-type]
                 prior_event_digest=prior,
             ),
         )
         prior = document_digest(item)
         objects[prior] = item
     result = validate_coordination(objects, NOW)  # type: ignore[arg-type]
-    assert result.detail == "terminal_state=TERMINATED"
+    assert result.detail.startswith("terminal_state=TERMINATED;")
     assert {
-        "commitment_digest_required",
-        "reveal_without_matching_commitment",
+        "commitment_reveal_digest_mismatch:proposal-1",
         "coordination_exposure_limit_exceeded",
-        "integration_artifact_required",
+        "integration_before_all_reveals_verified",
     }.issubset(result.blockers)

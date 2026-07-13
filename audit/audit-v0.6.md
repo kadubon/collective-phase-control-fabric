@@ -65,10 +65,16 @@ This audit lists known findings only. It does not assert that undiscovered defec
    operational facets, apply worst-case removal, and rerun the shared audit kernel for every outcome.
    API use of only loader-approved capabilities and differential coverage for every typed replacement
    remains incomplete.
-7. Coordination and trial kernels validate supplied records, but the authoritative API does not yet
-   recompute every event/registration/amendment/result quorum on admission.
-8. Remote onboarding still returns conservative bootstrap blockers instead of aggregating every
-   live subsystem.
+7. Coordination now binds plan and event actors to verified statement principals and validates the
+   event hash chain, deadlines, commitments, reveals, exposure, verifier capacity, integration, and
+   termination. Trial assessment retains every primary result and checks typed artifacts, CAS
+   presence, signer identity, registration/amendment/result quorums, time order, and outcome
+   completeness. The API queues these admissions fail-closed, but the production worker's
+   end-to-end admission transaction remains a release gate.
+8. Remote onboarding now aggregates typed live diagnostics for trust, time, ledger, quarantine,
+   science, perturbation, solver, planner, runner, projections, coordination, trials, quotas, and
+   repairs. Missing diagnostics remain unknown and repairs remain unbound unless they carry a
+   signed action digest. PostgreSQL-backed end-to-end diagnostic population remains a release gate.
 
 These gaps block any claim that CPCF operationally accelerates a collective. The strongest permitted
 statement remains a bounded evidence-control analysis plus separately validated external evidence.
@@ -99,3 +105,20 @@ Machine-readable status is in `audit/findings-v0.6.json`.
   scientific dimension, or become evidence before independent receipt-backed promotion.
 - The focused science, structural, planning, and intervention branch-coverage gate is above 95
   percent. Full mutation and external integration gates remain blocking.
+
+## Coordination, trial, and onboarding assurance added in the staged implementation
+
+- The authoritative loader exposes verified subject-to-statement/principal bindings and rejects a
+  typed coordination or trial actor that is not a verified signer in its declared role.
+- Measurement protocols, amendments, and trial results require exactly one recomputed matching
+  quorum decision before they can remain authoritative.
+- The coordination kernel reconstructs one event chain and validates proposal preimages, actor
+  binding, deadlines, exposure recipients, verifier capacity and outcome, integration evidence, and
+  signed termination. Its focused branch coverage is complete.
+- Trial assessment distinguishes provenance blockers from outcome contradictions, retains
+  unexpected and duplicate primary results, and never selects a favorable replacement. Its focused
+  branch coverage is complete.
+- The CLI and API expose generation- and idempotency-bound queued workflows. A `202 accepted`
+  response explicitly grants no admission or scientific claim.
+- OIDC device login uses the current keyring 25.7 series and stores an access token only in a secure
+  OS keyring. `CPCF_TOKEN` remains the explicit non-persistent fallback.

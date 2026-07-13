@@ -49,6 +49,7 @@ dependencies = [
   "networkx>=3.6.1,<4",
   "pydantic>=2.13.4,<3",
   "httpx>=0.28,<1",
+  "keyring>=25.7,<26",
 ]
 
 [project.optional-dependencies]
@@ -232,7 +233,11 @@ only_mutate = [
   "src/collective_phase_control_fabric/v6/intervention.py",
   "src/collective_phase_control_fabric/v6/planning.py",
   "src/collective_phase_control_fabric/v6/trials.py",
+  "src/collective_phase_control_fabric/v6/coordination.py",
+  "src/collective_phase_control_fabric/v6/onboarding.py",
+  "src/collective_phase_control_fabric/v6/repairs.py",
   "packages/cpcf-api/src/cpcf_api/runner_gateway.py",
+  "packages/cpcf-cli/src/cpcf_cli/auth.py",
 ]
 pytest_add_cli_args = ["-q"]
 pytest_add_cli_args_test_selection = [
@@ -242,9 +247,12 @@ pytest_add_cli_args_test_selection = [
   "tests/test_v6_db_worker_assurance.py",
   "tests/test_v6_golden_semantics.py",
   "tests/test_v6_intervention.py",
+  "tests/test_v6_cli_auth.py",
+  "tests/test_v6_coordination_trial_assurance.py",
   "tests/test_v6_model_assurance.py",
   "tests/test_v6_models_trust.py",
   "tests/test_v6_planning_assurance.py",
+  "tests/test_v6_onboarding_repairs.py",
   "tests/test_v6_runner_gateway.py",
   "tests/test_v6_science_assurance.py",
   "tests/test_v6_science_planner.py",

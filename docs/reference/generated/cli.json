@@ -2,6 +2,21 @@
   "commands": [
     {
       "argv": [
+        "action"
+      ],
+      "description": "Dispatch one signed action to a runner queue.",
+      "help": "Dispatch one signed action to a runner queue."
+    },
+    {
+      "argv": [
+        "action",
+        "dispatch"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
         "agent"
       ],
       "description": "Obtain evidence-driven onboarding instructions.",
@@ -19,6 +34,21 @@
       "argv": [
         "agent",
         "onboard"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "attestation"
+      ],
+      "description": "Admit typed signed statements.",
+      "help": "Admit typed signed statements."
+    },
+    {
+      "argv": [
+        "attestation",
+        "admit"
       ],
       "description": "",
       "help": null
@@ -58,8 +88,8 @@
         "auth",
         "login"
       ],
-      "description": "Explain the non-persistent bearer-token boundary.",
-      "help": "Explain the non-persistent bearer-token boundary."
+      "description": "Use OIDC device authorization and an OS-backed credential store.",
+      "help": "Use OIDC device authorization and an OS-backed credential store."
     },
     {
       "argv": [
@@ -75,6 +105,76 @@
       ],
       "description": "Verify bundle content and optional trust.",
       "help": "Verify bundle content and optional trust."
+    },
+    {
+      "argv": [
+        "coordination"
+      ],
+      "description": "Advance signed coordination sessions.",
+      "help": "Advance signed coordination sessions."
+    },
+    {
+      "argv": [
+        "coordination",
+        "commit"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "coordination",
+        "init"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "coordination",
+        "reveal"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "coordination",
+        "route"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "coordination",
+        "status"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "coordination",
+        "terminate"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "intervention"
+      ],
+      "description": "Queue bounded intervention analysis.",
+      "help": "Queue bounded intervention analysis."
+    },
+    {
+      "argv": [
+        "intervention",
+        "analyze"
+      ],
+      "description": "",
+      "help": null
     },
     {
       "argv": [
@@ -101,7 +201,107 @@
     {
       "argv": [
         "object",
+        "admit"
+      ],
+      "description": "Queue signed object admission.",
+      "help": "Queue signed object admission."
+    },
+    {
+      "argv": [
+        "object",
         "upload"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "perturbation"
+      ],
+      "description": "Replay a reduced immutable snapshot.",
+      "help": "Replay a reduced immutable snapshot."
+    },
+    {
+      "argv": [
+        "perturbation",
+        "replay"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "projection"
+      ],
+      "description": "Inspect and approve pending projections.",
+      "help": "Inspect and approve pending projections."
+    },
+    {
+      "argv": [
+        "projection",
+        "approve"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "projection",
+        "pending"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "quarantine"
+      ],
+      "description": "Inspect or queue quarantine changes.",
+      "help": "Inspect or queue quarantine changes."
+    },
+    {
+      "argv": [
+        "quarantine",
+        "list"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "quarantine",
+        "resolve"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "repair"
+      ],
+      "description": "Inspect typed repairs or run a bound action.",
+      "help": "Inspect typed repairs or run a bound action."
+    },
+    {
+      "argv": [
+        "repair",
+        "list"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "repair",
+        "run"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "repair",
+        "show"
       ],
       "description": "",
       "help": null
@@ -153,6 +353,91 @@
     },
     {
       "argv": [
+        "time"
+      ],
+      "description": "Inspect or admit trusted-time receipts.",
+      "help": "Inspect or admit trusted-time receipts."
+    },
+    {
+      "argv": [
+        "time",
+        "status"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "time",
+        "update"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "trial"
+      ],
+      "description": "Admit and inspect preregistered external evidence.",
+      "help": "Admit and inspect preregistered external evidence."
+    },
+    {
+      "argv": [
+        "trial",
+        "amendment-import"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "trial",
+        "protocol-import"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "trial",
+        "result-import"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "trial",
+        "status"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "trust"
+      ],
+      "description": "Inspect or queue role-separated trust updates.",
+      "help": "Inspect or queue role-separated trust updates."
+    },
+    {
+      "argv": [
+        "trust",
+        "status"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
+        "trust",
+        "update"
+      ],
+      "description": "",
+      "help": null
+    },
+    {
+      "argv": [
         "workspace"
       ],
       "description": "Create and inspect tenant workspaces.",
@@ -165,6 +450,14 @@
       ],
       "description": "Create a workspace with two out-of-band genesis fingerprints.",
       "help": "Create a workspace with two out-of-band genesis fingerprints."
+    },
+    {
+      "argv": [
+        "workspace",
+        "import-legacy"
+      ],
+      "description": "Queue copy-on-write import of uploaded legacy material.",
+      "help": "Queue copy-on-write import of uploaded legacy material."
     },
     {
       "argv": [

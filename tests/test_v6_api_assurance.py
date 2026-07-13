@@ -15,6 +15,7 @@ from cpcf_api.auth import OidcAuthenticator, PrincipalContext, authorize
 from cpcf_api.object_store import S3ObjectStore
 
 from collective_phase_control_fabric.v6.canonical import digest_bytes
+from collective_phase_control_fabric.v6.onboarding import OnboardingState
 
 GENESIS_BODY = {
     "root_spki_fingerprint": "sha256:" + "1" * 64,
@@ -177,7 +178,8 @@ def test_api_workspace_job_status_onboarding_and_idempotency_paths() -> None:
             headers={"Authorization": "Bearer token"},
         )
     )
-    assert onboard.json()["code"] == "onboarding_decisions_required"
+    assert onboard.json()["code"] == "onboarding_blockers_present"
+    assert "trust_unknown" in onboard.json()["unknowns"]
 
     accepted = asyncio.run(
         request(
@@ -249,6 +251,126 @@ def test_api_cas_upload_is_digest_scoped_bounded_and_quarantined() -> None:
     )
     assert mismatch.status_code == 422
     assert mismatch.json()["code"] == "cas_upload_digest_mismatch"
+
+
+def test_api_complete_workspace_surface_is_generation_bound_and_live() -> None:
+    backend = InMemoryBackend()
+    app = create_app(
+        backend=backend,
+        authenticator=StaticAuthenticator(principal("tenant_admin"), "token"),
+    )
+    created = asyncio.run(
+        request(
+            app,
+            "POST",
+            "/v1/workspaces",
+            headers={"Authorization": "Bearer token", "Idempotency-Key": "a" * 16},
+            json={"workspace_id": "surface-workspace", **GENESIS_BODY},
+        )
+    ).json()
+    generation = created["generation_digest"]
+    subject = "sha256:" + "3" * 64
+    mutation_paths = [
+        "/objects/admissions",
+        "/trust/updates",
+        "/time/receipts",
+        "/perturbations",
+        "/interventions",
+        "/actions",
+        "/projections/approvals",
+        "/coordination/init",
+        "/coordination/commit",
+        "/coordination/reveal",
+        "/coordination/route",
+        "/coordination/terminate",
+        "/trials/protocol-import",
+        "/trials/amendment-import",
+        "/trials/result-import",
+        "/quarantine/actions",
+        "/repairs/repair-one/actions",
+    ]
+    for index, suffix in enumerate(mutation_paths, start=1):
+        response = asyncio.run(
+            request(
+                app,
+                "POST",
+                f"/v1/workspaces/surface-workspace{suffix}",
+                headers={
+                    "Authorization": "Bearer token",
+                    "Idempotency-Key": f"operation-key-{index:04d}",
+                    "If-Match": generation,
+                },
+                json={"subject_digests": [subject]},
+            )
+        )
+        assert response.status_code == 202, (suffix, response.text)
+        assert response.json()["claims"]["authoritative_effect_pending_worker_validation"] is True
+
+    stale = asyncio.run(
+        request(
+            app,
+            "POST",
+            "/v1/workspaces/surface-workspace/interventions",
+            headers={
+                "Authorization": "Bearer token",
+                "Idempotency-Key": "stale-generation",
+                "If-Match": "sha256:" + "f" * 64,
+            },
+            json={"subject_digests": []},
+        )
+    )
+    assert stale.status_code == 412
+    invalid = asyncio.run(
+        request(
+            app,
+            "POST",
+            "/v1/workspaces/surface-workspace/interventions",
+            headers={
+                "Authorization": "Bearer token",
+                "Idempotency-Key": "invalid-digest-1",
+                "If-Match": generation,
+            },
+            json={"subject_digests": ["not-a-digest"]},
+        )
+    )
+    assert invalid.status_code == 422
+
+    for collection in ("projections", "coordination", "trials", "quarantine", "repairs"):
+        response = asyncio.run(
+            request(
+                app,
+                "GET",
+                f"/v1/workspaces/surface-workspace/collections/{collection}",
+                headers={"Authorization": "Bearer token"},
+            )
+        )
+        assert response.status_code == 200
+        assert response.json()["code"] == f"{collection}_status"
+
+    workspace = backend.workspaces[("tenant-a", "surface-workspace")]
+    workspace.onboarding_state = OnboardingState(
+        workspace_id="surface-workspace",
+        generation_digest=generation,
+        trust_status="satisfied",
+        temporal_status="satisfied",
+        ledger_status="satisfied",
+        perturbation_status="satisfied",
+        solver_status="satisfied",
+        planner_status="satisfied",
+        runner_status="satisfied",
+        coordination_status="satisfied",
+        trial_status="satisfied",
+        science_dimensions={"provenance_integrity": "satisfied"},
+    )
+    onboard = asyncio.run(
+        request(
+            app,
+            "GET",
+            "/v1/workspaces/surface-workspace/onboarding",
+            headers={"Authorization": "Bearer token"},
+        )
+    )
+    assert onboard.json()["code"] == "onboarding_ready"
 
 
 def test_in_memory_backend_cross_tenant_job_and_idempotency_write_collision() -> None:

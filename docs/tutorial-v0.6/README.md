@@ -53,14 +53,28 @@ With an authorized control plane:
 
 ```text
 set CPCF_API_URL=https://cpcf.example.org
-set CPCF_TOKEN=OIDC_ACCESS_TOKEN
+set CPCF_OIDC_DEVICE_AUTHORIZATION_ENDPOINT=https://identity.example.org/oauth/device
+set CPCF_OIDC_TOKEN_ENDPOINT=https://identity.example.org/oauth/token
+set CPCF_OIDC_CLIENT_ID=cpcf-cli
+cpcf auth login --json
 cpcf workspace status WORKSPACE --json
 cpcf agent onboard --workspace WORKSPACE --json
 ```
 
-The response must carry the immutable generation, unknowns, quarantined objects, and exact safe
-commands. The current reference API does not yet aggregate every trust, science, runner, projection,
-coordination, and trial subsystem; that is an explicit stable-release blocker.
+The response carries the immutable generation, observed subsystem states, unknowns, quarantined
+objects, unresolved human decisions, and exact safe inspection commands. Missing observations stay
+unknown. The PostgreSQL-backed end-to-end diagnostic aggregation evidence remains an explicit
+stable-release blocker.
+
+Queue one uploaded signed statement for admission, then inspect its immutable job:
+
+```text
+cpcf object admit WORKSPACE --generation sha256:GENERATION --digest sha256:SIGNED_STATEMENT --json
+cpcf audit status JOB_ID --json
+```
+
+`accepted` does not mean admitted. A worker must revalidate the statement and atomically commit a
+new generation before it can become authoritative.
 
 For offline runner receipt checking, use the closed job, receipt, capability, execution-policy, and
 artifact records:

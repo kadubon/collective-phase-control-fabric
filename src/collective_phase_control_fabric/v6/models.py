@@ -1202,12 +1202,38 @@ class AuditEvent(Document):
 
 class CoordinationPlanSpec(StrictModel):
     session_id: Identifier
+    plan_principal_id: Identifier
+    integration_principal_id: Identifier
     participant_principals: list[Identifier] = Field(min_length=2, max_length=256)
     verifier_principals: list[Identifier] = Field(min_length=1, max_length=256)
+    verifier_capacity: dict[Identifier, Annotated[int, Field(ge=1, le=100_000)]] = Field(
+        min_length=1, max_length=256
+    )
+    required_proposal_count: Annotated[int, Field(ge=1, le=100_000)]
     commit_deadline: datetime
     reveal_deadline: datetime
     termination_deadline: datetime
     maximum_exposures: Annotated[int, Field(ge=0, le=100_000)]
+
+    @model_validator(mode="after")
+    def coordination_plan_integrity(self) -> CoordinationPlanSpec:
+        participants = set(self.participant_principals)
+        verifiers = set(self.verifier_principals)
+        if len(participants) != len(self.participant_principals):
+            raise ValueError("coordination participants must be unique")
+        if len(verifiers) != len(self.verifier_principals):
+            raise ValueError("coordination verifiers must be unique")
+        if set(self.verifier_capacity) != verifiers:
+            raise ValueError("coordination verifier capacity domain must match verifiers")
+        if self.plan_principal_id not in participants:
+            raise ValueError("coordination plan principal must be a participant")
+        if self.integration_principal_id not in participants:
+            raise ValueError("coordination integration principal must be a participant")
+        if self.required_proposal_count > len(participants):
+            raise ValueError("coordination proposal count exceeds participant count")
+        if not self.commit_deadline < self.reveal_deadline < self.termination_deadline:
+            raise ValueError("coordination deadlines must be strictly ordered")
+        return self
 
 
 class CoordinationPlan(Document):
@@ -1231,9 +1257,30 @@ class CoordinationEventSpec(StrictModel):
     ]
     actor_principal_id: Identifier
     occurred_at: datetime
+    proposal_id: Identifier | None = None
+    recipient_principal_id: Identifier | None = None
     artifact_digest: Digest | None = None
     commitment_digest: Digest | None = None
+    verification_status: Literal["passed", "failed"] | None = None
+    termination_reason: (
+        Literal["all_verified", "explicit_failure", "capacity_blocked", "deadline"] | None
+    ) = None
     prior_event_digest: Digest | None = None
+
+    @model_validator(mode="after")
+    def event_fields_match_type(self) -> CoordinationEventSpec:
+        required: dict[str, tuple[str, ...]] = {
+            "commit": ("proposal_id", "commitment_digest"),
+            "reveal": ("proposal_id", "commitment_digest", "artifact_digest"),
+            "exposure": ("recipient_principal_id", "artifact_digest"),
+            "verification": ("artifact_digest", "verification_status"),
+            "integration": ("artifact_digest",),
+            "terminate": ("termination_reason",),
+        }
+        for name in required.get(self.event_type, ()):
+            if getattr(self, name) is None:
+                raise ValueError(f"coordination {self.event_type} requires {name}")
+        return self
 
 
 class CoordinationEventDocument(Document):
@@ -1265,9 +1312,18 @@ class CoordinationSession(Document):
 
 class ArtifactRecordSpec(StrictModel):
     artifact_type: Literal["dataset", "assignment", "analysis-executable"]
+    protocol_id: Identifier
+    producer_principal_id: Identifier
     artifact_digest: Digest
     acquisition_committed_at: datetime
+    recorded_at: datetime
     source_system: Identifier
+
+    @model_validator(mode="after")
+    def artifact_record_time_order(self) -> ArtifactRecordSpec:
+        if self.recorded_at < self.acquisition_committed_at:
+            raise ValueError("trial artifact record precedes its acquisition commitment")
+        return self
 
 
 class ArtifactRecord(Document):
@@ -1326,6 +1382,7 @@ class MeasurementProtocol(Document):
 
 class ProtocolAmendmentSpec(StrictModel):
     protocol_digest: Digest
+    author_principal_id: Identifier
     prior_amendment_digest: Digest | None = None
     sequence: Annotated[int, Field(ge=1)]
     amended_at: datetime
@@ -1358,6 +1415,7 @@ class TrialResultSpec(StrictModel):
     assignment_record_digest: Digest
     analysis_executable_record_digest: Digest
     evaluator_principal_id: Identifier
+    quality_verifier_principal_id: Identifier
     observation_completed_at: datetime
     issued_at: datetime
     design: Literal["descriptive", "observational", "quasi-experimental", "randomized"]

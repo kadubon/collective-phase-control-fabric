@@ -57,7 +57,7 @@ from tests.v6_helpers import NOW, metadata, trust_fixture
 def test_native_digest_and_encoding_goldens_are_stable() -> None:
     snapshot, snapshot_objects = build_science_fixture()
     assert analysis_basis_digest(snapshot) == (
-        "sha256:591bf2bbf5b72533cc38348b539ea60ff537d672eee923820aef13e84d5ce444"
+        "sha256:f9f906518a281425c0bf22e5478fb96095c0f06d0951e3eb28eb6fff85a282f6"
     )
     capability_value = capability("golden", "blocker", "3/2")
     action_value = action("action:golden", capability_value)
@@ -77,7 +77,7 @@ def test_native_digest_and_encoding_goldens_are_stable() -> None:
         "sha256:134da671f3f3f573195def58972a3192edd4c35611718cf0b33d0eb8fea52706"
     )
     assert digest_bytes(canonical_bytes(registry_manifest())) == (
-        "sha256:808e9dc53c39b186ed75bc095050b640587e8646c6a1892776eced8d0476b352"
+        "sha256:dcda07eb822cc417b50444f5a65e785b5cd3e32fc44c818d0b70d41429aad6d7"
     )
     assert dsse_pae("type", b"abc") == b"DSSEv1 4 type 3 abc"
     assert dsse_pae(PAYLOAD_TYPE, b"") == (
@@ -85,7 +85,7 @@ def test_native_digest_and_encoding_goldens_are_stable() -> None:
     )
     profile = audit_snapshot(snapshot, snapshot_objects)  # type: ignore[arg-type]
     assert digest_bytes(canonical_bytes(profile.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:dd2089525d500eab59cc8ad0ce21bb91ac1f64584e68b2f30cf09c4beaa65b49"
+        "sha256:565ac22aae5cdeaf7569859703dcfd2d34c4ed0cd9a2f4ae001f56169bdcc3f7"
     )
 
 
@@ -116,7 +116,7 @@ def test_trust_and_trial_result_goldens_bind_complete_outputs() -> None:
     protocol, objects, _result = trial_fixture()
     assessment = assess_trial(protocol, objects)
     assert digest_bytes(canonical_bytes(assessment.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:3c2d2fa17236ca29394042f8e0ded643ba9f39b0679595c5c40f6d5021889ef6"
+        "sha256:bdb4ada277de84ad14ddf91e7385befc5dc9a061aea0c985765fa9b0b1842797"
     )
     missing = dict(objects)
     for digest, item in list(missing.items()):
@@ -130,7 +130,7 @@ def test_trust_and_trial_result_goldens_bind_complete_outputs() -> None:
         missing.pop(digest)
     incomplete = assess_trial(protocol, missing)
     assert digest_bytes(canonical_bytes(incomplete.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:cd41539a4d31662ea63817ee5cd5dc1bcfda33f9ceca17d4e1f3f7a13cc2697f"
+        "sha256:5c25fcd8f54fc9439961f5a052383f11d66d71e5b1bd9023404a630f7627e2bd"
     )
 
 
@@ -162,7 +162,7 @@ def test_complete_planner_result_golden_binds_policy_and_rejections() -> None:
         [cheap, expensive],
     )
     assert digest_bytes(canonical_bytes(result.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:9964a5e15dd248ae32d781f00cb570fd11fb3999d05bf8c8f05febbc250d8e4b"
+        "sha256:a5521cf13cd1ad2eec11d202f6da5a31f753e093c40b8e8f4b3c813a8ad19c98"
     )
 
 

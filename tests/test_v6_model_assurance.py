@@ -290,6 +290,7 @@ def test_protocol_amendment_and_remaining_trial_model_invariants() -> None:
     with pytest.raises(ValidationError, match="changes must be unique"):
         ProtocolAmendmentSpec(
             protocol_digest="sha256:" + "6" * 64,
+            author_principal_id="author",
             sequence=1,
             amended_at=NOW,
             changes=["estimand", "estimand"],

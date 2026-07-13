@@ -18,12 +18,17 @@ from collective_phase_control_fabric.v6.canonical import canonical_bytes, digest
 from collective_phase_control_fabric.v6.models import (
     AuditEvent,
     AuditEventSpec,
+    CoordinationEventDocument,
+    CoordinationEventSpec,
     Document,
     EvidenceAttestation,
     EvidenceSpec,
     LedgerEntry,
     Lifecycle,
+    MeasurementProtocol,
+    MeasurementProtocolSpec,
     Metadata,
+    OutcomeDefinition,
     PendingProjection,
     PendingProjectionSpec,
     QuorumDecisionDocument,
@@ -243,6 +248,103 @@ def test_authoritative_loader_promotes_only_reverified_signed_subjects() -> None
     assert document_digest(policy) in view.objects
     assert document_digest(trusted_time) in view.objects
     assert not view.quarantined
+
+
+def test_authoritative_loader_rejects_claimed_coordination_actor_without_matching_signer() -> None:
+    policy, trusted_time, _ = trust_fixture()
+    event = CoordinationEventDocument(
+        metadata=metadata("actor-binding-event"),
+        spec=CoordinationEventSpec(
+            session_id="actor-binding-session",
+            event_id="actor-binding-event",
+            event_type="open_commit",
+            actor_principal_id="root-principal",
+            occurred_at=NOW,
+        ),
+    )
+    view = _load_documents(
+        [
+            _statement(policy, "workspace_root", "root"),
+            _statement(trusted_time, "timestamp", "time"),
+            _statement(event, "coordination_event", "auditor"),
+        ]
+    )
+    assert not view.valid
+    assert document_digest(event) not in view.objects
+    assert any("typed_subject_signer_binding_mismatch" in item for item in view.reasons)
+
+
+def test_authoritative_loader_requires_and_exposes_protocol_quorum_signers() -> None:
+    policy, trusted_time, _ = trust_fixture()
+    protocol = MeasurementProtocol(
+        metadata=metadata("authoritative-protocol"),
+        spec=MeasurementProtocolSpec(
+            protocol_id="authoritative-protocol",
+            author_principal_id="root-principal",
+            registrar_principal_id="auditor-principal",
+            evaluator_principal_id="root-principal",
+            quality_verifier_principal_id="auditor-principal",
+            eligibility="Registered eligibility.",
+            treatment_strategy="Registered treatment.",
+            comparison_strategy="Registered comparison.",
+            time_zero=NOW + timedelta(hours=1),
+            observation_complete_at=NOW + timedelta(hours=2),
+            estimand="Registered effect.",
+            outcomes=[
+                OutcomeDefinition(
+                    outcome_id="primary",
+                    unit="second",
+                    direction="lower",
+                    minimum_effect="-1",
+                    quality_floor="1",
+                )
+            ],
+            multiplicity_policy="One primary outcome.",
+            assignment_record_digest="sha256:" + "1" * 64,
+            dataset_record_digest="sha256:" + "2" * 64,
+            analysis_executable_record_digest="sha256:" + "3" * 64,
+            missing_data_policy="Missing is unfavorable.",
+            stopping_rule="Fixed window.",
+            exclusion_policy="No post-assignment exclusions.",
+            primary_result_id="primary-result",
+        ),
+    )
+    policy_statement = _statement(policy, "workspace_root", "root")
+    time_statement = _statement(trusted_time, "timestamp", "time")
+    author = _statement(protocol, "protocol_author", "root")
+    registrar = _statement(protocol, "registration", "auditor")
+    timestamp = _statement(protocol, "timestamp", "time")
+
+    missing = _load_documents([policy_statement, time_statement, author, registrar, timestamp])
+    assert not missing.valid
+    assert document_digest(protocol) not in missing.objects
+    assert any("protocol_registration_quorum_not_unique" in item for item in missing.reasons)
+
+    decision = QuorumDecisionDocument(
+        metadata=metadata("protocol-registration-authority"),
+        spec=QuorumDecisionSpec(
+            decision_type="protocol_registration",
+            subject_digest=document_digest(protocol),
+            statement_digests=[
+                document_digest(author),
+                document_digest(registrar),
+                document_digest(timestamp),
+            ],
+            decided_at=NOW,
+        ),
+    )
+    admitted = _load_documents(
+        [policy_statement, time_statement, author, registrar, timestamp, decision]
+    )
+    assert admitted.valid
+    protocol_digest = document_digest(protocol)
+    assert admitted.objects[protocol_digest] == protocol
+    assert admitted.subject_principals[protocol_digest] == {
+        "root-principal",
+        "auditor-principal",
+        "time-principal",
+    }
+    assert admitted.statement_roles[document_digest(author)] == "protocol_author"
 
 
 def test_authoritative_loader_rejects_unsigned_native_authority() -> None:

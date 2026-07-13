@@ -92,6 +92,10 @@ def trust_fixture() -> tuple[
                 "state_source",
                 "job_dispatcher",
                 "capability_authority",
+                "coordination_plan",
+                "coordination_participant",
+                "coordination_integrator",
+                "trial_artifact_producer",
             ],
             "root",
         ),
@@ -105,6 +109,8 @@ def trust_fixture() -> tuple[
                 "quality_safety_verifier",
                 "projection_verifier",
                 "execution_policy_authority",
+                "coordination_event",
+                "coordination_verifier",
             ],
             "auditor",
         ),
@@ -136,6 +142,10 @@ def trust_fixture() -> tuple[
                 ),
                 QuorumRule(
                     decision_type="protocol_registration",
+                    required_roles=["protocol_author", "registration", "timestamp"],
+                ),
+                QuorumRule(
+                    decision_type="protocol_amendment",
                     required_roles=["protocol_author", "registration", "timestamp"],
                 ),
                 QuorumRule(

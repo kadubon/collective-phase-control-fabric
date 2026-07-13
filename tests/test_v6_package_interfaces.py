@@ -17,7 +17,7 @@ from cpcf_worker.main import run_once
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_cli_parser_and_environment_only_authentication(
+def test_cli_parser_and_secure_authentication_fallback(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -25,8 +25,8 @@ def test_cli_parser_and_environment_only_authentication(
     assert parser.parse_args(["workspace", "status", "workspace-a"]).workspace == "workspace-a"
     monkeypatch.delenv("CPCF_TOKEN", raising=False)
     assert cli_entry(["auth", "login", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["code"] == "bearer_token_required"
-    with pytest.raises(RuntimeError, match="CPCF_TOKEN"):
+    assert json.loads(capsys.readouterr().out)["code"] == "oidc_device_configuration_missing"
+    with pytest.raises(RuntimeError, match="OIDC login or CPCF_TOKEN"):
         _headers()
     assert _headers(authenticated=False) == {}
     monkeypatch.setenv("CPCF_TOKEN", "ephemeral-token")
@@ -228,3 +228,58 @@ def test_authz_runner_exports_and_process_entrypoint_fail_closed(
     with pytest.raises(RuntimeError, match="CPCF_DATABASE_URL"):
         asyncio.run(run_once())
     assert api_main() == 2
+
+
+def test_cli_mirrors_generation_bound_control_plane_surface(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, str, dict[str, object]]] = []
+
+    def request(method: str, path: str, **kwargs: object) -> int:
+        calls.append((method, path, kwargs))
+        return 0
+
+    monkeypatch.setattr("cpcf_cli.main._request", request)
+    generation = "sha256:" + "a" * 64
+    digest = "sha256:" + "b" * 64
+    commands = [
+        ["workspace", "import-legacy", "workspace-a"],
+        ["object", "admit", "workspace-a"],
+        ["attestation", "admit", "workspace-a"],
+        ["trust", "update", "workspace-a"],
+        ["time", "update", "workspace-a"],
+        ["perturbation", "replay", "workspace-a", "--scenario", "scenario-a"],
+        ["intervention", "analyze", "workspace-a"],
+        ["action", "dispatch", "workspace-a"],
+        ["projection", "approve", "workspace-a"],
+        ["coordination", "init", "workspace-a", "--session", "session-a"],
+        ["coordination", "commit", "workspace-a", "--session", "session-a"],
+        ["coordination", "reveal", "workspace-a", "--session", "session-a"],
+        ["coordination", "route", "workspace-a", "--session", "session-a"],
+        ["coordination", "terminate", "workspace-a", "--session", "session-a"],
+        ["trial", "protocol-import", "workspace-a"],
+        ["trial", "amendment-import", "workspace-a"],
+        ["trial", "result-import", "workspace-a"],
+        ["quarantine", "resolve", "workspace-a"],
+        ["repair", "run", "repair-a", "workspace-a"],
+    ]
+    for command in commands:
+        assert cli_entry([*command, "--generation", generation, "--digest", digest, "--json"]) == 0
+    assert all(item[0] == "POST" for item in calls)
+    assert all(item[2]["mutation"] is True for item in calls)
+    assert all(item[2]["generation"] == generation for item in calls)
+    assert all(item[2]["body"]["subject_digests"] == [digest] for item in calls)  # type: ignore[index]
+
+    calls.clear()
+    for command in (
+        ["trust", "status", "workspace-a"],
+        ["time", "status", "workspace-a"],
+        ["projection", "pending", "workspace-a"],
+        ["coordination", "status", "workspace-a"],
+        ["trial", "status", "workspace-a"],
+        ["quarantine", "list", "workspace-a"],
+        ["repair", "list", "workspace-a"],
+        ["repair", "show", "repair-a", "workspace-a"],
+    ):
+        assert cli_entry([*command, "--json"]) == 0
+    assert all(item[0] == "GET" and item[2]["mutation"] is False for item in calls)

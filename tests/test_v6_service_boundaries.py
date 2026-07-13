@@ -533,8 +533,11 @@ def trial_fixture() -> tuple[MeasurementProtocol, dict[str, object], TrialResult
             metadata=metadata(f"artifact-{artifact_type}"),
             spec=ArtifactRecordSpec(
                 artifact_type=artifact_type,  # type: ignore[arg-type]
+                protocol_id="protocol-1",
+                producer_principal_id="author",
                 artifact_digest="sha256:" + marker * 64,
                 acquisition_committed_at=NOW - timedelta(days=2),
+                recorded_at=NOW - timedelta(days=2),
                 source_system="trial-source",
             ),
         )
@@ -593,6 +596,7 @@ def trial_fixture() -> tuple[MeasurementProtocol, dict[str, object], TrialResult
             assignment_record_digest=artifact_digests["assignment"],
             analysis_executable_record_digest=artifact_digests["analysis-executable"],
             evaluator_principal_id="evaluator",
+            quality_verifier_principal_id="quality-verifier",
             observation_completed_at=NOW + timedelta(days=1),
             issued_at=NOW + timedelta(days=1, minutes=1),
             design="randomized",
@@ -602,6 +606,16 @@ def trial_fixture() -> tuple[MeasurementProtocol, dict[str, object], TrialResult
         ),
     )
     objects[document_digest(result)] = result
+    result_quorum = QuorumDecisionDocument(
+        metadata=metadata("result-quorum"),
+        spec=QuorumDecisionSpec(
+            decision_type="acceleration_compatibility",
+            subject_digest=document_digest(result),
+            statement_digests=["sha256:" + "6" * 64, "sha256:" + "7" * 64],
+            decided_at=result.spec.issued_at + timedelta(minutes=1),
+        ),
+    )
+    objects[document_digest(result_quorum)] = result_quorum
     return protocol, objects, result
 
 

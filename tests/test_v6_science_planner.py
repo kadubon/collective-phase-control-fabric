@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
+from collective_phase_control_fabric.v6.coordination import proposal_commitment_digest
 from collective_phase_control_fabric.v6.models import (
     ActionDocument,
     ActionSpec,
@@ -89,6 +90,10 @@ def event(
     *,
     commitment: str | None = None,
     artifact: str | None = None,
+    proposal: str | None = None,
+    actor: str = "root-principal",
+    verification_status: str | None = None,
+    termination_reason: str | None = None,
 ) -> CoordinationEventDocument:
     return CoordinationEventDocument(
         metadata=metadata(event_id),
@@ -96,10 +101,13 @@ def event(
             session_id="session-1",
             event_id=event_id,
             event_type=event_type,  # type: ignore[arg-type]
-            actor_principal_id="root-principal",
+            actor_principal_id=actor,
             occurred_at=occurred_at,
+            proposal_id=proposal,
             commitment_digest=commitment,
             artifact_digest=artifact,
+            verification_status=verification_status,  # type: ignore[arg-type]
+            termination_reason=termination_reason,  # type: ignore[arg-type]
             prior_event_digest=prior,
         ),
     )
@@ -272,8 +280,12 @@ def build_science_fixture() -> tuple[AnalysisSnapshot, dict[str, object]]:
         metadata=metadata("coordination-plan"),
         spec=CoordinationPlanSpec(
             session_id="session-1",
+            plan_principal_id="root-principal",
+            integration_principal_id="root-principal",
             participant_principals=["root-principal", "auditor-principal"],
             verifier_principals=["auditor-principal"],
+            verifier_capacity={"auditor-principal": 1},
+            required_proposal_count=1,
             commit_deadline=NOW - timedelta(minutes=40),
             reveal_deadline=NOW - timedelta(minutes=20),
             termination_deadline=NOW + timedelta(hours=1),
@@ -282,17 +294,75 @@ def build_science_fixture() -> tuple[AnalysisSnapshot, dict[str, object]]:
     )
     input_digests.append(add(objects, plan))
     prior = None
+    revealed_artifact = "sha256:" + "7" * 64
+    commitment_digest = proposal_commitment_digest(
+        "session-1", "proposal-1", "root-principal", revealed_artifact
+    )
     sequence = [
-        ("open", "open_commit", None, None),
-        ("commit", "commit", "sha256:" + "6" * 64, None),
-        ("close", "close_commit", None, None),
-        ("reveal-open", "open_reveal", None, None),
-        ("reveal", "reveal", "sha256:" + "6" * 64, "sha256:" + "7" * 64),
-        ("verify", "verification", None, "sha256:" + "8" * 64),
-        ("integrate", "integration", None, "sha256:" + "9" * 64),
-        ("terminate", "terminate", None, None),
+        ("open", "open_commit", None, None, None, "root-principal", None, None),
+        (
+            "commit",
+            "commit",
+            commitment_digest,
+            None,
+            "proposal-1",
+            "root-principal",
+            None,
+            None,
+        ),
+        ("close", "close_commit", None, None, None, "root-principal", None, None),
+        ("reveal-open", "open_reveal", None, None, None, "root-principal", None, None),
+        (
+            "reveal",
+            "reveal",
+            commitment_digest,
+            revealed_artifact,
+            "proposal-1",
+            "root-principal",
+            None,
+            None,
+        ),
+        (
+            "verify",
+            "verification",
+            None,
+            revealed_artifact,
+            None,
+            "auditor-principal",
+            "passed",
+            None,
+        ),
+        (
+            "integrate",
+            "integration",
+            None,
+            "sha256:" + "9" * 64,
+            None,
+            "root-principal",
+            None,
+            None,
+        ),
+        (
+            "terminate",
+            "terminate",
+            None,
+            None,
+            None,
+            "root-principal",
+            None,
+            "all_verified",
+        ),
     ]
-    for index, (event_id, event_type, commitment, artifact) in enumerate(sequence):
+    for index, (
+        event_id,
+        event_type,
+        commitment,
+        artifact,
+        proposal,
+        actor,
+        verification_status,
+        termination_reason,
+    ) in enumerate(sequence):
         item = event(
             event_id,
             event_type,
@@ -300,6 +370,10 @@ def build_science_fixture() -> tuple[AnalysisSnapshot, dict[str, object]]:
             prior,
             commitment=commitment,
             artifact=artifact,
+            proposal=proposal,
+            actor=actor,
+            verification_status=verification_status,
+            termination_reason=termination_reason,
         )
         prior = add(objects, item)
         input_digests.append(prior)

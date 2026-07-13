@@ -70,7 +70,9 @@ jobs:
           tests/test_v6_authority.py
           tests/test_v6_db_worker_assurance.py tests/test_v6_golden_semantics.py
           tests/test_v6_intervention.py
+          tests/test_v6_cli_auth.py tests/test_v6_coordination_trial_assurance.py
           tests/test_v6_model_assurance.py tests/test_v6_models_trust.py
+          tests/test_v6_onboarding_repairs.py
           tests/test_v6_package_interfaces.py tests/test_v6_planning_assurance.py
           tests/test_v6_runner_gateway.py
           tests/test_v6_science_assurance.py tests/test_v6_science_planner.py
