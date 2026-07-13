@@ -38,8 +38,8 @@ threshold cryptography.
 CAS objects are immutable tenant-bound SHA-256 bytes. A conforming PostgreSQL implementation commits
 the typed ledger, event-chain head, outbox records, and current-generation pointer in one serializable
 transaction after every CAS object is verified. Mutations compare the expected generation. The
-checked-in API currently implements workspace/outbox metadata but not this complete object-generation
-transaction, so it is not storage-conformant.
+checked-in PostgreSQL unit of work implements this atomic boundary for generation commits. API-wide
+use and crash-matrix evidence remain required before storage conformance can be claimed.
 
 ## Execution and projection
 
@@ -47,8 +47,10 @@ A conforming control plane signs finite job specifications but executes no adapt
 external runner claims a short lease and returns a signed receipt. Timeout, stale lease, replay,
 image/material substitution, truncated required output, incomplete cleanup, or unrecognized
 isolation maps to failure. Output remains pending until exact pointer reconstruction and independent
-approval. The checked-in core implements receipt and projection conformance; the lease/mTLS API and
-transactional promotion workflow remain nonconformant.
+approval. The checked-in reference runner gateway implements certificate-identity parsing, bounded
+leases, attempts, heartbeats, artifact admission, signed receipt validation, and pending projection
+creation behind an identity-sanitizing Envoy boundary contract. A multi-replica PostgreSQL runner
+repository, deployed Envoy sidecar, and transactional promotion endpoint remain release blockers.
 
 ## Science and planning
 

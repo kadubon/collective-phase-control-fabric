@@ -6,15 +6,32 @@ from __future__ import annotations
 import argparse
 import json
 import tempfile
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from cpcf_api.app import create_app
+from cpcf_api.runner_gateway import (
+    InMemoryRunnerGateway,
+    VerifiedStatement,
+    create_runner_app,
+)
 from cpcf_cli.main import build_parser
 
 from collective_phase_control_fabric.v6.catalog import AGENT_GUIDANCE, ERROR_CATALOG
+from collective_phase_control_fabric.v6.models import RunnerJob, SignedStatement
+from collective_phase_control_fabric.v6.storage import MemoryObjectStore
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class _DocumentationAuthority:
+    def sign(self, _: RunnerJob) -> SignedStatement:
+        raise RuntimeError("documentation authority cannot sign")
+
+    def verify(self, _: SignedStatement, *, evaluated_at: datetime) -> VerifiedStatement:
+        del evaluated_at
+        raise RuntimeError("documentation authority cannot verify")
 
 
 def _commands(
@@ -39,11 +56,23 @@ def _commands(
 
 
 def documents() -> dict[str, Any]:
+    store = MemoryObjectStore()
+    authority = _DocumentationAuthority()
+    runner_gateway = InMemoryRunnerGateway(
+        object_store=store,
+        signer=authority,
+        verifier=authority,
+    )
     return {
         "agent-guidance.json": AGENT_GUIDANCE,
         "cli.json": {"program": "cpcf", "commands": _commands(build_parser())},
         "error-catalog.json": ERROR_CATALOG,
         "openapi.json": create_app().openapi(),
+        "runner-openapi.json": create_runner_app(
+            runner_gateway,
+            store,
+            expected_trust_domain="runners.cpcf.invalid",
+        ).openapi(),
     }
 
 

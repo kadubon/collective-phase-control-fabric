@@ -357,8 +357,10 @@ def test_authoritative_loader_reconstructs_projection_only_after_quorum() -> Non
             stderr_discarded_bytes=0,
             return_code=0,
             timeout=False,
+            claimed_outcome="success",
             cleanup_complete=True,
             output_digests=[raw_digest],
+            started_at=NOW,
             completed_at=NOW,
         ),
     )
@@ -574,8 +576,10 @@ def _projection_case(
             stderr_discarded_bytes=0,
             return_code=0,
             timeout=False,
+            claimed_outcome="success",
             cleanup_complete=True,
             output_digests=[raw_digest],
+            started_at=NOW,
             completed_at=NOW,
         ),
     )

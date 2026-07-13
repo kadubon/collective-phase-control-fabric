@@ -108,6 +108,21 @@
     },
     {
       "argv": [
+        "runner"
+      ],
+      "description": "Validate signed runner protocol records.",
+      "help": "Validate signed runner protocol records."
+    },
+    {
+      "argv": [
+        "runner",
+        "conformance"
+      ],
+      "description": "Validate one local job/receipt contract without execution.",
+      "help": "Validate one local job/receipt contract without execution."
+    },
+    {
+      "argv": [
         "schema"
       ],
       "description": "Inspect the closed v0.6 schema registry.",

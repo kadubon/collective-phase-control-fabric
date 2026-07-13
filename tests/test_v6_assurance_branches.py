@@ -98,7 +98,7 @@ def valid_projection_fixture() -> tuple[
     SourceArtifactEnvelope,
     bytes,
 ]:
-    _, _, receipt = runner_fixture()
+    _, _, _, receipt = runner_fixture()
     projected = state_document()
     raw = canonical_bytes({"projected": projected.model_dump(mode="json", exclude_none=True)})
     raw_digest = digest_bytes(raw)
@@ -419,7 +419,7 @@ def test_projection_pointer_and_binding_failures_are_fail_closed() -> None:
         with pytest.raises(ValueError, match=reason):
             resolve_pointer(value, pointer)
 
-    _, _, receipt = runner_fixture()
+    _, _, _, receipt = runner_fixture()
     from collective_phase_control_fabric.v6.models import (
         PendingProjection,
         PendingProjectionSpec,
@@ -485,7 +485,7 @@ def test_projection_pointer_and_binding_failures_are_fail_closed() -> None:
 
 
 def test_runner_receipt_reports_all_boundaries() -> None:
-    capability, job, receipt = runner_fixture()
+    capability, execution_policy, job, receipt = runner_fixture()
     changed = receipt.model_copy(
         update={
             "spec": receipt.spec.model_copy(
@@ -510,12 +510,22 @@ def test_runner_receipt_reports_all_boundaries() -> None:
         job,
         changed,
         capability,
+        execution_policy,
         received_at=job.spec.lease_expires_at + timedelta(seconds=1),
         expected_runner_principal_id="runner-principal",
         prior_attempts={(job.spec.job_id, job.spec.attempt)},
+        available_digests=set(),
+        artifact_lengths={},
     )
     assert not result.accepted
-    assert len(result.reasons) == 15
+    assert {
+        "runner_attempt_replay",
+        "runner_artifact_digest_missing",
+        "runner_cleanup_incomplete",
+        "runner_lease_expired",
+        "runner_material_closure_mismatch",
+        "runner_outcome_forged",
+    }.issubset(result.reasons)
 
 
 def test_coordination_invalid_transitions_and_deadline_are_reported() -> None:

@@ -223,9 +223,12 @@ def test_exposure_perturbation_branch_capability_and_projection_validators() -> 
         "capability_id": "capability",
         "adapter_principal_id": "adapter",
         "verifier_principal_id": "verifier",
+        "execution_policy_digest": "sha256:" + "6" * 64,
         "image_digest": "sha256:" + "4" * 64,
+        "argv": ["/adapter/run"],
         "output_schema_name": "state-attestation",
         "output_schema_digest": schema_digest("state-attestation"),
+        "return_code_outcomes": {"0": "success"},
         "repeatable": False,
         "branches": branches,
     }

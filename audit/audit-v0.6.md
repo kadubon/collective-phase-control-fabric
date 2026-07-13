@@ -46,8 +46,11 @@ This audit lists known findings only. It does not assert that undiscovered defec
    lifecycle, and projection chain before every domain decision.
 2. PostgreSQL code does not yet commit the full CAS ledger, audit event, idempotency record, outbox
    event, and generation pointer as one serializable domain transaction for every mutation.
-3. Outbound-only mTLS runner lease transport, artifact exchange, replay protection, and deployed
-   cleanup evidence are not complete.
+3. The reference runner gateway now enforces an Envoy-sanitized certificate identity, signed
+   capability and execution-policy authority, leases, attempts, heartbeats, digest-scoped material
+   and output admission, receipt replay protection, cleanup evidence, and pending-only projection.
+   Its multi-replica PostgreSQL repository, deployed Envoy sidecar, and integration evidence are not
+   complete.
 4. Minimal/fed siphons, exact flux coupling, cut/enablement sets, deterministic service curves, and
    bounded occurrence prefixes now have closed result kinds and bounded exact reference algorithms.
    Their large-network solver integration, mutation score, and exhaustive differential gate remain

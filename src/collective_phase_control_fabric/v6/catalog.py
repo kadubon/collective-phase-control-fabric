@@ -29,6 +29,47 @@ AGENT_GUIDANCE: Final[dict[str, object]] = {
     ],
 }
 
+RUNNER_GATEWAY_ERROR_CODES: Final[frozenset[str]] = frozenset(
+    {
+        "runner_artifact_budget_exhausted",
+        "runner_artifact_digest_invalid",
+        "runner_artifact_digest_mismatch",
+        "runner_artifact_limit_exceeded",
+        "runner_artifact_missing_after_upload",
+        "runner_artifact_storage_invariant_failed",
+        "runner_artifact_too_large",
+        "runner_attempt_limit_exhausted",
+        "runner_capability_authority_invalid",
+        "runner_certificate_binding_duplicate",
+        "runner_certificate_header_invalid",
+        "runner_certificate_identity_untrusted",
+        "runner_execution_policy_authority_invalid",
+        "runner_failure_projection_rejected",
+        "runner_heartbeat_sequence_invalid",
+        "runner_idempotency_key_reused",
+        "runner_idempotency_type_mismatch",
+        "runner_identity_not_registered",
+        "runner_job_duplicate",
+        "runner_job_not_available",
+        "runner_job_not_bound",
+        "runner_job_signature_invalid",
+        "runner_lease_not_found",
+        "runner_lease_stale",
+        "runner_material_limit_exceeded",
+        "runner_material_missing",
+        "runner_pending_projection_duplicate",
+        "runner_pending_projection_invalid",
+        "runner_projection_storage_invariant_failed",
+        "runner_receipt_nonconformant",
+        "runner_receipt_signature_invalid",
+        "runner_receipt_storage_invariant_failed",
+        "runner_registration_duplicate",
+        "runner_request_schema_invalid",
+        "runner_selector_output_invalid",
+        "runner_signed_statement_invalid",
+    }
+)
+
 ERROR_CATALOG: Final[dict[str, dict[str, object]]] = {
     "authoritative_time_required": {
         "effect_class": "none",
@@ -77,5 +118,14 @@ ERROR_CATALOG: Final[dict[str, dict[str, object]]] = {
     "unsupported_document_version": {
         "effect_class": "none",
         "recovery": ["Inspect legacy content read-only and migrate by copy."],
+    },
+    **{
+        code: {
+            "effect_class": "none",
+            "recovery": [
+                "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+            ],
+        }
+        for code in sorted(RUNNER_GATEWAY_ERROR_CODES)
     },
 }
