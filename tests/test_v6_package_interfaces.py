@@ -95,6 +95,56 @@ def test_cli_request_reports_control_plane_failures_without_token_leakage(
     assert "secret-not-for-output" not in output
 
 
+def test_cli_remote_command_routes_preserve_mutation_and_generation_contracts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, str, dict[str, object]]] = []
+
+    def request(method: str, path: str, **kwargs: object) -> int:
+        calls.append((method, path, kwargs))
+        return 0
+
+    monkeypatch.setattr("cpcf_cli.main._request", request)
+    monkeypatch.setattr(
+        "cpcf_cli.main.verify_bundle",
+        lambda *_: {"valid": True, "authenticity_status": "unknown"},
+    )
+    assert cli_entry(["schema", "list", "--json"]) == 0
+    assert cli_entry(["bundle", "verify", "bundle.zip", "--json"]) == 0
+    assert cli_entry(["workspace", "create", "workspace-a", "--json"]) == 0
+    assert cli_entry(["workspace", "status", "workspace-a", "--json"]) == 0
+    assert (
+        cli_entry(
+            [
+                "audit",
+                "start",
+                "workspace-a",
+                "--generation",
+                "sha256:" + "a" * 64,
+                "--json",
+            ]
+        )
+        == 0
+    )
+    assert cli_entry(["audit", "status", "job-a", "--json"]) == 0
+    assert cli_entry(["agent", "onboard", "--workspace", "workspace-a", "--json"]) == 0
+    assert calls == [
+        ("POST", "/v1/workspaces", {"body": {"workspace_id": "workspace-a"}, "mutation": True}),
+        ("GET", "/v1/workspaces/workspace-a", {}),
+        (
+            "POST",
+            "/v1/workspaces/workspace-a/analyses",
+            {
+                "body": {},
+                "mutation": True,
+                "generation": "sha256:" + "a" * 64,
+            },
+        ),
+        ("GET", "/v1/jobs/job-a", {}),
+        ("GET", "/v1/workspaces/workspace-a/onboarding", {}),
+    ]
+
+
 def test_authz_runner_exports_and_process_entrypoint_fail_closed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

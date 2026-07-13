@@ -143,7 +143,13 @@ def _hard_filter(
         reasons.append("capability_digest_mismatch")
     if not set(action.spec.required_object_digests).issubset(state.live_objects):
         reasons.append("required_object_missing")
-    if capability.spec.output_schema_digest != schema_digest(capability.spec.output_schema_name):
+    try:
+        expected_schema_digest = schema_digest(capability.spec.output_schema_name)
+    except ValueError:
+        expected_schema_digest = None
+    if expected_schema_digest is None:
+        reasons.append("capability_output_schema_unknown")
+    elif capability.spec.output_schema_digest != expected_schema_digest:
         reasons.append("capability_output_schema_digest_mismatch")
     protected = set(action.spec.protected_object_digests)
     for branch in capability.spec.branches:

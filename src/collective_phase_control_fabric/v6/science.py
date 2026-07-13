@@ -154,14 +154,17 @@ def _provenance(
         if item is None:
             blockers.append(f"missing:{digest}")
             continue
+        invalid = False
         if document_digest(item) != digest:
             blockers.append(f"digest_mismatch:{digest}")
-            continue
+            invalid = True
         if item.metadata.tenant_id != snapshot.metadata.tenant_id:
             blockers.append(f"tenant_mismatch:{digest}")
-            continue
+            invalid = True
         if item.metadata.workspace_id != snapshot.metadata.workspace_id:
             blockers.append(f"workspace_mismatch:{digest}")
+            invalid = True
+        if invalid:
             continue
         live[digest] = item
     required = set(MANDATORY_DIMENSIONS)

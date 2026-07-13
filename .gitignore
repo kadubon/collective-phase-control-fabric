@@ -8,9 +8,10 @@
 /coverage*.json
 /coverage*.xml
 /dist*/
+/release-metadata/
 /build-production-requirements.txt
 /sbom*.json
-/mutation-results.txt
+/mutation-results*.txt
 /mutants/
 /.idea/
 /.vscode/

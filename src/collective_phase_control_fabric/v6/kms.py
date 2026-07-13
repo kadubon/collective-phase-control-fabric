@@ -31,8 +31,6 @@ def normalize_p256_raw(signature: bytes) -> bytes:
     if r <= 0 or r >= P256_ORDER or raw_s <= 0 or raw_s >= P256_ORDER:
         raise ValueError("kms_ecdsa_signature_out_of_range")
     s = min(raw_s, P256_ORDER - raw_s)
-    if s <= 0 or s > P256_ORDER // 2:
-        raise ValueError("kms_ecdsa_signature_out_of_range")
     return r.to_bytes(32, "big") + s.to_bytes(32, "big")
 
 

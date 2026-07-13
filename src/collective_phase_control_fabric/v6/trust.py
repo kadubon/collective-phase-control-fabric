@@ -274,7 +274,7 @@ def verify_envelope(
         reasons.append("workspace_binding_mismatch")
     if protected.policy_sequence > policy.spec.policy_sequence:
         reasons.append("policy_sequence_from_future")
-    authoritative_time: datetime
+    authoritative_time: datetime | None = None
     if trusted_time is not None:
         if document_digest(trusted_time) != protected.trusted_time_receipt_digest:
             reasons.append("trusted_time_receipt_binding_mismatch")
@@ -301,10 +301,12 @@ def verify_envelope(
             reasons.append("document_kind_not_authorized")
         if not set(protected.scope).issubset(principal.scope):
             reasons.append("scope_not_authorized")
-        reasons.extend(_time_status(principal, protected.signing_time, authoritative_time))
+        if authoritative_time is not None:
+            reasons.extend(_time_status(principal, protected.signing_time, authoritative_time))
         message = dsse_pae(envelope.payloadType, payload_bytes)
         valid_signature = False
         for signature_entry in envelope.signatures:
+            signature_verified = False
             try:
                 signature = base64.b64decode(signature_entry.sig, validate=True)
                 _verify_signature(principal, message, signature)
@@ -312,9 +314,12 @@ def verify_envelope(
                 # Cryptographic verification is a fail-closed boundary. Provider, parser, and
                 # backend exceptions cannot promote authority; process-control exceptions are
                 # BaseException subclasses and are deliberately not swallowed.
-                continue
-            valid_signature = True
-            break
+                signature_verified = False
+            else:
+                signature_verified = True
+            if signature_verified:
+                valid_signature = True
+                break
         if not valid_signature:
             reasons.append("signature_invalid")
     reasons = sorted(set(reasons))
