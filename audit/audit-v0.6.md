@@ -26,8 +26,9 @@ This audit lists known findings only. It does not assert that undiscovered defec
 - Generated coverage, build directories, local databases, caches, key material, and SBOM output are
   excluded. The prior absolute Windows source paths were replaced with symbolic paths.
 - The release workflow builds one wheel and one sdist in a non-OIDC job. PyPI upload is isolated,
-  release-only, version-matched, protected by the `pypi` environment, and disabled unless
-  `PYPI_PUBLISH_ENABLED=true`.
+  release-only, version-matched, protected by the `pypi` environment, disabled unless
+  `PYPI_PUBLISH_ENABLED=true`, and now depends on closed commit-bound external evidence. No release
+  manifest exists, so stable release assets and publication fail closed.
 - The universal lock now resolves under Windows CPython 3.14.6. `pip-audit` was updated to 2.10.1;
   Semgrep remains a pinned external CI action because its Python dependency constraints conflict
   with the required runtime `jsonschema` baseline.
@@ -39,6 +40,16 @@ This audit lists known findings only. It does not assert that undiscovered defec
   PostgreSQL integration test verifies that the committed schema has forced RLS before tenant tests.
 - Mutation execution covers the eight configured critical modules. Mutmut result export now passes
   the explicit Boolean required by Mutmut 3.6 before the unchanged 85 percent score gate runs.
+- Exact repair-namespace tests exposed and corrected `trusted_time_*` blockers being classified as
+  generic trust blockers because of overlapping prefix order. The tests cover every registered
+  namespace and its exact required document and authority outputs. The parent native-Linux
+  mutation job passed at 85.37 percent across 7,623 counted mutants; the child commit still requires
+  its own run.
+- CI and release mutation jobs retain a short-lived diagnostic result artifact before enforcing the
+  unchanged score. This artifact is evidence for test repair, not a release distribution.
+- The first OCI conformance run exposed missing package forced-includes in both service build
+  contexts. Images now copy the same agent guidance, fixtures, and documentation required by the
+  wheel, and missing SARIF files no longer produce a misleading upload error after a build failure.
 
 ## Open authority and scientific findings
 
@@ -75,6 +86,14 @@ This audit lists known findings only. It does not assert that undiscovered defec
    science, perturbation, solver, planner, runner, projections, coordination, trials, quotas, and
    repairs. Missing diagnostics remain unknown and repairs remain unbound unless they carry a
    signed action digest. PostgreSQL-backed end-to-end diagnostic population remains a release gate.
+9. The API and worker image dependency omission is corrected: both install their explicit extras,
+   use digest-pinned base images, and expose provider-specific KMS targets. Helm uses separate
+   service accounts and an explicit owner-only migration hook. The incomplete tenant-scoped worker
+   and migration hook are disabled by default; multi-tenant worker processing remains a release
+   blocker.
+10. Deterministic load, chaos, and restore reference harnesses now emit commit-bound exact JSON.
+    They are deliberately not accepted as availability, PostgreSQL, S3, RPO/RTO, or intended-
+    deployment evidence. The stable-release checker requires those external gates separately.
 
 These gaps block any claim that CPCF operationally accelerates a collective. The strongest permitted
 statement remains a bounded evidence-control analysis plus separately validated external evidence.
@@ -122,3 +141,14 @@ Machine-readable status is in `audit/findings-v0.6.json`.
   response explicitly grants no admission or scientific claim.
 - OIDC device login uses the current keyring 25.7 series and stores an access token only in a secure
   OS keyring. `CPCF_TOKEN` remains the explicit non-persistent fallback.
+
+## Operations and release assurance added in the staged implementation
+
+- Local regression: 547 passed and three service-dependent tests skipped. Full branch-enabled
+  coverage is 90.46 percent; all 12 named critical groups independently exceed 95 percent.
+- Strict mypy now covers operational scripts and exposed an archive-member type error that was
+  corrected. The source, wheel, and sdist hygiene gate also rejects critical coverage reports.
+- OTLP/HTTP telemetry is opt-in, credential-free, payload-free, and HTTPS-only unless a controlled
+  deployment explicitly acknowledges insecure transport.
+- Helm 3.21.1 is checksum-pinned for Kubernetes 1.36 lint/render checks. OCI security jobs build and
+  scan both service images in addition to scanning the source tree.

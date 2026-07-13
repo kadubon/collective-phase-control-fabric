@@ -1,6 +1,9 @@
 replicaCount:
   api: 3
   worker: 3
+worker:
+  enabled: false
+  tenantId: ""
 image:
   api:
     repository: cpcf-api
@@ -8,6 +11,12 @@ image:
   worker:
     repository: cpcf-worker
     digest: ""
+  migration:
+    repository: cpcf-migration
+    digest: ""
+migration:
+  enabled: false
+  secretName: cpcf-migration
 oidc:
   issuer: ""
   audience: "cpcf-api"
@@ -15,6 +24,12 @@ oidc:
 objectStore:
   bucket: ""
 secretName: cpcf-runtime
+telemetry:
+  endpoint: ""
+  allowInsecure: false
+  serviceNames:
+    api: cpcf-api
+    worker: cpcf-worker
 resources:
   api:
     requests: {cpu: 250m, memory: 256Mi}

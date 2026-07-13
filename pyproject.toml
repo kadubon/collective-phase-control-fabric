@@ -64,6 +64,7 @@ server = [
   "uvicorn>=0.35,<1",
   "opentelemetry-api>=1.35,<2",
   "opentelemetry-sdk>=1.35,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.35,<2",
   "boto3>=1.39,<2",
 ]
 worker = [
@@ -77,6 +78,7 @@ worker = [
   "uvicorn>=0.35,<1",
   "opentelemetry-api>=1.35,<2",
   "opentelemetry-sdk>=1.35,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.35,<2",
   "boto3>=1.39,<2",
 ]
 runner = ["httpx[http2]>=0.28,<1"]
@@ -98,6 +100,7 @@ all = [
   "uvicorn>=0.35,<1",
   "opentelemetry-api>=1.35,<2",
   "opentelemetry-sdk>=1.35,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.35,<2",
   "boto3>=1.39,<2",
   "httpx[http2]>=0.28,<1",
   "z3-solver>=4.16,<4.17",
@@ -146,6 +149,7 @@ include = [
   "/scripts",
   "/packages",
   "/deploy",
+  "/release-evidence",
   "/src",
   "/tests",
   "/adapter-capability-manifest.json",

@@ -35,7 +35,7 @@
       "severity": "critical",
       "exploit": "A manual workflow or mismatched tag can upload an unreviewed distribution.",
       "affected_claim": "PyPI release integrity",
-      "correction": "Release-only trusted-publishing job, exact artifact contract, version match, protected pypi environment, explicit kadubon self-review governance downgrade, and disabled publication variable.",
+      "correction": "Release-only trusted-publishing job, exact artifact contract, version match, protected pypi environment, explicit kadubon self-review governance downgrade, disabled publication variable, and a commit-bound external-evidence dependency.",
       "regression_test": "tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
       "status": "partial"
     },
@@ -116,9 +116,9 @@
       "severity": "high",
       "exploit": "Passing regression counts can conceal weak branch or mutation assurance.",
       "affected_claim": "Commercial release readiness",
-      "correction": "95 percent critical branch, 90 percent overall, 85 percent mutation, integration, load, chaos, restore, soak, threat-model, and penetration gates remain blocking.",
-      "regression_test": ".github/workflows/ci.yml and external release evidence",
-      "status": "open"
+      "correction": "The full combined branch-enabled gate exceeds 90 percent and each named critical group is checked independently at 95 percent. Final-commit mutation, live integration, deployed load/chaos/restore, soak, threat-model, and penetration gates remain blocking.",
+      "regression_test": "scripts/check_critical_coverage.py, tests/test_v6_operations_release.py, .github/workflows/ci.yml, and external release evidence",
+      "status": "partial"
     },
     {
       "id": "V6-014",
@@ -199,6 +199,78 @@
       "affected_claim": "Finite-horizon resource persistence",
       "correction": "Every used transformation requires a live rate interval, exact action rate must lie inside it, and fed-siphon credit requires positive lower supply.",
       "regression_test": "tests/test_v6_science_assurance.py and tests/test_v6_science_planner.py",
+      "status": "closed"
+    },
+    {
+      "id": "V6-023",
+      "severity": "critical",
+      "exploit": "A stable release can reach the artifact or PyPI jobs after only automated source checks, without sustained availability, intended-deployment restore, threat review, or penetration evidence.",
+      "affected_claim": "Commercial stable-release governance",
+      "correction": "A closed commit- and version-bound manifest is required for release assets and PyPI. Independent review, a 30-day soak, intended-deployment restore, load, chaos, and zero-blocker penetration evidence are mandatory; no placeholder manifest is shipped.",
+      "regression_test": "tests/test_v6_operations_release.py::test_release_workflow_fails_closed_on_external_and_per_group_gates",
+      "status": "closed"
+    },
+    {
+      "id": "V6-024",
+      "severity": "critical",
+      "exploit": "API and worker images can build without their optional runtime dependencies and then fail only after deployment.",
+      "affected_claim": "Deployable service artifacts",
+      "correction": "Service images install their explicit frozen extras, pin both base-image manifest digests, expose provider-specific KMS targets, and are built and scanned in CI.",
+      "regression_test": "tests/test_v6_operations_release.py::test_service_images_install_runtime_and_provider_extras and .github/workflows/security.yml",
+      "status": "closed"
+    },
+    {
+      "id": "V6-025",
+      "severity": "high",
+      "exploit": "One aggregate critical-coverage percentage can conceal a subsystem below the required assurance threshold.",
+      "affected_claim": "Per-subsystem semantic assurance",
+      "correction": "Coverage JSON is evaluated fail-closed for 12 explicitly named groups, including missing-file detection, after the unchanged 95 percent aggregate gate.",
+      "regression_test": "tests/test_v6_operations_release.py::test_critical_coverage_is_enforced_per_named_group",
+      "status": "closed"
+    },
+    {
+      "id": "V6-026",
+      "severity": "high",
+      "exploit": "Reference load and restore evidence can pass function tests but fail during serialization because floating-point timings violate CPCF canonical JSON.",
+      "affected_claim": "Machine-readable operations evidence",
+      "correction": "All timing evidence is represented as integer microseconds and command-level harness execution is verified before CI admission.",
+      "regression_test": "tests/test_v6_operations_release.py::test_reference_operations_harness_runs_exact_selected_scale_without_external_claims",
+      "status": "closed"
+    },
+    {
+      "id": "V6-027",
+      "severity": "medium",
+      "exploit": "Strict type checking can pass while excluding operational release scripts that contain archive-scanner type defects.",
+      "affected_claim": "Strict static assurance",
+      "correction": "CI and release mypy commands include scripts, and zip/tar archive member types use distinct variables.",
+      "regression_test": ".github/workflows/ci.yml and strict mypy gate",
+      "status": "closed"
+    },
+    {
+      "id": "V6-028",
+      "severity": "high",
+      "exploit": "A trusted_time blocker begins with trust and can be routed to trust-policy repair instead of authoritative time evidence when namespace prefixes overlap.",
+      "affected_claim": "Typed and command-safe first-agent repair guidance",
+      "correction": "Time namespaces are evaluated before generic trust namespaces, and every registered repair prefix is checked against exact document-kind and authority outputs.",
+      "regression_test": "tests/test_v6_onboarding_repairs.py::test_repair_generation_maps_every_blocker_namespace_exactly",
+      "status": "closed"
+    },
+    {
+      "id": "V6-029",
+      "severity": "medium",
+      "exploit": "A mutation score can fail without retaining the survivor list, forcing an expensive rerun and encouraging speculative test changes or pressure to weaken the gate.",
+      "affected_claim": "Reproducible mutation assurance",
+      "correction": "CI and release workflows upload the complete Mutmut status list as a 14-day diagnostic artifact before enforcing the unchanged 85 percent score.",
+      "regression_test": "tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
+      "status": "closed"
+    },
+    {
+      "id": "V6-030",
+      "severity": "high",
+      "exploit": "A service image build omits wheel forced-includes and fails before vulnerability scanning, while unconditional SARIF upload obscures the primary failure with missing-file errors.",
+      "affected_claim": "Reproducible and scanned API/worker OCI artifacts",
+      "correction": "Both service build contexts include every wheel-forced agent, fixture, and documentation input, and SARIF upload is conditional on the scanner output existing.",
+      "regression_test": "tests/test_v6_operations_release.py::test_service_images_install_runtime_and_provider_extras and .github/workflows/security.yml",
       "status": "closed"
     }
   ]

@@ -1,3 +1,4 @@
+{{- if .Values.worker.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,19 +11,32 @@ spec:
     metadata:
       labels: {app.kubernetes.io/name: cpcf-worker}
     spec:
-      serviceAccountName: {{ .Release.Name }}-cpcf
+      serviceAccountName: {{ .Release.Name }}-cpcf-worker
       automountServiceAccountToken: false
       securityContext: {runAsNonRoot: true, runAsUser: 65532, fsGroup: 65532}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: {app.kubernetes.io/name: cpcf-worker}
       containers:
         - name: worker
           image: "{{ .Values.image.worker.repository }}@{{ required "Worker image digest is required" .Values.image.worker.digest }}"
           imagePullPolicy: IfNotPresent
           env:
+            - {name: CPCF_WORKER_TENANT, value: {{ required "worker.tenantId is required when worker.enabled=true" .Values.worker.tenantId | quote }}}
             - name: CPCF_DATABASE_URL
               valueFrom: {secretKeyRef: {name: {{ .Values.secretName }}, key: database-url}}
+            {{- if .Values.telemetry.endpoint }}
+            - {name: CPCF_OTEL_EXPORTER_OTLP_ENDPOINT, value: {{ .Values.telemetry.endpoint | quote }}}
+            - {name: CPCF_OTEL_SERVICE_NAME, value: {{ .Values.telemetry.serviceNames.worker | quote }}}
+            - {name: CPCF_OTEL_ALLOW_INSECURE, value: {{ ternary "true" "false" .Values.telemetry.allowInsecure | quote }}}
+            {{- end }}
           resources: {{ toYaml .Values.resources.worker | nindent 12 }}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities: {drop: ["ALL"]}
             seccompProfile: {type: RuntimeDefault}
+{{- end }}

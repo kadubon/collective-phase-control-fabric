@@ -56,7 +56,7 @@ jobs:
       - run: uv sync --frozen --all-extras --group dev --group security
       - run: uv run --frozen ruff format --check .
       - run: uv run --frozen ruff check .
-      - run: uv run --frozen mypy src packages/cpcf-api/src packages/cpcf-cli/src packages/cpcf-worker/src packages/cpcf-runner-protocol/src
+      - run: uv run --frozen mypy src packages/cpcf-api/src packages/cpcf-cli/src packages/cpcf-worker/src packages/cpcf-runner-protocol/src scripts
       - name: Overall branch coverage
         run: >-
           uv run --frozen pytest
@@ -79,7 +79,12 @@ jobs:
           tests/test_v6_service_boundaries.py tests/test_v6_structural_analysis.py
           --cov=collective_phase_control_fabric.v6 --cov=cpcf_api --cov=cpcf_cli
           --cov=cpcf_worker --cov=cpcf_runner_protocol --cov-branch
-          --cov-report=term-missing --cov-fail-under=95
+          --cov-report=term-missing --cov-report=json:critical-coverage.json
+          --cov-fail-under=95
+      - name: Enforce every critical subsystem independently
+        run: >-
+          uv run --frozen python scripts/check_critical_coverage.py
+          critical-coverage.json --minimum 95
       - run: uv run --frozen bandit -c pyproject.toml -r src packages
       - run: >-
           uv run --frozen pip-audit --local --cache-dir .cache/pip-audit
@@ -89,6 +94,14 @@ jobs:
       - run: uv run --frozen twine check dist/*
       - run: uv run --frozen python scripts/generate_sbom.py uv.lock release-metadata/cpcf-sbom.cdx.json
       - run: uv run --frozen python scripts/check_publication_hygiene.py --archive dist/*.whl --archive dist/*.tar.gz
+      - name: Lint and render Helm chart with pinned Helm 3.21.1
+        run: |
+          curl --fail --silent --show-error --location --output /tmp/helm.tar.gz https://get.helm.sh/helm-v3.21.1-linux-amd64.tar.gz
+          echo "a349c62d6ab2d5d11f044fc0d3afa6deed7d27cc7d5c351f536b169d9fc2cc1a  /tmp/helm.tar.gz" | sha256sum --check
+          tar --extract --gzip --file /tmp/helm.tar.gz --directory /tmp
+          /tmp/linux-amd64/helm lint deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          /tmp/linux-amd64/helm template test deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >/dev/null
+          /tmp/linux-amd64/helm template test deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --set worker.enabled=true --set worker.tenantId=tenant-a --set image.worker.digest=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb --set migration.enabled=true --set image.migration.digest=sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc >/dev/null
 
   postgres-integration:
     runs-on: ubuntu-latest
@@ -138,4 +151,37 @@ jobs:
       - run: uv sync --frozen --all-extras --group dev --group security
       - run: uv run --frozen mutmut run
       - run: uv run --frozen mutmut results --all true > mutation-results.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: mutation-results
+          path: mutation-results.txt
+          retention-days: 14
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
+
+  reference-operations:
+    name: Reference load, chaos, and restore evidence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - name: Execute bounded reference harnesses
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/cpcf-reference-evidence
+          CPCF_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p "$EVIDENCE_DIR"
+          uv run --frozen python scripts/run_load_harness.py --commit "$CPCF_COMMIT_SHA" --out "$EVIDENCE_DIR/load.json"
+          uv run --frozen python scripts/run_chaos_harness.py --commit "$CPCF_COMMIT_SHA" --out "$EVIDENCE_DIR/chaos.json"
+          uv run --frozen python scripts/run_restore_harness.py --commit "$CPCF_COMMIT_SHA" --out "$EVIDENCE_DIR/restore.json"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: reference-operations-evidence
+          path: ${{ runner.temp }}/cpcf-reference-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14

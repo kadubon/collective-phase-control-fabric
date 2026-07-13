@@ -9,6 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from collective_phase_control_fabric.v6.models import (
+    MANDATORY_DIMENSIONS,
     BranchEffect,
     CapabilitySpec,
     CatalystClause,
@@ -17,6 +18,7 @@ from collective_phase_control_fabric.v6.models import (
     ExposureLedgerSpec,
     Lifecycle,
     PerturbationScenario,
+    PhaseContractSpec,
     ProjectionApprovalSpec,
     ProtocolAmendmentSpec,
     RateObservationSpec,
@@ -33,6 +35,26 @@ from tests.v6_helpers import NOW, VALID_FROM, VALID_UNTIL
 
 def lifecycle() -> Lifecycle:
     return Lifecycle(valid_from=VALID_FROM, valid_until=VALID_UNTIL)
+
+
+@pytest.mark.parametrize(
+    ("field", "message"),
+    [
+        ("target_ids", "contract targets must be unique"),
+        ("required_dimensions", "contract required dimensions must be unique"),
+    ],
+)
+def test_phase_contract_rejects_duplicate_semantic_sets(field: str, message: str) -> None:
+    values = {
+        "target_ids": ["target"],
+        "required_dimensions": list(MANDATORY_DIMENSIONS),
+        "minimum_independent_domains": 1,
+        field: ["target", "target"]
+        if field == "target_ids"
+        else [*MANDATORY_DIMENSIONS[:-1], MANDATORY_DIMENSIONS[0]],
+    }
+    with pytest.raises(ValidationError, match=message):
+        PhaseContractSpec.model_validate(values)
 
 
 @pytest.mark.parametrize(
