@@ -13,10 +13,10 @@ from collective_phase_control_fabric.v6.models import Metadata, RepairRecord, Re
 def _repair_class(blocker: str) -> tuple[list[str], list[str], list[list[str]]]:
     """Map a stable blocker namespace to evidence kinds, authority, and safe inspections."""
 
-    if blocker.startswith(("trust", "active_trust", "genesis", "typed_subject_signer")):
-        return ["trust-policy", "signed-statement"], ["workspace_root", "trust_auditor"], []
     if blocker.startswith(("time", "trusted_time", "temporal", "object_expired")):
         return ["trusted-time-receipt", "signed-statement"], ["timestamp"], []
+    if blocker.startswith(("trust", "active_trust", "genesis", "typed_subject_signer")):
+        return ["trust-policy", "signed-statement"], ["workspace_root", "trust_auditor"], []
     if blocker.startswith(("quarantine", "ledger", "source_", "evidence_")):
         return ["signed-statement"], ["evidence_producer"], []
     if blocker.startswith(("resource", "finite_horizon", "fed_siphon", "rate_")):
