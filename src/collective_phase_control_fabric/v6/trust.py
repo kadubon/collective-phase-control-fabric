@@ -308,7 +308,10 @@ def verify_envelope(
             try:
                 signature = base64.b64decode(signature_entry.sig, validate=True)
                 _verify_signature(principal, message, signature)
-            except (ValueError, InvalidSignature):
+            except Exception:
+                # Cryptographic verification is a fail-closed boundary. Provider, parser, and
+                # backend exceptions cannot promote authority; process-control exceptions are
+                # BaseException subclasses and are deliberately not swallowed.
                 continue
             valid_signature = True
             break
