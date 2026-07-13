@@ -779,14 +779,31 @@ class BranchEffect(StrictModel):
         return self
 
 
+class OutcomeSelector(StrictModel):
+    json_pointer: Annotated[str, StringConstraints(max_length=2048)]
+    values: dict[
+        Annotated[str, StringConstraints(max_length=1024)],
+        Literal["success", "partial", "failure"],
+    ] = Field(min_length=1, max_length=64)
+
+
 class CapabilitySpec(StrictModel):
     capability_id: Identifier
     adapter_principal_id: Identifier
     verifier_principal_id: Identifier
+    execution_policy_digest: Digest
     image_digest: Digest
     material_digests: list[Digest] = Field(default_factory=list, max_length=1024)
+    argv: list[Annotated[str, StringConstraints(min_length=1, max_length=4096)]] = Field(
+        min_length=1, max_length=256
+    )
     output_schema_name: Identifier
     output_schema_digest: Digest
+    return_code_outcomes: dict[
+        Annotated[str, StringConstraints(pattern=r"^-?(?:0|[1-9][0-9]*)$", max_length=12)],
+        Literal["success", "partial", "failure"],
+    ] = Field(min_length=1, max_length=64)
+    output_selector: OutcomeSelector | None = None
     repeatable: bool
     progress_measure: Identifier | None = None
     branches: list[BranchEffect] = Field(min_length=4, max_length=4)
@@ -800,12 +817,40 @@ class CapabilitySpec(StrictModel):
             raise ValueError("capability verifier must be independent from adapter principal")
         if self.repeatable and self.progress_measure is None:
             raise ValueError("repeatable capability requires a progress measure")
+        if len(self.material_digests) != len(set(self.material_digests)):
+            raise ValueError("capability material digests must be unique")
         return self
 
 
 class CapabilityDocument(Document):
     kind: Literal["adapter-capability"] = "adapter-capability"
     spec: CapabilitySpec
+
+
+class ExecutionPolicySpec(StrictModel):
+    execution_policy_id: Identifier
+    allowed_image_digests: list[Digest] = Field(min_length=1, max_length=64)
+    timeout_seconds: Annotated[int, Field(ge=1, le=300)]
+    stdout_limit: Annotated[int, Field(ge=1, le=4_194_304)]
+    stderr_limit: Annotated[int, Field(ge=1, le=4_194_304)]
+    maximum_input_bytes: Annotated[int, Field(ge=1, le=67_108_864)]
+    maximum_output_bytes: Annotated[int, Field(ge=1, le=67_108_864)]
+    permitted_environment_keys: list[Identifier] = Field(default_factory=list, max_length=128)
+    network_policy: Literal["runner-attested", "none"]
+    filesystem_policy: Literal["runner-attested", "none"]
+
+    @model_validator(mode="after")
+    def unique_policy_sets(self) -> ExecutionPolicySpec:
+        if len(self.allowed_image_digests) != len(set(self.allowed_image_digests)):
+            raise ValueError("execution-policy image digests must be unique")
+        if len(self.permitted_environment_keys) != len(set(self.permitted_environment_keys)):
+            raise ValueError("execution-policy environment keys must be unique")
+        return self
+
+
+class ExecutionPolicy(Document):
+    kind: Literal["execution-policy"] = "execution-policy"
+    spec: ExecutionPolicySpec
 
 
 class ActionSpec(StrictModel):
@@ -850,6 +895,9 @@ class RunnerJobSpec(StrictModel):
     job_id: Identifier
     action_digest: Digest
     capability_digest: Digest
+    capability_statement_digest: Digest
+    execution_policy_digest: Digest
+    execution_policy_statement_digest: Digest
     generation_digest: Digest
     attempt: Annotated[int, Field(ge=1, le=32)]
     lease_id: Identifier
@@ -861,6 +909,12 @@ class RunnerJobSpec(StrictModel):
     stderr_limit: Annotated[int, Field(ge=1, le=4_194_304)]
     network_policy: Literal["runner-attested", "none"]
     filesystem_policy: Literal["runner-attested", "none"]
+
+    @model_validator(mode="after")
+    def unique_inputs(self) -> RunnerJobSpec:
+        if len(self.input_digests) != len(set(self.input_digests)):
+            raise ValueError("runner input digests must be unique")
+        return self
 
 
 class RunnerJob(Document):
@@ -884,10 +938,26 @@ class RunnerReceiptSpec(StrictModel):
     stderr_discarded_bytes: Annotated[int, Field(ge=0)]
     return_code: int | None
     timeout: bool
+    claimed_outcome: OutcomeName
     cleanup_complete: bool
     isolation_profile_digest: Digest | None = None
     output_digests: list[Digest] = Field(default_factory=list, max_length=10_000)
+    started_at: datetime
     completed_at: datetime
+
+    @model_validator(mode="after")
+    def unique_receipt_sets(self) -> RunnerReceiptSpec:
+        if len(self.material_digests) != len(set(self.material_digests)):
+            raise ValueError("runner receipt material digests must be unique")
+        if len(self.output_digests) != len(set(self.output_digests)):
+            raise ValueError("runner receipt output digests must be unique")
+        if self.timeout and self.claimed_outcome != "timeout":
+            raise ValueError("timed-out receipt must claim timeout")
+        if not self.timeout and self.return_code is None:
+            raise ValueError("non-timeout receipt requires a return code")
+        if self.completed_at < self.started_at:
+            raise ValueError("runner completion cannot precede start")
+        return self
 
 
 class RunnerReceipt(Document):
@@ -1242,6 +1312,7 @@ type DocumentType = (
     | CutSetAnalysisResult
     | OccurrencePrefixResult
     | InterventionPortfolio
+    | ExecutionPolicy
     | CapabilityDocument
     | ActionDocument
     | PlannerResult
@@ -1294,6 +1365,7 @@ DOCUMENT_MODELS: dict[str, type[Document]] = {
         CutSetAnalysisResult,
         OccurrencePrefixResult,
         InterventionPortfolio,
+        ExecutionPolicy,
         CapabilityDocument,
         ActionDocument,
         PlannerResult,

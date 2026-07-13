@@ -61,3 +61,13 @@ cpcf agent onboard --workspace WORKSPACE --json
 The response must carry the immutable generation, unknowns, quarantined objects, and exact safe
 commands. The current reference API does not yet aggregate every trust, science, runner, projection,
 coordination, and trial subsystem; that is an explicit stable-release blocker.
+
+For offline runner receipt checking, use the closed job, receipt, capability, execution-policy, and
+artifact records:
+
+```text
+cpcf runner conformance runner-job.json runner-receipt.json adapter-capability.json execution-policy.json --runner-principal RUNNER --received-at 2026-01-01T00:00:00+00:00 --artifact sha256:DIGEST=artifact.bin --json
+```
+
+This command executes no adapter and promotes no projection. Successful execution still creates a
+pending projection that requires independent, source-pointer-reconstructing approval.

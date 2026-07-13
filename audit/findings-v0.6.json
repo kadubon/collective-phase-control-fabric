@@ -62,9 +62,9 @@
       "severity": "critical",
       "exploit": "A stale or replayed runner lease can submit unbound output or hide incomplete cleanup.",
       "affected_claim": "Customer-controlled runner protocol",
-      "correction": "Closed models and conformance checks exist; outbound mTLS lease transport remains required.",
-      "regression_test": "release gate: mTLS lease replay and artifact integrity suite",
-      "status": "open"
+      "correction": "The reference gateway now validates sanitized certificate identities, independently signed capability and execution policies, leases, attempts, bounded artifacts, DSSE receipts, cleanup, and pending-only projections. A multi-replica PostgreSQL repository, deployed Envoy sidecar, and integration evidence remain required.",
+      "regression_test": "tests/test_v6_runner_gateway.py and release gate: deployed mTLS lease replay and artifact integrity suite",
+      "status": "partial"
     },
     {
       "id": "V6-008",

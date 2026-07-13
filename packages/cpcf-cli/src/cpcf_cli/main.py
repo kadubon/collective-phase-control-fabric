@@ -9,7 +9,9 @@ import importlib.util
 import json
 import os
 import platform
+import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -17,12 +19,21 @@ import httpx
 
 from collective_phase_control_fabric import __version__
 from collective_phase_control_fabric.bundle import verify_bundle
+from collective_phase_control_fabric.v6.canonical import digest_bytes, loads_bounded
 from collective_phase_control_fabric.v6.catalog import AGENT_GUIDANCE
+from collective_phase_control_fabric.v6.models import (
+    CapabilityDocument,
+    ExecutionPolicy,
+    RunnerJob,
+    RunnerReceipt,
+)
 from collective_phase_control_fabric.v6.registry import (
     DocumentValidationError,
+    parse_document_bytes,
     registry_manifest,
     schema_for_kind,
 )
+from collective_phase_control_fabric.v6.runner import validate_receipt
 
 LEGACY_READ_ONLY_COMMANDS = frozenset(
     {
@@ -214,6 +225,19 @@ def build_parser() -> argparse.ArgumentParser:
     job_status = audit_sub.add_parser("status")
     job_status.add_argument("job_id")
 
+    runner = commands.add_parser("runner", help="Validate signed runner protocol records.")
+    runner_sub = runner.add_subparsers(dest="subcommand", required=True)
+    conformance = runner_sub.add_parser(
+        "conformance", help="Validate one local job/receipt contract without execution."
+    )
+    conformance.add_argument("job", type=Path)
+    conformance.add_argument("receipt", type=Path)
+    conformance.add_argument("capability", type=Path)
+    conformance.add_argument("execution_policy", type=Path)
+    conformance.add_argument("--runner-principal", required=True)
+    conformance.add_argument("--received-at", required=True)
+    conformance.add_argument("--artifact", action="append", default=[], metavar="DIGEST=PATH")
+
     agent = commands.add_parser("agent", help="Obtain evidence-driven onboarding instructions.")
     agent_sub = agent.add_subparsers(dest="subcommand", required=True)
     explain = agent_sub.add_parser(
@@ -239,6 +263,7 @@ def build_parser() -> argparse.ArgumentParser:
         upload,
         start,
         job_status,
+        conformance,
         onboard,
     ):
         item.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
@@ -420,6 +445,73 @@ def main(argv: list[str] | None = None) -> int:
             content=content,
             mutation=True,
             generation=args.generation,
+        )
+    if args.command == "runner":
+        try:
+            job = parse_document_bytes(args.job.read_bytes())
+            receipt = parse_document_bytes(args.receipt.read_bytes())
+            capability = parse_document_bytes(args.capability.read_bytes())
+            execution_policy = parse_document_bytes(args.execution_policy.read_bytes())
+            if not isinstance(job, RunnerJob):
+                raise ValueError("runner_job_document_required")
+            if not isinstance(receipt, RunnerReceipt):
+                raise ValueError("runner_receipt_document_required")
+            if not isinstance(capability, CapabilityDocument):
+                raise ValueError("runner_capability_document_required")
+            if not isinstance(execution_policy, ExecutionPolicy):
+                raise ValueError("runner_execution_policy_document_required")
+            available: set[str] = set()
+            artifact_lengths: dict[str, int] = {}
+            artifact_values: dict[str, bytes] = {}
+            for binding in args.artifact:
+                digest, separator, path_value = binding.partition("=")
+                if not separator or not digest.startswith("sha256:"):
+                    raise ValueError("runner_artifact_binding_invalid")
+                path = Path(path_value)
+                if not path.is_file() or path.stat().st_size > 64 * 1024 * 1024:
+                    raise ValueError("runner_artifact_binding_invalid")
+                data = path.read_bytes()
+                if digest_bytes(data) != digest or digest in available:
+                    raise ValueError("runner_artifact_digest_invalid")
+                available.add(digest)
+                artifact_lengths[digest] = len(data)
+                artifact_values[digest] = data
+            output_document = None
+            if len(receipt.spec.output_digests) == 1:
+                output_document = loads_bounded(artifact_values[receipt.spec.output_digests[0]])
+            runner_checked = validate_receipt(
+                job,
+                receipt,
+                capability,
+                execution_policy,
+                received_at=datetime.fromisoformat(args.received_at),
+                expected_runner_principal_id=args.runner_principal,
+                prior_attempts=set(),
+                available_digests=available,
+                artifact_lengths=artifact_lengths,
+                output_document=output_document,
+            )
+        except (KeyError, OSError, TypeError, ValueError) as error:
+            code = str(error)
+            if not re.fullmatch(r"[a-z0-9_:-]{1,128}", code):
+                code = "runner_conformance_input_invalid"
+            return _emit(
+                _local_response(
+                    status="error",
+                    code=code,
+                    unknowns=["runner_contract_not_evaluated"],
+                )
+            )
+        return _emit(
+            _local_response(
+                status="ok" if runner_checked.accepted else "error",
+                code=runner_checked.code,
+                claims={
+                    "accepted": runner_checked.accepted,
+                    "reasons": runner_checked.reasons,
+                },
+                unknowns=[] if runner_checked.accepted else runner_checked.reasons,
+            )
         )
     if args.command == "agent":
         if args.subcommand == "explain":

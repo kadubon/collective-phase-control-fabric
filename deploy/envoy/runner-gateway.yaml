@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: Apache-2.0
+# Reference Envoy sidecar contract for the CPCF outbound-pull runner API.
+static_resources:
+  listeners:
+    - name: runner_mtls
+      address:
+        socket_address: {address: 0.0.0.0, port_value: 8443}
+      filter_chains:
+        - transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+              require_client_certificate: true
+              common_tls_context:
+                tls_params:
+                  tls_minimum_protocol_version: TLSv1_3
+                  tls_maximum_protocol_version: TLSv1_3
+                tls_certificates:
+                  - certificate_chain: {filename: /etc/cpcf/runner-tls/tls.crt}
+                    private_key: {filename: /etc/cpcf/runner-tls/tls.key}
+                validation_context:
+                  trusted_ca: {filename: /etc/cpcf/runner-tls/ca.crt}
+                  match_typed_subject_alt_names:
+                    - san_type: URI
+                      matcher:
+                        safe_regex:
+                          regex: "spiffe://[a-z0-9.-]+/tenant/[A-Za-z0-9._:-]+/runner/[A-Za-z0-9._:-]+"
+          filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: cpcf_runner_gateway
+                forward_client_cert_details: SANITIZE_SET
+                set_current_client_cert_details:
+                  uri: true
+                request_headers_to_remove:
+                  - x-cpcf-runner-id
+                  - x-cpcf-runner-principal
+                  - x-cpcf-tenant-id
+                route_config:
+                  name: runner_loopback
+                  virtual_hosts:
+                    - name: runner_api
+                      domains: ["*"]
+                      routes:
+                        - match: {prefix: /}
+                          route:
+                            cluster: runner_loopback
+                            timeout: 305s
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+  clusters:
+    - name: runner_loopback
+      type: STATIC
+      connect_timeout: 1s
+      load_assignment:
+        cluster_name: runner_loopback
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: {address: 127.0.0.1, port_value: 8081}
+admin:
+  address:
+    socket_address: {address: 127.0.0.1, port_value: 9901}

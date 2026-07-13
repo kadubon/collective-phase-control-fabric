@@ -219,17 +219,19 @@ skip_covered = true
 exclude_dirs = ["tests"]
 
 [tool.mutmut]
-source_paths = ["src"]
+source_paths = ["src", "packages/cpcf-api/src"]
 only_mutate = [
   "src/collective_phase_control_fabric/v6/authority.py",
   "src/collective_phase_control_fabric/v6/trust.py",
   "src/collective_phase_control_fabric/v6/registry.py",
   "src/collective_phase_control_fabric/v6/storage.py",
   "src/collective_phase_control_fabric/v6/projection.py",
+  "src/collective_phase_control_fabric/v6/runner.py",
   "src/collective_phase_control_fabric/v6/science.py",
   "src/collective_phase_control_fabric/v6/structural_analysis.py",
   "src/collective_phase_control_fabric/v6/planning.py",
   "src/collective_phase_control_fabric/v6/trials.py",
+  "packages/cpcf-api/src/cpcf_api/runner_gateway.py",
 ]
 pytest_add_cli_args = ["-q"]
 pytest_add_cli_args_test_selection = [
@@ -241,6 +243,7 @@ pytest_add_cli_args_test_selection = [
   "tests/test_v6_model_assurance.py",
   "tests/test_v6_models_trust.py",
   "tests/test_v6_planning_assurance.py",
+  "tests/test_v6_runner_gateway.py",
   "tests/test_v6_science_assurance.py",
   "tests/test_v6_science_planner.py",
   "tests/test_v6_service_boundaries.py",

@@ -19,6 +19,9 @@ quarantined and non-authoritative until a later signed admission generation. The
 should set `CPCF_IDEMPOTENCY_KEY` when retries must share one identity. Existing-generation
 mutations require `If-Match` and fail on a stale generation.
 
-The current API surface is deliberately narrow. Trust admission, projection approval,
-coordination, trials, runner transport, and complete live onboarding aggregation remain release
-blockers until their authoritative endpoints and integration tests are present.
+The public control-plane API surface is deliberately narrow. A separate generated runner-gateway
+OpenAPI contract covers claim, heartbeat, bounded artifact upload, and completion. Its checked-in
+implementation is a deterministic in-memory conformance service, not the multi-replica production
+transport. Trust admission, projection approval, coordination, trials, production runner storage,
+and complete live onboarding aggregation remain release blockers until their authoritative
+endpoints and integration tests are present.

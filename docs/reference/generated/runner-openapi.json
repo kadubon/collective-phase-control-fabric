@@ -1,0 +1,673 @@
+{
+  "components": {
+    "schemas": {
+      "CompletionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "projection_statements": {
+            "items": {
+              "$ref": "#/components/schemas/SignedStatement"
+            },
+            "maxItems": 64,
+            "title": "Projection Statements",
+            "type": "array"
+          },
+          "receipt_statement": {
+            "$ref": "#/components/schemas/SignedStatement"
+          }
+        },
+        "required": [
+          "receipt_statement"
+        ],
+        "title": "CompletionRequest",
+        "type": "object"
+      },
+      "DsseEnvelope": {
+        "additionalProperties": false,
+        "properties": {
+          "payload": {
+            "maxLength": 24000000,
+            "minLength": 4,
+            "title": "Payload",
+            "type": "string"
+          },
+          "payloadType": {
+            "const": "application/vnd.cpcf.statement+json;version=0.6",
+            "title": "Payloadtype",
+            "type": "string"
+          },
+          "signatures": {
+            "items": {
+              "$ref": "#/components/schemas/DsseSignature"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Signatures",
+            "type": "array"
+          }
+        },
+        "required": [
+          "payloadType",
+          "payload",
+          "signatures"
+        ],
+        "title": "DsseEnvelope",
+        "type": "object"
+      },
+      "DsseSignature": {
+        "additionalProperties": false,
+        "properties": {
+          "keyid": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Keyid",
+            "type": "string"
+          },
+          "sig": {
+            "maxLength": 1024,
+            "minLength": 40,
+            "title": "Sig",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sig"
+        ],
+        "title": "DsseSignature",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HeartbeatRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "sequence": {
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sequence"
+        ],
+        "title": "HeartbeatRequest",
+        "type": "object"
+      },
+      "JsonScalar": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "JsonValue": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/JsonScalar"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "array"
+          },
+          {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "Metadata": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "object_id": {
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+            "title": "Object Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "workspace_id",
+          "object_id",
+          "created_at"
+        ],
+        "title": "Metadata",
+        "type": "object"
+      },
+      "RunnerApiResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "authority_required": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authority Required",
+            "type": "array"
+          },
+          "claims": {
+            "additionalProperties": true,
+            "title": "Claims",
+            "type": "object"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "effect_class": {
+            "title": "Effect Class",
+            "type": "string"
+          },
+          "generation_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Digest"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "next_safe_commands": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Next Safe Commands",
+            "type": "array"
+          },
+          "objects_written": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Objects Written",
+            "type": "array"
+          },
+          "quarantined_objects": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Quarantined Objects",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          },
+          "unknowns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unknowns",
+            "type": "array"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "required": [
+          "status",
+          "code",
+          "effect_class",
+          "trace_id"
+        ],
+        "title": "RunnerApiResponse",
+        "type": "object"
+      },
+      "SignedStatement": {
+        "additionalProperties": false,
+        "properties": {
+          "api_version": {
+            "const": "cpcf.io/v0.6",
+            "default": "cpcf.io/v0.6",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "extensions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "maxProperties": 32,
+            "title": "Extensions",
+            "type": "object"
+          },
+          "kind": {
+            "const": "signed-statement",
+            "default": "signed-statement",
+            "title": "Kind",
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/SignedStatementSpec"
+          }
+        },
+        "required": [
+          "metadata",
+          "spec"
+        ],
+        "title": "SignedStatement",
+        "type": "object"
+      },
+      "SignedStatementSpec": {
+        "additionalProperties": false,
+        "description": "A DSSE envelope admitted as a first-class immutable ledger object.",
+        "properties": {
+          "envelope": {
+            "$ref": "#/components/schemas/DsseEnvelope"
+          }
+        },
+        "required": [
+          "envelope"
+        ],
+        "title": "SignedStatementSpec",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "CPCF Outbound Runner API",
+    "version": "0.6.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health/live": {
+      "get": {
+        "operationId": "live_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunnerApiResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Live"
+      }
+    },
+    "/v1/runner/leases/claim": {
+      "post": {
+        "operationId": "claim_v1_runner_leases_claim_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Forwarded-Client-Cert",
+            "required": true,
+            "schema": {
+              "maxLength": 4096,
+              "title": "X-Forwarded-Client-Cert",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunnerApiResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Claim"
+      }
+    },
+    "/v1/runner/leases/{lease_id}/artifacts/sha256/{hex_digest}": {
+      "put": {
+        "operationId": "upload_artifact_v1_runner_leases__lease_id__artifacts_sha256__hex_digest__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lease_id",
+            "required": true,
+            "schema": {
+              "title": "Lease Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "hex_digest",
+            "required": true,
+            "schema": {
+              "title": "Hex Digest",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Forwarded-Client-Cert",
+            "required": true,
+            "schema": {
+              "maxLength": 4096,
+              "title": "X-Forwarded-Client-Cert",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunnerApiResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Artifact"
+      }
+    },
+    "/v1/runner/leases/{lease_id}/complete": {
+      "post": {
+        "operationId": "complete_v1_runner_leases__lease_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lease_id",
+            "required": true,
+            "schema": {
+              "title": "Lease Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Forwarded-Client-Cert",
+            "required": true,
+            "schema": {
+              "maxLength": 4096,
+              "title": "X-Forwarded-Client-Cert",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunnerApiResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Complete"
+      }
+    },
+    "/v1/runner/leases/{lease_id}/heartbeat": {
+      "post": {
+        "operationId": "heartbeat_v1_runner_leases__lease_id__heartbeat_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lease_id",
+            "required": true,
+            "schema": {
+              "title": "Lease Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Forwarded-Client-Cert",
+            "required": true,
+            "schema": {
+              "maxLength": 4096,
+              "title": "X-Forwarded-Client-Cert",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunnerApiResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Heartbeat"
+      }
+    }
+  }
+}

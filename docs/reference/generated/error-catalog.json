@@ -59,6 +59,222 @@
       "Obtain role-separated signatures from distinct admitted principals."
     ]
   },
+  "runner_artifact_budget_exhausted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_artifact_digest_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_artifact_digest_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_artifact_limit_exceeded": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_artifact_missing_after_upload": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_artifact_storage_invariant_failed": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_artifact_too_large": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_attempt_limit_exhausted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_capability_authority_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_certificate_binding_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_certificate_header_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_certificate_identity_untrusted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_execution_policy_authority_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_failure_projection_rejected": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_heartbeat_sequence_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_idempotency_key_reused": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_idempotency_type_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_identity_not_registered": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_job_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_job_not_available": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_job_not_bound": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_job_signature_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_lease_not_found": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_lease_stale": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_material_limit_exceeded": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_material_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_pending_projection_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_pending_projection_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_projection_storage_invariant_failed": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_receipt_nonconformant": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_receipt_signature_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_receipt_storage_invariant_failed": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_registration_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_request_schema_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_selector_output_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
+  "runner_signed_statement_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the signed lease, capability, execution policy, artifacts, and receipt."
+    ]
+  },
   "unknown_document_kind": {
     "effect_class": "none",
     "recovery": [

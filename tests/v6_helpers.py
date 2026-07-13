@@ -73,7 +73,12 @@ def trust_fixture() -> tuple[
     TrustedTimeReceipt,
     dict[str, Ed25519PrivateKey],
 ]:
-    keys = {"root": keypair(1), "auditor": keypair(2), "time": keypair(3)}
+    keys = {
+        "root": keypair(1),
+        "auditor": keypair(2),
+        "time": keypair(3),
+        "runner": keypair(4),
+    }
     principals = [
         principal(
             "root-principal",
@@ -85,6 +90,8 @@ def trust_fixture() -> tuple[
                 "evaluator",
                 "projection_authority",
                 "state_source",
+                "job_dispatcher",
+                "capability_authority",
             ],
             "root",
         ),
@@ -97,6 +104,7 @@ def trust_fixture() -> tuple[
                 "registration",
                 "quality_safety_verifier",
                 "projection_verifier",
+                "execution_policy_authority",
             ],
             "auditor",
         ),
@@ -106,6 +114,13 @@ def trust_fixture() -> tuple[
             keys["time"],
             ["timestamp"],
             "time",
+        ),
+        principal(
+            "runner-principal",
+            "runner-key",
+            keys["runner"],
+            ["runner_receipt"],
+            "runner",
         ),
     ]
     policy = TrustPolicyDocument(

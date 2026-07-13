@@ -20,11 +20,14 @@ from collective_phase_control_fabric.v6.models import (
     CapabilityDocument,
     CapabilitySpec,
     EffectInterval,
+    ExecutionPolicy,
+    ExecutionPolicySpec,
     LedgerEntry,
     Lifecycle,
     MeasurementProtocol,
     MeasurementProtocolSpec,
     OutcomeDefinition,
+    OutcomeSelector,
     PendingProjection,
     PendingProjectionSpec,
     ProjectionApproval,
@@ -87,29 +90,55 @@ def four_branches() -> list[dict[str, object]]:
     ]
 
 
-def runner_fixture() -> tuple[CapabilityDocument, RunnerJob, RunnerReceipt]:
+def runner_fixture() -> tuple[CapabilityDocument, ExecutionPolicy, RunnerJob, RunnerReceipt]:
     from collective_phase_control_fabric.v6.models import BranchEffect
 
+    image_digest = "sha256:" + "a" * 64
+    execution_policy = ExecutionPolicy(
+        metadata=metadata("runner-execution-policy"),
+        spec=ExecutionPolicySpec(
+            execution_policy_id="runner-execution-policy",
+            allowed_image_digests=[image_digest],
+            timeout_seconds=30,
+            stdout_limit=1024,
+            stderr_limit=1024,
+            maximum_input_bytes=4096,
+            maximum_output_bytes=4096,
+            network_policy="runner-attested",
+            filesystem_policy="runner-attested",
+        ),
+    )
     capability = CapabilityDocument(
         metadata=metadata("runner-capability"),
         spec=CapabilitySpec(
             capability_id="runner-capability",
             adapter_principal_id="adapter-principal",
             verifier_principal_id="verifier-principal",
-            image_digest="sha256:" + "a" * 64,
+            execution_policy_digest=document_digest(execution_policy),
+            image_digest=image_digest,
             material_digests=["sha256:" + "b" * 64],
+            argv=["/adapter/run"],
             output_schema_name="state-attestation",
             output_schema_digest=schema_digest("state-attestation"),
+            return_code_outcomes={"0": "success"},
             repeatable=False,
             branches=[BranchEffect.model_validate(value) for value in four_branches()],
         ),
     )
+    capability_statement_digest = "sha256:" + "2" * 64
+    policy_statement_digest = "sha256:" + "3" * 64
+    output = state_document()
+    output_bytes = canonical_bytes(output.model_dump(mode="json", exclude_none=True))
+    output_digest = digest_bytes(output_bytes)
     job = RunnerJob(
         metadata=metadata("job"),
         spec=RunnerJobSpec(
             job_id="job-1",
             action_digest="sha256:" + "c" * 64,
             capability_digest=document_digest(capability),
+            capability_statement_digest=capability_statement_digest,
+            execution_policy_digest=document_digest(execution_policy),
+            execution_policy_statement_digest=policy_statement_digest,
             generation_digest="sha256:" + "d" * 64,
             attempt=1,
             lease_id="lease-1",
@@ -132,7 +161,11 @@ def runner_fixture() -> tuple[CapabilityDocument, RunnerJob, RunnerReceipt]:
             lease_id="lease-1",
             runner_principal_id="runner-principal",
             image_digest=capability.spec.image_digest,
-            material_digests=capability.spec.material_digests,
+            material_digests=[
+                *capability.spec.material_digests,
+                capability_statement_digest,
+                policy_statement_digest,
+            ],
             stdout_digest="sha256:" + "e" * 64,
             stderr_digest="sha256:" + "f" * 64,
             stdout_captured_bytes=10,
@@ -141,47 +174,263 @@ def runner_fixture() -> tuple[CapabilityDocument, RunnerJob, RunnerReceipt]:
             stderr_discarded_bytes=0,
             return_code=0,
             timeout=False,
+            claimed_outcome="success",
             cleanup_complete=True,
             isolation_profile_digest="sha256:" + "1" * 64,
-            output_digests=[],
+            output_digests=[output_digest],
+            started_at=NOW,
             completed_at=NOW,
         ),
     )
-    return capability, job, receipt
+    return capability, execution_policy, job, receipt
 
 
 def test_runner_rejects_replay_timeout_and_unattested_cleanup() -> None:
-    capability, job, receipt = runner_fixture()
+    capability, execution_policy, job, receipt = runner_fixture()
+    available = {
+        *receipt.spec.material_digests,
+        receipt.spec.stdout_digest,
+        receipt.spec.stderr_digest,
+        *receipt.spec.output_digests,
+    }
     valid = validate_receipt(
         job,
         receipt,
         capability,
+        execution_policy,
         received_at=NOW,
         expected_runner_principal_id="runner-principal",
         prior_attempts=set(),
+        available_digests=available,
+        artifact_lengths={
+            receipt.spec.stdout_digest: receipt.spec.stdout_captured_bytes,
+            receipt.spec.stderr_digest: receipt.spec.stderr_captured_bytes,
+            receipt.spec.output_digests[0]: len(
+                canonical_bytes(state_document().model_dump(mode="json", exclude_none=True))
+            ),
+        },
+        output_document=state_document().model_dump(mode="json", exclude_none=True),
     )
     assert valid.accepted
     bad = receipt.model_copy(
         update={
-            "spec": receipt.spec.model_copy(update={"timeout": True, "cleanup_complete": False})
+            "spec": receipt.spec.model_copy(
+                update={
+                    "timeout": True,
+                    "claimed_outcome": "timeout",
+                    "cleanup_complete": False,
+                }
+            )
         }
     )
     result = validate_receipt(
         job,
         bad,
         capability,
+        execution_policy,
         received_at=NOW,
         expected_runner_principal_id="runner-principal",
         prior_attempts={("job-1", 1)},
+        available_digests=available,
+        artifact_lengths={
+            receipt.spec.stdout_digest: receipt.spec.stdout_captured_bytes,
+            receipt.spec.stderr_digest: receipt.spec.stderr_captured_bytes,
+            receipt.spec.output_digests[0]: len(
+                canonical_bytes(state_document().model_dump(mode="json", exclude_none=True))
+            ),
+        },
+        output_document=state_document().model_dump(mode="json", exclude_none=True),
     )
     assert not result.accepted
     assert "runner_attempt_replay" in result.reasons
-    assert "runner_timeout_maps_to_failure" in result.reasons
     assert "runner_cleanup_incomplete" in result.reasons
 
 
+def test_runner_conformance_recomputes_every_signed_policy_boundary() -> None:
+    capability, execution_policy, job, receipt = runner_fixture()
+    invalid_capability = capability.model_copy(
+        update={
+            "spec": capability.spec.model_copy(
+                update={
+                    "execution_policy_digest": "sha256:" + "7" * 64,
+                    "output_schema_digest": "sha256:" + "8" * 64,
+                    "image_digest": "sha256:" + "9" * 64,
+                }
+            )
+        }
+    )
+    invalid_policy = execution_policy.model_copy(
+        update={
+            "spec": execution_policy.spec.model_copy(
+                update={
+                    "allowed_image_digests": ["sha256:" + "0" * 64],
+                    "timeout_seconds": 1,
+                    "stdout_limit": 1,
+                    "stderr_limit": 1,
+                    "maximum_output_bytes": 1,
+                    "network_policy": "none",
+                    "filesystem_policy": "none",
+                }
+            )
+        }
+    )
+    invalid_job = job.model_copy(
+        update={
+            "spec": job.spec.model_copy(
+                update={
+                    "capability_digest": "sha256:" + "1" * 64,
+                    "execution_policy_digest": "sha256:" + "2" * 64,
+                }
+            )
+        }
+    )
+    invalid_receipt = receipt.model_copy(
+        update={
+            "spec": receipt.spec.model_copy(
+                update={
+                    "started_at": job.metadata.created_at - timedelta(seconds=1),
+                    "completed_at": job.spec.lease_expires_at + timedelta(seconds=1),
+                }
+            )
+        }
+    )
+    result = validate_receipt(
+        invalid_job,
+        invalid_receipt,
+        invalid_capability,
+        invalid_policy,
+        received_at=NOW,
+        expected_runner_principal_id="runner-principal",
+        prior_attempts=set(),
+        available_digests=set(invalid_receipt.spec.material_digests)
+        | {
+            invalid_receipt.spec.stdout_digest,
+            invalid_receipt.spec.stderr_digest,
+            *invalid_receipt.spec.output_digests,
+        },
+        artifact_lengths={
+            invalid_receipt.spec.stdout_digest: invalid_receipt.spec.stdout_captured_bytes,
+            invalid_receipt.spec.stderr_digest: invalid_receipt.spec.stderr_captured_bytes,
+            invalid_receipt.spec.output_digests[0]: 100,
+        },
+        output_document=state_document().model_dump(mode="json", exclude_none=True),
+    )
+    assert {
+        "capability_execution_policy_digest_mismatch",
+        "runner_capability_digest_mismatch",
+        "runner_capability_image_mismatch",
+        "runner_completion_after_lease_expiry",
+        "runner_execution_policy_digest_mismatch",
+        "runner_filesystem_policy_mismatch",
+        "runner_image_not_allowed_by_execution_policy",
+        "runner_network_policy_mismatch",
+        "runner_output_policy_exceeded",
+        "runner_output_schema_digest_mismatch",
+        "runner_receipt_completed_in_future",
+        "runner_start_before_job_creation",
+        "runner_stderr_policy_exceeded",
+        "runner_stdout_policy_exceeded",
+        "runner_timeout_policy_exceeded",
+    }.issubset(result.reasons)
+
+
+def test_runner_output_schema_and_selector_fail_closed() -> None:
+    capability, execution_policy, job, receipt = runner_fixture()
+    available = {
+        *receipt.spec.material_digests,
+        receipt.spec.stdout_digest,
+        receipt.spec.stderr_digest,
+        *receipt.spec.output_digests,
+    }
+    lengths = {
+        receipt.spec.stdout_digest: receipt.spec.stdout_captured_bytes,
+        receipt.spec.stderr_digest: receipt.spec.stderr_captured_bytes,
+        receipt.spec.output_digests[0]: len(
+            canonical_bytes(state_document().model_dump(mode="json", exclude_none=True))
+        ),
+    }
+
+    def checked(output: object, selected_capability: CapabilityDocument = capability) -> set[str]:
+        selected_job = job.model_copy(
+            update={
+                "spec": job.spec.model_copy(
+                    update={"capability_digest": document_digest(selected_capability)}
+                )
+            }
+        )
+        selected_receipt = receipt.model_copy(
+            update={
+                "spec": receipt.spec.model_copy(
+                    update={"job_digest": document_digest(selected_job)}
+                )
+            }
+        )
+        return set(
+            validate_receipt(
+                selected_job,
+                selected_receipt,
+                selected_capability,
+                execution_policy,
+                received_at=NOW,
+                expected_runner_principal_id="runner-principal",
+                prior_attempts=set(),
+                available_digests=available,
+                artifact_lengths=lengths,
+                output_document=output,
+            ).reasons
+        )
+
+    assert "runner_output_schema_document_missing" in checked(None)
+    assert "runner_output_schema_document_invalid" in checked([])
+    assert "runner_output_schema_document_invalid" in checked({"kind": "invalid"})
+    assert "runner_output_kind_mismatch" in checked(
+        execution_policy.model_dump(mode="json", exclude_none=True)
+    )
+
+    selector_capability = capability.model_copy(
+        update={
+            "spec": capability.spec.model_copy(
+                update={
+                    "output_selector": OutcomeSelector(
+                        json_pointer="/spec/state_id",
+                        values={"projected-state": "success"},
+                    )
+                }
+            )
+        }
+    )
+    valid_output = state_document().model_dump(mode="json", exclude_none=True)
+    assert not checked(valid_output, selector_capability)
+    invalid_pointer = selector_capability.model_copy(
+        update={
+            "spec": selector_capability.spec.model_copy(
+                update={
+                    "output_selector": OutcomeSelector(
+                        json_pointer="/missing", values={"value": "success"}
+                    )
+                }
+            )
+        }
+    )
+    assert "runner_output_selector_invalid" in checked(valid_output, invalid_pointer)
+    assert "runner_output_selector_unrecognized" in checked(
+        valid_output,
+        selector_capability.model_copy(
+            update={
+                "spec": selector_capability.spec.model_copy(
+                    update={
+                        "output_selector": OutcomeSelector(
+                            json_pointer="/spec/state_id", values={"other": "success"}
+                        )
+                    }
+                )
+            }
+        ),
+    )
+
+
 def test_projection_reconstructs_exact_pointer_and_independent_approval() -> None:
-    _, _, receipt = runner_fixture()
+    _, _, _, receipt = runner_fixture()
     projected = state_document()
     raw = canonical_bytes({"projected": projected.model_dump(mode="json", exclude_none=True)})
     raw_digest = digest_bytes(raw)
