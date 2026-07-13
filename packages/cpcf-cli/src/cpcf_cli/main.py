@@ -23,6 +23,45 @@ from collective_phase_control_fabric.v6.registry import (
     schema_for_kind,
 )
 
+LEGACY_READ_ONLY_COMMANDS = frozenset(
+    {
+        ("agent", "explain"),
+        ("agent", "next"),
+        ("agent", "onboard"),
+        ("agent", "why"),
+        ("attestation", "inspect"),
+        ("contract", "explain-missing"),
+        ("contract", "validate"),
+        ("doctor",),
+        ("execution", "inspect-risk"),
+        ("intervention", "analyze"),
+        ("perturbation", "replay"),
+        ("phase", "inspect"),
+        ("projection", "pending"),
+        ("repair", "list"),
+        ("repair", "show"),
+        ("schema", "list"),
+        ("schema", "show"),
+        ("science", "audit"),
+        ("source", "inspect"),
+        ("time", "inspect"),
+        ("trial", "amendment-inspect"),
+        ("trial", "inspect"),
+        ("trial", "protocol-inspect"),
+        ("trust", "genesis-inspect"),
+        ("trust", "quorum-inspect"),
+        ("trust", "validate"),
+        ("workspace", "status"),
+    }
+)
+
+
+def _legacy_command_is_read_only(arguments: list[str]) -> bool:
+    if "--apply" in arguments:
+        return False
+    positional = tuple(item for item in arguments if not item.startswith("-"))
+    return any(positional[: len(command)] == command for command in LEGACY_READ_ONLY_COMMANDS)
+
 
 def _local_response(
     *,
@@ -350,6 +389,15 @@ def main(argv: list[str] | None = None) -> int:
             return _explain()
         return _request("GET", f"/v1/workspaces/{args.workspace}/onboarding")
     if args.command == "legacy":
+        if not _legacy_command_is_read_only(args.arguments):
+            return _emit(
+                _local_response(
+                    status="error",
+                    code="legacy_mutation_blocked",
+                    unknowns=["legacy_authority_objects_are_quarantined"],
+                    next_safe_commands=[["cpcf", "legacy", "inspect", "doctor", "--json"]],
+                )
+            )
         from collective_phase_control_fabric.cli import main as legacy_main
 
         previous = sys.argv

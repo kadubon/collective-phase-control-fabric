@@ -54,6 +54,10 @@ ERROR_CATALOG: Final[dict[str, dict[str, object]]] = {
         "effect_class": "none",
         "recovery": ["Validate the object against the installed schema digest."],
     },
+    "legacy_mutation_blocked": {
+        "effect_class": "none",
+        "recovery": ["Use cpcf legacy inspect only for a registered read-only command."],
+    },
     "offline_self_check_failed": {
         "effect_class": "none",
         "recovery": ["Reinstall the wheel under a supported CPython version."],

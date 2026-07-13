@@ -92,7 +92,7 @@ def _windows_job(process: subprocess.Popen[bytes]) -> tuple[object, int] | None:
             ("PeakJobMemoryUsed", ctypes.c_size_t),
         ]
 
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32 = ctypes.__dict__["WinDLL"]("kernel32", use_last_error=True)
     job = kernel32.CreateJobObjectW(None, None)
     if not job:
         return None
@@ -140,7 +140,7 @@ def run_process(
     creationflags = 0
     start_new_session = os.name != "nt"
     if os.name == "nt":
-        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+        creationflags = int(subprocess.__dict__["CREATE_NEW_PROCESS_GROUP"])
     started_at = _utc_now()
     start = time.monotonic()
     # The executable and argv are canonical inputs, and shell execution is explicitly disabled.

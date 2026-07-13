@@ -9,7 +9,7 @@ import httpx
 import pytest
 from cpcf_api.auth import OidcAuthenticator, PrincipalContext, authorize
 from cpcf_api.main import main as api_main
-from cpcf_cli.main import _headers, _request, build_parser
+from cpcf_cli.main import _headers, _legacy_command_is_read_only, _request, build_parser
 from cpcf_cli.main import main as cli_entry
 from cpcf_runner_protocol import RunnerConformance, __version__, validate_receipt
 from cpcf_worker.main import run_once
@@ -35,6 +35,30 @@ def test_cli_parser_and_environment_only_authentication(
     assert headers["Authorization"] == "Bearer ephemeral-token"
     assert headers["Idempotency-Key"] == "i" * 32
     assert headers["If-Match"] == "sha256:" + "a" * 64
+
+
+def test_legacy_bridge_is_read_only(capsys: pytest.CaptureFixture[str]) -> None:
+    assert _legacy_command_is_read_only(["doctor", "--workspace", "legacy", "--json"])
+    assert not _legacy_command_is_read_only(
+        ["control", "run", "--workspace", "legacy", "action", "--apply", "--json"]
+    )
+    assert (
+        cli_entry(
+            [
+                "legacy",
+                "inspect",
+                "control",
+                "run",
+                "--workspace",
+                "legacy",
+                "action",
+                "--apply",
+                "--json",
+            ]
+        )
+        == 1
+    )
+    assert json.loads(capsys.readouterr().out)["code"] == "legacy_mutation_blocked"
 
 
 def test_uv_lock_is_present_and_not_ignored() -> None:

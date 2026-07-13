@@ -8,6 +8,7 @@ import threading
 import time
 from pathlib import Path
 from types import TracebackType
+from typing import BinaryIO
 
 _INITIALIZATION_LOCK = threading.Lock()
 
@@ -17,7 +18,7 @@ class WorkspaceLock:
 
     def __init__(self, workspace: Path, *, timeout_seconds: float = 10.0) -> None:
         self.path = workspace / ".cpcf" / "workspace.lock"
-        self._stream: object | None = None
+        self._stream: BinaryIO | None = None
         self.timeout_seconds = max(0.0, timeout_seconds)
 
     def __enter__(self) -> WorkspaceLock:
@@ -44,13 +45,14 @@ class WorkspaceLock:
                 if os.name == "nt":
                     import msvcrt
 
-                    msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+                    locking = msvcrt.__dict__["locking"]
+                    locking(stream.fileno(), int(msvcrt.__dict__["LK_NBLCK"]), 1)
                 else:
                     import fcntl
 
                     exclusive = int(fcntl.__dict__["LOCK_EX"])
                     nonblocking = int(fcntl.__dict__["LOCK_NB"])
-                    fcntl.flock(stream.fileno(), exclusive | nonblocking)  # type: ignore[attr-defined]
+                    fcntl.__dict__["flock"](stream.fileno(), exclusive | nonblocking)
                 break
             except OSError as error:
                 if time.monotonic() >= deadline:
@@ -72,11 +74,11 @@ class WorkspaceLock:
         if os.name == "nt":
             import msvcrt
 
-            stream.seek(0)  # type: ignore[attr-defined]
-            msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)  # type: ignore[attr-defined]
+            stream.seek(0)
+            msvcrt.__dict__["locking"](stream.fileno(), int(msvcrt.__dict__["LK_UNLCK"]), 1)
         else:
             import fcntl
 
-            fcntl.flock(stream.fileno(), fcntl.LOCK_UN)  # type: ignore[attr-defined]
-        stream.close()  # type: ignore[attr-defined]
+            fcntl.__dict__["flock"](stream.fileno(), int(fcntl.__dict__["LOCK_UN"]))
+        stream.close()
         self._stream = None

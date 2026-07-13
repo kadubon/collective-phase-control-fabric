@@ -23,10 +23,9 @@ def main() -> int:
         if cursor.fetchone() is None:
             cursor.execute(
                 sql.SQL(
-                    "CREATE ROLE {} LOGIN PASSWORD %s NOSUPERUSER NOCREATEDB "
+                    "CREATE ROLE {} LOGIN PASSWORD {} NOSUPERUSER NOCREATEDB "
                     "NOCREATEROLE NOINHERIT NOBYPASSRLS"
-                ).format(sql.Identifier(role)),
-                (password,),
+                ).format(sql.Identifier(role), sql.Literal(password))
             )
         cursor.execute(sql.SQL("GRANT USAGE ON SCHEMA public TO {}").format(sql.Identifier(role)))
         cursor.execute(

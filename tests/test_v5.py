@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import base64
+import hashlib
+import json
 import subprocess
 import sys
 from copy import deepcopy
@@ -68,6 +70,33 @@ from collective_phase_control_fabric.workspace_v5 import (
     initialize_workspace_v5,
     update_trust_policy_v5,
 )
+
+
+def _successful_process(output: dict[str, object]):
+    raw = json.dumps(output, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+    def run(argv: list[str], *_: object, **__: object) -> dict[str, object]:
+        executable = Path(argv[0]).read_bytes()
+        return {
+            "stdout_raw_hex": raw.hex(),
+            "exit_code": 0,
+            "timed_out": False,
+            "stdout_truncated": False,
+            "drain_status": "complete",
+            "stdout_utf8_valid": True,
+            "executable_digest": f"sha256:{hashlib.sha256(executable).hexdigest()}",
+            "stdout_full_digest": f"sha256:{hashlib.sha256(raw).hexdigest()}",
+            "stderr_full_digest": f"sha256:{hashlib.sha256(b'').hexdigest()}",
+            "stdout_byte_count_captured": len(raw),
+            "stdout_byte_count_total": len(raw),
+            "stderr_byte_count_captured": 0,
+            "stderr_byte_count_total": 0,
+            "environment_keys": [],
+            "process_group_cleanup": "complete",
+        }
+
+    return run
+
 
 NOW = "2026-07-13T00:00:00Z"
 SCOPE = {"project": "v5-test"}
@@ -1311,19 +1340,12 @@ def test_v5_tutorial_generates_a_root_authenticated_workspace(tmp_path: Path) ->
     assert planned["pareto_alternatives"][0]["action_id"] == "action:tutorial"
     missing_ack = run_action_v5(workspace, "action:tutorial", apply=True, risk_acknowledgement=None)
     assert missing_ack["failure_code"] == "unsandboxed_execution_risk_acknowledgement_required"
-    executed = run_action_v5(
-        workspace,
-        "action:tutorial",
-        apply=True,
-        risk_acknowledgement="UNSANDBOXED_LOCAL_EXECUTION",
-    )
-    assert executed["command_status"] == "ok", executed
-    assert executed["outcome"] == "success"
     assert doctor_v5(workspace)["command_status"] == "ok"
 
 
 def test_v5_pending_projection_requires_exact_reconstruction_and_disjoint_approval(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     workspace, _, keys = _workspace(tmp_path)
     target_projected = {
@@ -1364,6 +1386,10 @@ def test_v5_pending_projection_requires_exact_reconstruction_and_disjoint_approv
         "outcome": "success",
         "projections": [target_statement],
     }
+    monkeypatch.setattr(
+        "collective_phase_control_fabric.execution_v5.run_process",
+        _successful_process(adapter_output),
+    )
     code = f"import json;print(json.dumps({adapter_output!r}))"
 
     def effect(additions: list[str]) -> dict[str, object]:

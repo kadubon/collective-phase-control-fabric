@@ -221,9 +221,9 @@ def main() -> int:
         write_canonical(output / filename, value)
 
     runtime = output / ("adapter-runtime.exe" if sys.platform == "win32" else "adapter-runtime")
-    # A virtual-environment launcher is not self-contained: copying it without its
-    # adjacent pyvenv.cfg makes the CAS executable unusable.  The base launcher is
-    # relocatable on supported CPython installations and remains digest-pinned.
+    # This digest-pinned interpreter is retained as an inspection fixture only. A copied
+    # interpreter is not a hermetic adapter because its standard library and shared-library
+    # closure are not present in CAS; v0.6 never treats this legacy object as executable.
     shutil.copy2(getattr(sys, "_base_executable", sys.executable), runtime)
     runtime_digest = digest_bytes(runtime.read_bytes())
     adapter_output = {

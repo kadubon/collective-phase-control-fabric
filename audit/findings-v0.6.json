@@ -119,6 +119,24 @@
       "correction": "95 percent critical branch, 90 percent overall, 85 percent mutation, integration, load, chaos, restore, soak, threat-model, and penetration gates remain blocking.",
       "regression_test": ".github/workflows/ci.yml and external release evidence",
       "status": "open"
+    },
+    {
+      "id": "V6-014",
+      "severity": "critical",
+      "exploit": "The v0.6 read-only legacy bridge can forward a v0.1-v0.5 mutation or local process command.",
+      "affected_claim": "Legacy inspection-only compatibility",
+      "correction": "The bridge uses an explicit read-only command registry and rejects apply or mutation commands before legacy dispatch.",
+      "regression_test": "tests/test_v6_package_interfaces.py::test_legacy_bridge_is_read_only",
+      "status": "closed"
+    },
+    {
+      "id": "V6-015",
+      "severity": "high",
+      "exploit": "Platform newline conversion, OS-specific type surfaces, invalid PostgreSQL utility binding, or an incomplete Mutmut shadow tree can make release evidence non-portable or absent.",
+      "affected_claim": "Windows and Linux release-gate conformance",
+      "correction": "Generated references force LF, platform-only APIs use runtime module dictionaries, role DDL uses a safely composed literal, and Mutmut copies the full source tree while mutating only critical modules.",
+      "regression_test": ".github/workflows/ci.yml platform, PostgreSQL, and mutation jobs",
+      "status": "partial"
     }
   ]
 }

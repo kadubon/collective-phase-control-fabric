@@ -63,7 +63,7 @@ def main() -> int:
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
             for name, value in documents().items():
-                (target / name).write_text(_encoded(value), encoding="utf-8")
+                (target / name).write_text(_encoded(value), encoding="utf-8", newline="\n")
             mismatches = [
                 name
                 for name in documents()
@@ -77,7 +77,7 @@ def main() -> int:
         return 0
     destination.mkdir(parents=True, exist_ok=True)
     for name, value in documents().items():
-        (destination / name).write_text(_encoded(value), encoding="utf-8")
+        (destination / name).write_text(_encoded(value), encoding="utf-8", newline="\n")
     print(f"generated {len(documents())} runtime reference documents")
     return 0
 
