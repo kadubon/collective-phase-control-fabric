@@ -585,6 +585,10 @@ class PostgresBackend:
                         object_store.get(mutation.tenant_id, entry.object_digest)
                     ):
                         raise ValueError("stored_object_metadata_mismatch")
+                # Ledger rows have a composite foreign key to the object table.  An
+                # explicit boundary makes the insert order independent of dialect
+                # and ORM unit-of-work heuristics while retaining one transaction.
+                await session.flush()
                 session.add(
                     GenerationRow(
                         tenant_id=mutation.tenant_id,
@@ -596,6 +600,7 @@ class PostgresBackend:
                         created_at=now,
                     )
                 )
+                await session.flush()
                 for entry in mutation.generation.spec.ledger:
                     session.add(
                         LedgerRow(
