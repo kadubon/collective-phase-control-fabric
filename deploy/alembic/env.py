@@ -7,6 +7,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from cpcf_api.db import Base
+from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
 config = context.config
@@ -29,15 +30,18 @@ def run_migrations_offline() -> None:
 
 async def run_async_migrations() -> None:
     engine = create_async_engine(os.environ["CPCF_DATABASE_URL"], pool_pre_ping=True)
-    async with engine.connect() as connection:
-        await connection.run_sync(
-            lambda sync_connection: context.configure(
-                connection=sync_connection,
-                target_metadata=target_metadata,
-                compare_type=True,
-            )
+
+    def run_with_transaction(connection: Connection) -> None:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
         )
-        await connection.run_sync(lambda _: context.run_migrations())
+        with context.begin_transaction():
+            context.run_migrations()
+
+    async with engine.connect() as connection:
+        await connection.run_sync(run_with_transaction)
     await engine.dispose()
 
 

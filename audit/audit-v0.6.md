@@ -35,6 +35,8 @@ This audit lists known findings only. It does not assert that undiscovered defec
   including v0.5 process execution, is rejected by the v0.6 CLI.
 - Initial public CI exposed and corrected platform-neutral reference generation, Linux strict-mypy
   handling of OS-specific APIs, PostgreSQL role provisioning, and Mutmut shadow-tree construction.
+- The online Alembic path now wraps revision execution in an explicit migration transaction; the
+  PostgreSQL integration test verifies that the committed schema has forced RLS before tenant tests.
 
 ## Open authority and scientific findings
 
