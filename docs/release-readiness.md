@@ -16,7 +16,7 @@ statistical validity, or general controllability.
 
 - Environment: `uv 0.11.28` with CPython 3.14.6 on Windows.
 - Frozen universal lock: base plus all extras, development, and security groups synchronize.
-- Regression suite: 291 tests passed; two PostgreSQL integration tests skipped because disposable
+- Regression suite: 292 tests passed; two PostgreSQL integration tests skipped because disposable
   owner/application database URLs were not configured locally.
 - Ruff formatting and lint: passed.
 - Strict mypy: passed across the core and all four optional import-package source trees.
@@ -43,8 +43,8 @@ statistical validity, or general controllability.
 - Focused v0.6 critical-subsystem branch coverage is 72.20%, below the required 95%.
 - The required 85% mutation score has not been established; native Windows Mutmut execution is not
   supported, so the pinned Linux CI gate is authoritative.
-- Gitleaks, Semgrep, CodeQL, and Trivy are configured as immutable-action CI gates but have not run
-  against a public commit.
+- The initial public commit passed Gitleaks, Semgrep, CodeQL, and Trivy. These immutable-action jobs
+  remain required on protected changes and do not replace an independent penetration test.
 - PostgreSQL RLS, serializable generation commits, object-store interruption, OIDC/KMS rotation,
   mTLS runner leasing, and complete crash injection require live integration evidence.
 - The 100-tenant, 10,000-workspace, 100-concurrent-audit load profile has not run.

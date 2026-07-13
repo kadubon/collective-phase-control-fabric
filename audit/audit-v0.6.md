@@ -31,6 +31,10 @@ This audit lists known findings only. It does not assert that undiscovered defec
 - The universal lock now resolves under Windows CPython 3.14.6. `pip-audit` was updated to 2.10.1;
   Semgrep remains a pinned external CI action because its Python dependency constraints conflict
   with the required runtime `jsonschema` baseline.
+- The public legacy bridge now accepts only registered read-only commands. Direct legacy mutation,
+  including v0.5 process execution, is rejected by the v0.6 CLI.
+- Initial public CI exposed and corrected platform-neutral reference generation, Linux strict-mypy
+  handling of OS-specific APIs, PostgreSQL role provisioning, and Mutmut shadow-tree construction.
 
 ## Open authority and scientific findings
 
