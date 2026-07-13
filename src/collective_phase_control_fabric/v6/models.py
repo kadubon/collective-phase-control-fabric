@@ -97,6 +97,14 @@ class PhaseContractSpec(StrictModel):
     analysis_operation_budget: Annotated[int, Field(ge=1, le=10_000_000)] = 10_000_000
     solver_deadline_seconds: Annotated[int, Field(ge=1, le=30)] = 30
 
+    @model_validator(mode="after")
+    def unique_contract_sets(self) -> PhaseContractSpec:
+        if len(self.target_ids) != len(set(self.target_ids)):
+            raise ValueError("contract targets must be unique")
+        if len(self.required_dimensions) != len(set(self.required_dimensions)):
+            raise ValueError("contract required dimensions must be unique")
+        return self
+
 
 class PhaseContract(Document):
     kind: Literal["phase-contract"] = "phase-contract"
@@ -519,6 +527,14 @@ class OrganizationSpec(StrictModel):
     transformation_ids: list[Identifier] = Field(min_length=1, max_length=10_000)
     fluxes: dict[Identifier, Rational] = Field(min_length=1, max_length=10_000)
 
+    @model_validator(mode="after")
+    def unique_organization_sets(self) -> OrganizationSpec:
+        if len(self.target_ids) != len(set(self.target_ids)):
+            raise ValueError("organization targets must be unique")
+        if len(self.transformation_ids) != len(set(self.transformation_ids)):
+            raise ValueError("organization transformations must be unique")
+        return self
+
 
 class OrganizationWitness(Document):
     kind: Literal["organization-witness"] = "organization-witness"
@@ -554,6 +570,21 @@ class SnapshotSpec(StrictModel):
     protected_floors: dict[Identifier, Rational] = Field(default_factory=dict, max_length=10_000)
     minimum_independent_domains: Annotated[int, Field(ge=1, le=256)] = 2
     required_dimensions: list[Identifier] = Field(min_length=1, max_length=32)
+
+    @model_validator(mode="after")
+    def unique_snapshot_sets(self) -> SnapshotSpec:
+        collections = {
+            "objects": self.object_digests,
+            "witnesses": self.witness_digests,
+            "targets": self.target_ids,
+            "required dimensions": self.required_dimensions,
+        }
+        for name, values in collections.items():
+            if len(values) != len(set(values)):
+                raise ValueError(f"snapshot {name} must be unique")
+        if set(self.object_digests).intersection(self.witness_digests):
+            raise ValueError("snapshot objects and witnesses must be disjoint")
+        return self
 
 
 class AnalysisSnapshot(Document):
@@ -598,17 +629,82 @@ class PerturbationScenario(StrictModel):
     scenario_id: Identifier
     remove_object_digests: list[Digest] = Field(default_factory=list, max_length=50_000)
     remove_principal_ids: list[Identifier] = Field(default_factory=list, max_length=256)
+    remove_key_ids: list[Identifier] = Field(default_factory=list, max_length=256)
+    remove_source_systems: list[Identifier] = Field(default_factory=list, max_length=256)
+    remove_state_ids: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    remove_transformation_ids: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    remove_resource_coordinates: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    remove_supply_ids: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    remove_rate_transformation_ids: list[Identifier] = Field(
+        default_factory=list, max_length=10_000
+    )
+    remove_catalyst_ids: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    remove_inhibitor_ids: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    remove_verifier_stage_ids: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    remove_infrastructure_domains: list[Identifier] = Field(default_factory=list, max_length=256)
+    remove_coordination_session_ids: list[Identifier] = Field(
+        default_factory=list, max_length=10_000
+    )
+    remove_independence_domains: list[Identifier] = Field(default_factory=list, max_length=10_000)
+    replacement_object_digests: list[Digest] = Field(default_factory=list, max_length=50_000)
     replacement_witness_digests: list[Digest] = Field(default_factory=list, max_length=50_000)
-    expire_at: datetime | None = None
+    advance_trusted_time_receipt_digest: Digest | None = None
 
     @model_validator(mode="after")
     def changes_snapshot(self) -> PerturbationScenario:
-        if (
-            not self.remove_object_digests
-            and not self.remove_principal_ids
-            and self.expire_at is None
-        ):
+        changes = (
+            self.remove_object_digests,
+            self.remove_principal_ids,
+            self.remove_key_ids,
+            self.remove_source_systems,
+            self.remove_state_ids,
+            self.remove_transformation_ids,
+            self.remove_resource_coordinates,
+            self.remove_supply_ids,
+            self.remove_rate_transformation_ids,
+            self.remove_catalyst_ids,
+            self.remove_inhibitor_ids,
+            self.remove_verifier_stage_ids,
+            self.remove_infrastructure_domains,
+            self.remove_coordination_session_ids,
+            self.remove_independence_domains,
+            self.replacement_object_digests,
+            self.replacement_witness_digests,
+        )
+        if not any(changes) and self.advance_trusted_time_receipt_digest is None:
             raise ValueError("perturbation scenario must alter the snapshot")
+        all_digests = [
+            *self.remove_object_digests,
+            *self.replacement_object_digests,
+            *self.replacement_witness_digests,
+        ]
+        if len(all_digests) != len(set(all_digests)):
+            raise ValueError("perturbation digest sets must be disjoint and unique")
+        for field_name, values in zip(
+            (
+                "object",
+                "principal",
+                "key",
+                "source system",
+                "state",
+                "transformation",
+                "resource coordinate",
+                "supply",
+                "rate transformation",
+                "catalyst",
+                "inhibitor",
+                "verifier stage",
+                "infrastructure",
+                "coordination session",
+                "independence domain",
+                "replacement object",
+                "replacement witness",
+            ),
+            changes,
+            strict=True,
+        ):
+            if len(values) != len(set(values)):
+                raise ValueError(f"perturbation {field_name} selectors must be unique")
         return self
 
 
@@ -616,6 +712,15 @@ class PerturbationSuiteSpec(StrictModel):
     baseline_snapshot_digest: Digest
     scenarios: list[PerturbationScenario] = Field(min_length=1, max_length=256)
     required_dimensions: list[Identifier] = Field(min_length=1, max_length=32)
+
+    @model_validator(mode="after")
+    def unique_scenarios_and_dimensions(self) -> PerturbationSuiteSpec:
+        scenario_ids = [scenario.scenario_id for scenario in self.scenarios]
+        if len(scenario_ids) != len(set(scenario_ids)):
+            raise ValueError("perturbation scenario identifiers must be unique")
+        if len(self.required_dimensions) != len(set(self.required_dimensions)):
+            raise ValueError("perturbation required dimensions must be unique")
+        return self
 
 
 class PerturbationSuite(Document):
@@ -719,12 +824,22 @@ class OccurrencePrefixResult(Document):
 class InterventionCandidate(StrictModel):
     action_digest: Digest
     guaranteed_target_ids: list[Identifier] = Field(default_factory=list, max_length=256)
+    guaranteed_evidence_routes: list[Identifier] = Field(default_factory=list, max_length=256)
     resolves_blockers: list[Identifier] = Field(default_factory=list, max_length=256)
-    resource_cost_upper: dict[Identifier, Rational] = Field(default_factory=dict, max_length=10_000)
+    resource_delta_lower: dict[Identifier, Rational] = Field(
+        default_factory=dict, max_length=10_000
+    )
     time_upper: Rational
     monetary_cost_upper: Rational
+    quality_lower: Rational
+    safety_lower: Rational
     verification_load_upper: Rational
     independence_erosion_upper: Rational
+    correlation_concentration_upper: Rational
+    cut_exposure_upper: Rational
+    debt: list[Identifier] = Field(default_factory=list, max_length=256)
+    rollback_obligations: list[Identifier] = Field(default_factory=list, max_length=256)
+    hazards_added: list[Identifier] = Field(default_factory=list, max_length=256)
 
 
 class InterventionPortfolioSpec(StrictModel):
@@ -756,10 +871,16 @@ class BranchEffect(StrictModel):
     resolves_blockers: list[Identifier] = Field(default_factory=list, max_length=256)
     debt: list[Identifier] = Field(default_factory=list, max_length=256)
     rollback_obligations: list[Identifier] = Field(default_factory=list, max_length=256)
+    hazards_added: list[Identifier] = Field(default_factory=list, max_length=256)
+    hazards_removed: list[Identifier] = Field(default_factory=list, max_length=256)
     time_upper: Rational = "0"
     cost_upper: Rational = "0"
     quality_lower: Rational = "0"
+    safety_lower: Rational = "0"
     verification_load_upper: Rational = "0"
+    independence_erosion_upper: Rational = "0"
+    correlation_concentration_upper: Rational = "0"
+    cut_exposure_upper: Rational = "0"
 
     @model_validator(mode="after")
     def interval_integrity(self) -> BranchEffect:
@@ -774,8 +895,41 @@ class BranchEffect(StrictModel):
             raise ValueError("time upper bound must be nonnegative")
         if Fraction(self.cost_upper) < 0:
             raise ValueError("cost upper bound must be nonnegative")
-        if Fraction(self.verification_load_upper) < 0:
-            raise ValueError("verification load upper bound must be nonnegative")
+        nonnegative_upper_bounds = {
+            "verification load": self.verification_load_upper,
+            "independence erosion": self.independence_erosion_upper,
+            "correlation concentration": self.correlation_concentration_upper,
+            "cut exposure": self.cut_exposure_upper,
+        }
+        for name, value in nonnegative_upper_bounds.items():
+            if Fraction(value) < 0:
+                raise ValueError(f"{name} upper bound must be nonnegative")
+        if set(self.hazards_added).intersection(self.hazards_removed):
+            raise ValueError("a branch cannot add and remove the same hazard")
+        digest_sets = {
+            "must_add": self.must_add,
+            "may_add": self.may_add,
+            "must_remove": self.must_remove,
+            "may_remove": self.may_remove,
+        }
+        for name, values in digest_sets.items():
+            if len(values) != len(set(values)):
+                raise ValueError(f"branch {name} digests must be unique")
+        additions = set(self.must_add) | set(self.may_add)
+        removals = set(self.must_remove) | set(self.may_remove)
+        if additions.intersection(removals):
+            raise ValueError("branch additions and removals must be disjoint")
+        identifier_sets = {
+            "evidence routes": self.guaranteed_evidence_routes,
+            "resolved blockers": self.resolves_blockers,
+            "debt": self.debt,
+            "rollback obligations": self.rollback_obligations,
+            "hazards added": self.hazards_added,
+            "hazards removed": self.hazards_removed,
+        }
+        for name, values in identifier_sets.items():
+            if len(values) != len(set(values)):
+                raise ValueError(f"branch {name} must be unique")
         return self
 
 

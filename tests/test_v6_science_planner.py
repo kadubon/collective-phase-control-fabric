@@ -39,6 +39,8 @@ from collective_phase_control_fabric.v6.models import (
     PhaseContractSpec,
     QuorumDecisionDocument,
     QuorumDecisionSpec,
+    RateObservationAttestation,
+    RateObservationSpec,
     ResourceObservationAttestation,
     ResourceObservationSpec,
     SnapshotSpec,
@@ -119,6 +121,9 @@ def build_science_fixture() -> tuple[AnalysisSnapshot, dict[str, object]]:
                 "action": UnitDefinition(symbol="action", dimensions={"action": 1}, scale="1"),
                 "rate": UnitDefinition(
                     symbol="rate", dimensions={"resource": 1, "time": -1}, scale="1"
+                ),
+                "action-rate": UnitDefinition(
+                    symbol="action-rate", dimensions={"action": 1, "time": -1}, scale="1"
                 ),
             },
             coordinate_units={"A": "quantity", "target": "quantity"},
@@ -242,6 +247,27 @@ def build_science_fixture() -> tuple[AnalysisSnapshot, dict[str, object]]:
         ),
     ]
     input_digests = [add(objects, item) for item in typed_inputs]
+    evidence_digest = next(
+        digest for digest, item in objects.items() if isinstance(item, EvidenceAttestation)
+    )
+    input_digests.append(
+        add(
+            objects,
+            RateObservationAttestation(
+                metadata=metadata("transform-rate"),
+                spec=RateObservationSpec(
+                    transformation_id="transform",
+                    rate_lower="1",
+                    rate_upper="1",
+                    action_rate_unit="action-rate",
+                    observation_window_start=NOW - timedelta(hours=1),
+                    observation_window_end=NOW,
+                    source_record_digest=evidence_digest,
+                    lifecycle=lifecycle,
+                ),
+            ),
+        )
+    )
     plan = CoordinationPlan(
         metadata=metadata("coordination-plan"),
         spec=CoordinationPlanSpec(

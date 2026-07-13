@@ -207,7 +207,14 @@ def test_exposure_perturbation_branch_capability_and_projection_validators() -> 
         )
     with pytest.raises(ValidationError, match="must alter"):
         PerturbationScenario(scenario_id="empty")
-    for field in ("time_upper", "cost_upper", "verification_load_upper"):
+    for field in (
+        "time_upper",
+        "cost_upper",
+        "verification_load_upper",
+        "independence_erosion_upper",
+        "correlation_concentration_upper",
+        "cut_exposure_upper",
+    ):
         with pytest.raises(ValidationError, match="nonnegative"):
             BranchEffect.model_validate(
                 {
@@ -215,6 +222,23 @@ def test_exposure_perturbation_branch_capability_and_projection_validators() -> 
                     field: "-1",
                 }
             )
+    with pytest.raises(ValidationError, match="additions and removals"):
+        BranchEffect(
+            outcome="failure",
+            must_add=["sha256:" + "1" * 64],
+            may_remove=["sha256:" + "1" * 64],
+        )
+    with pytest.raises(ValidationError, match="same hazard"):
+        BranchEffect(
+            outcome="failure",
+            hazards_added=["hazard"],
+            hazards_removed=["hazard"],
+        )
+    with pytest.raises(ValidationError, match="selectors must be unique"):
+        PerturbationScenario(
+            scenario_id="duplicate-selectors",
+            remove_state_ids=["state", "state"],
+        )
 
     branches = [
         BranchEffect(outcome=outcome) for outcome in ("success", "partial", "failure", "timeout")

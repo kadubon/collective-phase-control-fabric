@@ -7,11 +7,11 @@ means the release gate remains open.
 |---|---|---|---|---|
 | RFC 8785-style float-free canonicalization and bounded JSON | `v6/canonical.py`, `v6/registry.py` | `test_v6_adversarial.py`, `test_v6_branches.py` | implemented | not a general JSON security proof |
 | DSSE protected subject and role quorum | `v6/trust.py` | `test_v6_adversarial.py`, `test_v6_advanced.py` | implemented kernel; API admission incomplete | not threshold cryptography or TUF equivalence |
-| directed-hypergraph reachability | `v6/science.py` | `test_v6_science.py` | implemented | reachability is not causal formation |
-| strictly prior causal formation | `v6/science.py` | `test_v6_science.py` | implemented bounded kernel | no elapsed-time or kinetics claim |
-| chemical-organization closure and exact maintenance balance | `v6/science.py` | `test_v6_science.py` | partial | no equilibrium, stability, or thermodynamic feasibility claim |
-| generalized/generative RAF distinctions | `v6/science.py` | `test_v6_science.py` | partial; exhaustive differential gate open | no chemical equivalence or universal catalysis claim |
-| exact finite resource trajectory | `v6/science.py` | `test_v6_science.py`, `test_v6_advanced.py` | implemented bounded kernel | mass balance is not kinetic or thermodynamic feasibility |
+| directed-hypergraph reachability | `v6/science.py` | `test_v6_science_assurance.py` | implemented | reachability is not causal formation |
+| strictly prior causal formation | `v6/science.py` | `test_v6_science_assurance.py` | implemented bounded kernel | no elapsed-time or kinetics claim |
+| chemical-organization closure and exact maintenance balance | `v6/science.py` | `test_v6_science_assurance.py`, `test_v6_science_planner.py` | exact rational witness check implemented | no equilibrium, stability, or thermodynamic feasibility claim |
+| generalized/generative RAF distinctions | `v6/structural_analysis.py`, `v6/science.py` | `test_v6_structural_analysis.py`, `test_v6_science_assurance.py` | inhibited generalized RAF enumeration and strict-prior generative layers are exact up to 20 transformations; larger inputs unknown | no chemical equivalence or universal catalysis claim |
+| exact finite resource trajectory and rate coverage | `v6/science.py`, `v6/planning.py` | `test_v6_science_assurance.py`, `test_v6_planning_assurance.py` | exact prefix marking and branch trajectory implemented | mass balance is not kinetic or thermodynamic feasibility |
 | minimal and fed siphons | `v6/structural_analysis.py`, `v6/science.py` | `test_v6_structural_analysis.py` | exact up to the declared 20-coordinate bound; larger inputs unknown | no persistence conclusion from an incomplete search |
 | verifier interval feasibility | `v6/science.py` | `test_v6_science.py` | implemented interval check | no stationarity or queue identity claim |
 | deterministic arrival/service curves | `v6/structural_analysis.py`, `v6/science.py` | `test_v6_structural_analysis.py` | exact for validated piecewise-rational finite curves | no backlog or delay bound without signed complete curves |
@@ -19,8 +19,9 @@ means the release gate remains open.
 | minimal transformation cuts and enablement sets | `v6/structural_analysis.py` | `test_v6_structural_analysis.py` | exhaustive up to the declared 20-transformation bound | no general network controllability claim |
 | bounded 1-safe occurrence prefix | `v6/structural_analysis.py` | `test_v6_structural_analysis.py` | bounded unit-stoichiometry profile | no unbounded Petri-net reachability claim |
 | effective independence | `v6/science.py`, `v6/coordination.py` | `test_v6_science.py`, `test_v6_advanced.py` | implemented bounded kernel | labels, roles, or model names do not prove independence |
-| reduced-snapshot perturbation replay | `v6/science.py` | `test_v6_advanced.py` | object-removal partial | no robustness claim for unsupported modification classes |
-| bounded strong nondeterministic planning | `v6/planning.py` | `test_v6_advanced.py`, `test_v6_branches.py` | abstract-state partial | no fairness, eventual success, or general controllability claim |
+| reduced-snapshot perturbation replay | `v6/science.py` | `test_v6_science_assurance.py`, `test_v6_science_planner.py` | typed removal, trusted-time advancement, and typed replacement inputs rerun the shared kernel; signed authoritative admission remains external to the reducer | no robustness claim for unmatched selectors, invalid replacements, or budget exhaustion |
+| bounded strong nondeterministic planning | `v6/planning.py` | `test_v6_planning_assurance.py`, `test_v6_science_planner.py` | four-outcome snapshot removal replay, resource trajectories, evidence-route-only progress, exhaustive horizon one, and width-32 horizons two to three implemented | no fairness, eventual success, promoted hypothetical evidence, or general controllability claim |
+| finite intervention portfolio | `v6/intervention.py` | `test_v6_intervention.py` | bounded siphon, coupling, cut, enablement, occurrence, and Pareto route results share one snapshot | no scalar intelligence, expected utility, or success-probability claim |
 | target-trial binding | `v6/trials.py` | `test_v6_advanced.py`, `test_v6_branches.py` | kernel implemented; authoritative API admission incomplete | no causality or statistical-method certification |
 | immutable bundle integrity | `bundle.py`, `v6/storage.py` | `test_v6_advanced.py` | implemented content check | unsigned content consistency is not distribution authenticity |
 

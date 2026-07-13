@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from fractions import Fraction
 
 from collective_phase_control_fabric.v6.models import (
@@ -11,6 +12,7 @@ from collective_phase_control_fabric.v6.models import (
     CapabilityDocument,
     DimensionResult,
     ResourceObservationAttestation,
+    TransformationAttestation,
 )
 from collective_phase_control_fabric.v6.planning import (
     _dominates,
@@ -98,8 +100,8 @@ def test_control_state_digest_initialization_and_progress_measures() -> None:
     )
     duplicate = observation.model_copy(update={"metadata": metadata("duplicate-A")})
     objects[document_digest(duplicate)] = duplicate
-    ambiguous = _initial_state(snapshot, objects, profile)  # type: ignore[arg-type]
-    assert "A" not in dict(ambiguous.resources)
+    unreferenced = _initial_state(snapshot, objects, profile)  # type: ignore[arg-type]
+    assert dict(unreferenced.resources)["A"] == Fraction(10)
 
     branch = BranchEffect(
         outcome="success",
@@ -120,6 +122,62 @@ def test_control_state_digest_initialization_and_progress_measures() -> None:
     assert successor.debt == frozenset({"debt"})
     assert successor.rollback == frozenset({"rollback"})
     assert successor.pending_projections == frozenset({"sha256:" + "1" * 64})
+
+
+def test_hypothetical_outputs_remain_pending_and_removals_trigger_fresh_audit() -> None:
+    snapshot, objects, profile = blocked_fixture("blocker")
+    state = _initial_state(snapshot, objects, profile)  # type: ignore[arg-type]
+    added = "sha256:" + "1" * 64
+    optional = "sha256:" + "2" * 64
+    pending = _successor(
+        state,
+        BranchEffect(
+            outcome="success",
+            must_add=[added],
+            may_add=[optional],
+            guaranteed_evidence_routes=["route"],
+            resolves_blockers=["blocker"],
+            resource_delta_lower={"A": "-1"},
+            resource_delta_upper={"A": "0"},
+            debt=["debt"],
+            rollback_obligations=["rollback"],
+            hazards_added=["hazard"],
+            verification_load_upper="2",
+            independence_erosion_upper="1",
+            correlation_concentration_upper="3",
+            cut_exposure_upper="4",
+            time_upper="5",
+            cost_upper="6",
+            quality_lower="7",
+            safety_lower="8",
+        ),
+    )
+    assert added not in pending.live_objects
+    assert optional not in pending.live_objects
+    assert pending.pending_projections == frozenset({added})
+    assert pending.addressed_blockers == frozenset({"blocker"})
+    assert pending.resource_trajectory[-1] == (("A", Fraction(9)),)
+    assert pending.hazards == frozenset({"hazard"})
+    assert pending.verification_load == 2
+    assert pending.independence_erosion == 1
+    assert pending.correlation_concentration == 3
+    assert pending.cut_exposure == 4
+    assert pending.elapsed_time == 5 and pending.monetary_cost == 6
+    assert pending.quality_floor == 7 and pending.safety_floor == 8
+
+    transform_digest = next(
+        digest for digest, item in objects.items() if isinstance(item, TransformationAttestation)
+    )
+    reduced = _successor(
+        state,
+        BranchEffect(outcome="failure", must_remove=[transform_digest]),
+        baseline_snapshot=snapshot,
+        objects=objects,  # type: ignore[arg-type]
+    )
+    assert transform_digest not in reduced.live_objects
+    assert reduced.snapshot_digest != state.snapshot_digest
+    assert dict(reduced.dimension_statuses)["causal_formation"] != "satisfied"
+    assert any("formation" in blocker for blocker in reduced.blockers)
 
 
 def test_hard_filter_reports_all_authority_schema_resource_and_repeatability_defects() -> None:
@@ -171,6 +229,12 @@ def test_hard_filter_reports_all_authority_schema_resource_and_repeatability_def
     assert "capability_output_schema_digest_mismatch" in _hard_filter(
         state, matching, digest_mismatch
     )
+
+    hazardous_state = replace(state, hazards=frozenset({"network-access"}))
+    prohibited = item.model_copy(
+        update={"spec": item.spec.model_copy(update={"prohibited_hazards": ["network-access"]})}
+    )
+    assert "prohibited_hazard_active" in _hard_filter(hazardous_state, prohibited, cap)
 
 
 def test_resource_safety_semantic_key_worst_case_and_pareto_directions() -> None:

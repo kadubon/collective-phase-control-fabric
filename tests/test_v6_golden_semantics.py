@@ -57,12 +57,12 @@ from tests.v6_helpers import NOW, metadata, trust_fixture
 def test_native_digest_and_encoding_goldens_are_stable() -> None:
     snapshot, snapshot_objects = build_science_fixture()
     assert analysis_basis_digest(snapshot) == (
-        "sha256:e79e1688e54eb4f11737adcd4d2e5515c42abf872ad3e95958ed2c6654faad0a"
+        "sha256:591bf2bbf5b72533cc38348b539ea60ff537d672eee923820aef13e84d5ce444"
     )
     capability_value = capability("golden", "blocker", "3/2")
     action_value = action("action:golden", capability_value)
     assert _semantic_key(action_value, capability_value) == (
-        "sha256:ef88048e203a6bc77f93a480dfa783c442593fdbfd1ae34f008b3a454d22e657"
+        "sha256:90672d655f18ae0cdff22e11c17a064a08011e73b6a82a9309b50e3af28bf1b5"
     )
     generation = WorkspaceGeneration(
         metadata=metadata("generation:golden"),
@@ -77,7 +77,7 @@ def test_native_digest_and_encoding_goldens_are_stable() -> None:
         "sha256:134da671f3f3f573195def58972a3192edd4c35611718cf0b33d0eb8fea52706"
     )
     assert digest_bytes(canonical_bytes(registry_manifest())) == (
-        "sha256:2662418e5bef5dd68abd9ef6049d258a7751761b15d683784175e3c678e7cd5d"
+        "sha256:808e9dc53c39b186ed75bc095050b640587e8646c6a1892776eced8d0476b352"
     )
     assert dsse_pae("type", b"abc") == b"DSSEv1 4 type 3 abc"
     assert dsse_pae(PAYLOAD_TYPE, b"") == (
@@ -85,7 +85,7 @@ def test_native_digest_and_encoding_goldens_are_stable() -> None:
     )
     profile = audit_snapshot(snapshot, snapshot_objects)  # type: ignore[arg-type]
     assert digest_bytes(canonical_bytes(profile.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:bce8b93ecc9717fa85176e84bbbf361888b8a35cef7e2eb26c55208c81fb730e"
+        "sha256:dd2089525d500eab59cc8ad0ce21bb91ac1f64584e68b2f30cf09c4beaa65b49"
     )
 
 
@@ -162,7 +162,7 @@ def test_complete_planner_result_golden_binds_policy_and_rejections() -> None:
         [cheap, expensive],
     )
     assert digest_bytes(canonical_bytes(result.model_dump(mode="json", exclude_none=True))) == (
-        "sha256:3c420589b04a6d0b4888f2e3aa6aa88a42a450beb627e810ec4bf629bf3515b3"
+        "sha256:9964a5e15dd248ae32d781f00cb570fd11fb3999d05bf8c8f05febbc250d8e4b"
     )
 
 
