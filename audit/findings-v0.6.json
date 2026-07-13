@@ -98,18 +98,18 @@
       "severity": "critical",
       "exploit": "Unsigned coordination or trial records can be treated as admitted upstream state.",
       "affected_claim": "Coordination and empirical evidence integrity",
-      "correction": "Authoritative admission must recompute every event and trial quorum.",
-      "regression_test": "release gate: coordination and trial quorum admission suite",
-      "status": "open"
+      "correction": "The authoritative loader binds typed actors to verified signers and requires recomputed protocol, amendment, and result quorums. Coordination and trial kernels validate complete admitted state; production worker admission integration remains required.",
+      "regression_test": "tests/test_v6_authority.py and tests/test_v6_coordination_trial_assurance.py; release gate: PostgreSQL coordination and trial admission suite",
+      "status": "partial"
     },
     {
       "id": "V6-012",
       "severity": "high",
       "exploit": "Onboarding can present static blockers that omit or misstate live workspace state.",
       "affected_claim": "First-agent remote onboarding",
-      "correction": "Aggregate every trust, time, ledger, science, planner, runner, projection, coordination, trial, quota, and repair subsystem.",
-      "regression_test": "release gate: installed-wheel live onboarding conformance",
-      "status": "open"
+      "correction": "A typed aggregator now reports every required subsystem, preserves unknowns, and generates non-executable unbound repairs. Production PostgreSQL diagnostic population remains required.",
+      "regression_test": "tests/test_v6_onboarding_repairs.py and tests/test_v6_api_assurance.py; release gate: installed-wheel PostgreSQL onboarding conformance",
+      "status": "partial"
     },
     {
       "id": "V6-013",

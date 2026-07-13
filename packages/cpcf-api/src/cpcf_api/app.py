@@ -8,7 +8,8 @@ import re
 import secrets
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from datetime import UTC, datetime
+from typing import Any, Literal, Protocol
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -17,7 +18,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from collective_phase_control_fabric.v6.canonical import canonical_bytes, digest_bytes
 from collective_phase_control_fabric.v6.models import DOCUMENT_MODELS
+from collective_phase_control_fabric.v6.onboarding import OnboardingState, aggregate_onboarding
 from collective_phase_control_fabric.v6.registry import registry_manifest, schema_for_kind
+from collective_phase_control_fabric.v6.repairs import generate_repairs
 from collective_phase_control_fabric.v6.storage import MemoryObjectStore, ObjectStore
 from cpcf_api.auth import Authenticator, PrincipalContext, authorize
 
@@ -48,6 +51,25 @@ class WorkspaceCreate(BaseModel):
     genesis_envelope_fingerprint: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
 
 
+class OperationRequest(BaseModel):
+    """Closed digest-only request used to enqueue authoritative admission work."""
+
+    model_config = ConfigDict(extra="forbid")
+    subject_digests: list[str] = Field(default_factory=list, max_length=10_000)
+    session_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+    scenario_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+
+    @classmethod
+    def _digest_pattern(cls) -> re.Pattern[str]:
+        return re.compile(r"^sha256:[0-9a-f]{64}$")
+
+    def model_post_init(self, _: Any) -> None:
+        if len(self.subject_digests) != len(set(self.subject_digests)):
+            raise ValueError("subject digests must be unique")
+        if any(self._digest_pattern().fullmatch(item) is None for item in self.subject_digests):
+            raise ValueError("subject digest is invalid")
+
+
 @dataclass
 class WorkspaceRecord:
     tenant_id: str
@@ -57,6 +79,8 @@ class WorkspaceRecord:
     root_spki_fingerprint: str | None = None
     genesis_envelope_fingerprint: str | None = None
     quarantined: list[str] = field(default_factory=list)
+    queued_topics: list[str] = field(default_factory=list)
+    onboarding_state: OnboardingState | None = None
 
 
 class Backend(Protocol):
@@ -135,6 +159,7 @@ class InMemoryBackend:
             raise ValueError("workspace_not_found") from error
 
     async def enqueue(self, tenant_id: str, workspace_id: str, topic: str) -> str:
+        workspace = await self.workspace(tenant_id, workspace_id)
         job_id = secrets.token_hex(16)
         self.jobs[job_id] = {
             "tenant_id": tenant_id,
@@ -142,6 +167,7 @@ class InMemoryBackend:
             "topic": topic,
             "status": "queued",
         }
+        workspace.queued_topics.append(topic)
         return job_id
 
     async def job(self, tenant_id: str, job_id: str) -> dict[str, Any] | None:
@@ -266,6 +292,51 @@ def create_app(
                 }
             )
         )
+
+    async def queue_workspace_operation(
+        *,
+        topic: str,
+        operation: str,
+        permission: str,
+        authority: list[str],
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext,
+        idempotency_key: str,
+        if_match: str,
+    ) -> ApiResponse:
+        authorize(actor, permission, actor.tenant_id)
+        workspace = await require_workspace(actor.tenant_id, workspace_id)
+        if if_match != workspace.generation_digest:
+            raise HTTPException(412, "workspace_generation_changed")
+        request_digest = mutation_digest(request, actor, body, expected_generation=if_match)
+        cache_key = (actor.tenant_id, idempotency_key, request_digest)
+        try:
+            cached = await backend_service.idempotency_get(*cache_key)
+        except ValueError as error:
+            raise HTTPException(409, str(error)) from error
+        if cached is not None:
+            return cached
+        job_id = await backend_service.enqueue(actor.tenant_id, workspace_id, topic)
+        response = ApiResponse(
+            status="accepted",
+            code=f"{operation}_queued",
+            effect_class="plan",
+            tenant_id=actor.tenant_id,
+            workspace_id=workspace_id,
+            generation_digest=workspace.generation_digest,
+            job_id=job_id,
+            authority_required=authority,
+            claims={
+                "subject_digests": body.subject_digests,
+                "authoritative_effect_pending_worker_validation": True,
+            },
+            next_safe_commands=[["cpcf", "audit", "status", job_id, "--json"]],
+            trace_id=trace(request),
+        )
+        await backend_service.idempotency_put(*cache_key, response)
+        return response
 
     @app.exception_handler(PermissionError)
     async def permission_handler(request: Request, error: PermissionError) -> Any:
@@ -536,6 +607,290 @@ def create_app(
             trace_id=trace(request),
         )
 
+    @app.post("/v1/workspaces/{workspace_id}/objects/admissions", status_code=202)
+    async def admit_objects(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="object-admission",
+            operation="object_admission",
+            permission="object:import",
+            authority=["evidence_producer", "tenant_admin"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/trust/updates", status_code=202)
+    async def update_trust(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="trust-update",
+            operation="trust_update",
+            permission="trust:write",
+            authority=["workspace_root", "trust_auditor", "timestamp"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/time/receipts", status_code=202)
+    async def admit_time(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="trusted-time-admission",
+            operation="trusted_time_admission",
+            permission="time:write",
+            authority=["timestamp"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/perturbations", status_code=202)
+    async def start_perturbation(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="perturbation",
+            operation="perturbation",
+            permission="analysis:start",
+            authority=["auditor"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/interventions", status_code=202)
+    async def analyze_interventions(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="intervention",
+            operation="intervention_analysis",
+            permission="analysis:start",
+            authority=["planner", "auditor"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/actions", status_code=202)
+    async def dispatch_action(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="action-dispatch",
+            operation="action_dispatch",
+            permission="action:dispatch",
+            authority=["action_dispatcher"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/projections/approvals", status_code=202)
+    async def approve_projection(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="projection-approval",
+            operation="projection_approval",
+            permission="projection:approve",
+            authority=["projection_verifier"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/coordination/{operation}", status_code=202)
+    async def advance_coordination(
+        workspace_id: str,
+        operation: Literal["init", "commit", "reveal", "route", "terminate"],
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic=f"coordination-{operation}",
+            operation=f"coordination_{operation}",
+            permission="coordination:write",
+            authority=["coordination_participant"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/trials/{operation}", status_code=202)
+    async def mutate_trial(
+        workspace_id: str,
+        operation: Literal["protocol-import", "amendment-import", "result-import"],
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic=f"trial-{operation}",
+            operation=f"trial_{operation.replace('-', '_')}",
+            permission="trial:write",
+            authority=["protocol_author", "registration", "timestamp"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/quarantine/actions", status_code=202)
+    async def change_quarantine(
+        workspace_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        return await queue_workspace_operation(
+            topic="quarantine-change",
+            operation="quarantine_change",
+            permission="quarantine:write",
+            authority=["tenant_admin"],
+            workspace_id=workspace_id,
+            body=body,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.post("/v1/workspaces/{workspace_id}/repairs/{repair_id}/actions", status_code=202)
+    async def run_repair(
+        workspace_id: str,
+        repair_id: str,
+        body: OperationRequest,
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=16, max_length=128),
+        if_match: str = Header(alias="If-Match"),
+    ) -> ApiResponse:
+        checked = body.model_copy(update={"session_id": repair_id})
+        return await queue_workspace_operation(
+            topic="repair-action",
+            operation="repair_action",
+            permission="repair:write",
+            authority=["tenant_admin"],
+            workspace_id=workspace_id,
+            body=checked,
+            request=request,
+            actor=actor,
+            idempotency_key=idempotency_key,
+            if_match=if_match,
+        )
+
+    @app.get("/v1/workspaces/{workspace_id}/collections/{collection}")
+    async def inspect_collection(
+        workspace_id: str,
+        collection: Literal["projections", "coordination", "trials", "quarantine", "repairs"],
+        request: Request,
+        actor: PrincipalContext = principal_dependency,
+    ) -> ApiResponse:
+        authorize(actor, "workspace:read", actor.tenant_id)
+        workspace = await require_workspace(actor.tenant_id, workspace_id)
+        state = workspace.onboarding_state or OnboardingState(
+            workspace_id=workspace_id,
+            generation_digest=workspace.generation_digest,
+            quarantined_objects=workspace.quarantined,
+        )
+        report = aggregate_onboarding(state)
+        claims: dict[str, Any] = {"queued_topics": workspace.queued_topics}
+        if collection == "repairs":
+            claims["repairs"] = [
+                item.model_dump(mode="json", exclude_none=True)
+                for item in generate_repairs(
+                    report.blocker_codes,
+                    tenant_id=actor.tenant_id,
+                    workspace_id=workspace_id,
+                    created_at=datetime.now(UTC),
+                )
+            ]
+        return ApiResponse(
+            status="ok",
+            code=f"{collection}_status",
+            effect_class="inspect",
+            tenant_id=actor.tenant_id,
+            workspace_id=workspace_id,
+            generation_digest=workspace.generation_digest,
+            claims=claims,
+            quarantined_objects=workspace.quarantined,
+            trace_id=trace(request),
+        )
+
     @app.get("/v1/workspaces/{workspace_id}/onboarding")
     async def onboard(
         workspace_id: str,
@@ -544,26 +899,27 @@ def create_app(
     ) -> ApiResponse:
         authorize(actor, "workspace:read", actor.tenant_id)
         workspace = await require_workspace(actor.tenant_id, workspace_id)
-        unknowns = [
-            "trust_genesis_not_imported",
-            "trusted_time_not_imported",
-            "analysis_snapshot_not_available",
-            "runner_not_registered",
-            "trial_evidence_unmeasured",
-        ]
+        state = workspace.onboarding_state or OnboardingState(
+            workspace_id=workspace_id,
+            generation_digest=workspace.generation_digest,
+            quarantined_objects=workspace.quarantined,
+        )
+        report = aggregate_onboarding(state)
         return ApiResponse(
-            status="blocked",
-            code="onboarding_decisions_required",
+            status=report.status,
+            code=report.code,
             effect_class="inspect",
             tenant_id=actor.tenant_id,
             workspace_id=workspace_id,
             generation_digest=workspace.generation_digest,
-            unknowns=unknowns,
+            claims={
+                "subsystem_status": report.subsystem_status,
+                "science_dimensions": report.science_dimensions,
+                "unresolved_human_decisions": report.unresolved_human_decisions,
+            },
+            unknowns=report.blocker_codes,
             quarantined_objects=workspace.quarantined,
-            next_safe_commands=[
-                ["cpcf", "trust", "genesis-inspect", "POLICY", "--json"],
-                ["cpcf", "time", "inspect", "RECEIPT", "--json"],
-            ],
+            next_safe_commands=report.next_safe_commands,
             trace_id=trace(request),
         )
 

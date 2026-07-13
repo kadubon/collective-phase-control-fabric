@@ -349,6 +349,7 @@ dependencies = [
     { name = "cryptography" },
     { name = "httpx" },
     { name = "jsonschema" },
+    { name = "keyring" },
     { name = "networkx" },
     { name = "pydantic" },
 ]
@@ -465,6 +466,7 @@ requires-dist = [
     { name = "httpx", extras = ["http2"], marker = "extra == 'all'", specifier = ">=0.28,<1" },
     { name = "httpx", extras = ["http2"], marker = "extra == 'runner'", specifier = ">=0.28,<1" },
     { name = "jsonschema", specifier = ">=4.26,<5" },
+    { name = "keyring", specifier = ">=25.7,<26" },
     { name = "networkx", specifier = ">=3.6.1,<4" },
     { name = "opentelemetry-api", marker = "extra == 'all'", specifier = ">=1.35,<2" },
     { name = "opentelemetry-api", marker = "extra == 'server'", specifier = ">=1.35,<2" },

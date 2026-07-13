@@ -14,19 +14,25 @@ from collective_phase_control_fabric.v6.canonical import (
     loads_bounded,
 )
 from collective_phase_control_fabric.v6.models import (
+    ArtifactRecord,
     AuditEvent,
+    CoordinationEventDocument,
+    CoordinationPlan,
     Document,
     DsseEnvelope,
     EvidenceAttestation,
     Lifecycle,
+    MeasurementProtocol,
     PendingProjection,
     ProjectionApproval,
     ProjectionApprovalSpec,
+    ProtocolAmendment,
     QuorumDecisionDocument,
     RunnerReceipt,
     SignedPayload,
     SignedStatement,
     SourceArtifactEnvelope,
+    TrialResult,
     TrustedTimeReceipt,
     TrustPolicyDocument,
     WorkspaceGeneration,
@@ -54,6 +60,10 @@ class AuthoritativeView:
     objects: dict[str, Document]
     signed_subjects: dict[str, Document]
     statement_envelopes: dict[str, DsseEnvelope]
+    subject_statements: dict[str, tuple[str, ...]]
+    subject_principals: dict[str, frozenset[str]]
+    statement_principals: dict[str, str]
+    statement_roles: dict[str, str]
     quarantined: dict[str, tuple[str, ...]]
     reasons: tuple[str, ...]
 
@@ -86,6 +96,34 @@ def _lifecycle_reasons(document: Document, evaluation_time: datetime) -> list[st
     if lifecycle.withdrawn_at is not None and evaluation_time >= lifecycle.withdrawn_at:
         reasons.append("object_withdrawn")
     return reasons
+
+
+def _claimed_signer(document: Document) -> tuple[str, str] | None:
+    """Return the identity and role that a typed subject is allowed to claim."""
+
+    if isinstance(document, CoordinationPlan):
+        return document.spec.plan_principal_id, "coordination_plan"
+    if isinstance(document, CoordinationEventDocument):
+        return document.spec.actor_principal_id, "coordination_event"
+    if isinstance(document, ArtifactRecord):
+        return document.spec.producer_principal_id, "trial_artifact_producer"
+    if isinstance(document, MeasurementProtocol):
+        return document.spec.author_principal_id, "protocol_author"
+    if isinstance(document, ProtocolAmendment):
+        return document.spec.author_principal_id, "protocol_author"
+    if isinstance(document, TrialResult):
+        return document.spec.evaluator_principal_id, "evaluator"
+    return None
+
+
+def _required_quorum(document: Document) -> str | None:
+    if isinstance(document, MeasurementProtocol):
+        return "protocol_registration"
+    if isinstance(document, ProtocolAmendment):
+        return "protocol_amendment"
+    if isinstance(document, TrialResult):
+        return "acceleration_compatibility"
+    return None
 
 
 def _validate_source_envelope(
@@ -227,6 +265,18 @@ def load_authoritative_generation(
 
     for subject_digest, subject in signed_subjects.items():
         subject_reasons: list[str] = []
+        claimed_signer = _claimed_signer(subject)
+        if claimed_signer is not None:
+            principal_id, required_role = claimed_signer
+            matching = [
+                statement_digest
+                for statement_digest in subject_statements[subject_digest]
+                if statement_digest not in quarantine
+                and statement_principals.get(statement_digest) == principal_id
+                and statement_roles.get(statement_digest) == required_role
+            ]
+            if not matching:
+                subject_reasons.append("typed_subject_signer_binding_mismatch")
         if isinstance(subject, SourceArtifactEnvelope):
             subject_reasons.extend(_validate_source_envelope(subject, store))
         if isinstance(subject, EvidenceAttestation):
@@ -267,6 +317,22 @@ def load_authoritative_generation(
                 reject(digest, *result.reasons)
             if not quarantine.get(digest):
                 derived[digest] = current_document
+
+    for subject_digest, subject in signed_subjects.items():
+        decision_type = _required_quorum(subject)
+        if decision_type is None:
+            continue
+        decisions = [
+            document
+            for document in derived.values()
+            if isinstance(document, QuorumDecisionDocument)
+            and document.spec.decision_type == decision_type
+            and document.spec.subject_digest == subject_digest
+        ]
+        if len(decisions) != 1:
+            for statement_digest in subject_statements[subject_digest]:
+                reject(statement_digest, f"{decision_type}_quorum_not_unique")
+            reasons.append(f"{decision_type}_quorum_not_unique:{subject_digest}")
 
     promoted_projections: dict[str, Document] = {}
     for pending_digest, pending_document in signed_subjects.items():
@@ -379,12 +445,36 @@ def load_authoritative_generation(
         digest: tuple(sorted(codes)) for digest, codes in sorted(quarantine.items())
     }
     normalized_reasons = tuple(sorted(set(reasons)))
+    active_statement_principals = {
+        digest: principal
+        for digest, principal in statement_principals.items()
+        if digest not in quarantine
+    }
+    active_statement_roles = {
+        digest: role for digest, role in statement_roles.items() if digest not in quarantine
+    }
+    normalized_subject_statements = {
+        digest: tuple(sorted(statement_digests))
+        for digest, statement_digests in subject_statements.items()
+    }
+    subject_principals = {
+        digest: frozenset(
+            active_statement_principals[statement]
+            for statement in statement_digests
+            if statement in active_statement_principals
+        )
+        for digest, statement_digests in normalized_subject_statements.items()
+    }
     return AuthoritativeView(
         valid=not normalized_reasons,
         generation=generation,
         objects=authoritative,
         signed_subjects=signed_subjects,
         statement_envelopes=statement_envelopes,
+        subject_statements=normalized_subject_statements,
+        subject_principals=subject_principals,
+        statement_principals=active_statement_principals,
+        statement_roles=active_statement_roles,
         quarantined=normalized_quarantine,
         reasons=normalized_reasons,
     )

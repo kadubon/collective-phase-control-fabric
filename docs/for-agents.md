@@ -5,8 +5,9 @@ CPCF v0.6 is an evidence-control platform, not an autonomous agent runtime. Star
 `cpcf agent onboard --workspace WORKSPACE --json`. Follow `next_safe_commands` only after checking
 their tenant, generation, authority, and effect class.
 
-The CLI sends authenticated requests to the configured control plane. It does not persist bearer
-tokens. The API and analysis worker never execute adapter code. Customer runners pull short-lived,
+The CLI sends authenticated requests to the configured control plane. Device login stores bearer
+tokens only in an OS keyring; `CPCF_TOKEN` is the explicit non-persistent fallback. The API and
+analysis worker never execute adapter code. Customer runners pull short-lived,
 signed jobs using an external mTLS boundary and return attempt- and lease-bound receipts. A runner's
 isolation assertion is not a containment proof.
 
@@ -18,3 +19,8 @@ statistical method.
 
 v0.1-v0.5 are read-only. Legacy import may copy raw bytes, but every authority-bearing legacy
 object remains quarantined until a new v0.6 attestation and required quorum decision exist.
+
+Mutation responses with status `accepted` are queue receipts, not scientific or authority claims.
+Re-read onboarding after the resulting generation commits. An unbound repair describes missing
+evidence or authority and cannot be executed; only a repair carrying a signed action digest can
+have effect class `execute`.
