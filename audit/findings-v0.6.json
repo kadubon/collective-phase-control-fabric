@@ -146,6 +146,15 @@
       "correction": "The online migration now configures and executes every revision inside Alembic's explicit transaction boundary.",
       "regression_test": "tests/test_v6_postgres.py and .github/workflows/ci.yml postgres-integration",
       "status": "closed"
+    },
+    {
+      "id": "V6-017",
+      "severity": "high",
+      "exploit": "A Mutmut results command can fail before computing the release score, leaving mutation assurance absent despite a completed mutation run.",
+      "affected_claim": "Mutation-tested critical evidence paths",
+      "correction": "CI and release workflows pass an explicit Boolean value to Mutmut 3.6 and retain the 85 percent fail-closed score check.",
+      "regression_test": "tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
+      "status": "closed"
     }
   ]
 }

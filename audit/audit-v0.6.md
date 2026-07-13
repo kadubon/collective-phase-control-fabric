@@ -37,6 +37,8 @@ This audit lists known findings only. It does not assert that undiscovered defec
   handling of OS-specific APIs, PostgreSQL role provisioning, and Mutmut shadow-tree construction.
 - The online Alembic path now wraps revision execution in an explicit migration transaction; the
   PostgreSQL integration test verifies that the committed schema has forced RLS before tenant tests.
+- Mutation execution covers the eight configured critical modules. Mutmut result export now passes
+  the explicit Boolean required by Mutmut 3.6 before the unchanged 85 percent score gate runs.
 
 ## Open authority and scientific findings
 
