@@ -24,10 +24,7 @@ def _commands(
     for action in parser._actions:  # argparse exposes no public subparser traversal API.
         if not isinstance(action, argparse._SubParsersAction):
             continue
-        choice_help = {
-            item.dest: item.help
-            for item in action._choices_actions
-        }
+        choice_help = {item.dest: item.help for item in action._choices_actions}
         for name, child in sorted(action.choices.items()):
             command = (*prefix, name)
             result.append(
