@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from typing import Any, cast
 
 
@@ -37,10 +38,19 @@ class S3ObjectStore:
         metadata = response.get("ResponseMetadata", {}) if isinstance(response, dict) else {}
         code = str(detail.get("Code", "")) if isinstance(detail, dict) else ""
         status = metadata.get("HTTPStatusCode") if isinstance(metadata, dict) else None
-        return code in {"404", "NoSuchKey", "NotFound"} or status == 404
+        return (
+            code
+            in {
+                "404",
+                "NoSuchKey",
+                "NotFound",
+                "ServerSideEncryptionConfigurationNotFoundError",
+            }
+            or status == 404
+        )
 
     def _key(self, tenant_id: str, digest: str) -> str:
-        if not digest.startswith("sha256:") or len(digest) != 71:
+        if re.fullmatch(r"sha256:[0-9a-f]{64}", digest) is None:
             raise ValueError("invalid_content_digest")
         if not tenant_id or any(value in tenant_id for value in ("/", "\\", "..")):
             raise ValueError("invalid_tenant_id")
@@ -50,28 +60,77 @@ class S3ObjectStore:
         if len(data) > self.maximum_object_bytes:
             raise ValueError("object_store_input_too_large")
         digest = "sha256:" + hashlib.sha256(data).hexdigest()
+        return self.put_expected(tenant_id, digest, data)
+
+    def put_expected(self, tenant_id: str, expected_digest: str, data: bytes) -> str:
+        """Finalize one digest-scoped upload using conditional immutable creation."""
+
+        if len(data) > self.maximum_object_bytes:
+            raise ValueError("object_store_input_too_large")
+        digest = "sha256:" + hashlib.sha256(data).hexdigest()
+        if digest != expected_digest:
+            raise ValueError("object_store_expected_digest_mismatch")
         key = self._key(tenant_id, digest)
         try:
-            existing = self.client.head_object(Bucket=self.bucket, Key=key)
-        except self.client.exceptions.ClientError as error:
-            if not self._is_not_found(error):
-                raise
             self.client.put_object(
                 Bucket=self.bucket,
                 Key=key,
                 Body=data,
                 ContentLength=len(data),
                 Metadata={"sha256": digest[7:]},
+                IfNoneMatch="*",
             )
-        else:
-            metadata = existing.get("Metadata", {})
+        except self.client.exceptions.ClientError as error:
+            response = getattr(error, "response", {})
+            detail = response.get("Error", {}) if isinstance(response, dict) else {}
+            code = str(detail.get("Code", "")) if isinstance(detail, dict) else ""
+            if code not in {"PreconditionFailed", "ConditionalRequestConflict", "412", "409"}:
+                raise
+            existing = self.client.head_object(Bucket=self.bucket, Key=key)
+            metadata = existing.get("Metadata", {}) if isinstance(existing, dict) else {}
             if (
                 int(existing["ContentLength"]) != len(data)
                 or not isinstance(metadata, dict)
                 or metadata.get("sha256") != digest[7:]
             ):
-                raise RuntimeError("immutable_object_key_collision")
+                raise RuntimeError("immutable_object_key_collision") from error
         return digest
+
+    def quarantine_unreferenced(self, tenant_id: str, digest: str, reason: str) -> None:
+        """Mark a CAS upload as non-authoritative after database admission failed."""
+
+        if not reason or len(reason) > 128:
+            raise ValueError("invalid_quarantine_reason")
+        self.client.put_object_tagging(
+            Bucket=self.bucket,
+            Key=self._key(tenant_id, digest),
+            Tagging={
+                "TagSet": [
+                    {"Key": "cpcf-authority", "Value": "quarantined"},
+                    {"Key": "cpcf-reason", "Value": reason},
+                ]
+            },
+        )
+
+    def validate_bucket_posture(self) -> list[str]:
+        """Check versioning and encryption; callers decide whether readiness must fail."""
+
+        reasons: list[str] = []
+        versioning = self.client.get_bucket_versioning(Bucket=self.bucket)
+        if versioning.get("Status") != "Enabled":
+            reasons.append("object_store_versioning_not_enabled")
+        try:
+            encryption = self.client.get_bucket_encryption(Bucket=self.bucket)
+        except self.client.exceptions.ClientError as error:
+            if self._is_not_found(error):
+                reasons.append("object_store_encryption_not_configured")
+            else:
+                raise
+        else:
+            rules = encryption.get("ServerSideEncryptionConfiguration", {}).get("Rules", [])
+            if not rules:
+                reasons.append("object_store_encryption_not_configured")
+        return sorted(set(reasons))
 
     def get(self, tenant_id: str, digest: str) -> bytes:
         response = self.client.get_object(Bucket=self.bucket, Key=self._key(tenant_id, digest))

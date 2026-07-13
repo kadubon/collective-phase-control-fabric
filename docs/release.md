@@ -12,9 +12,10 @@ non-prerelease GitHub Release whose `vX.Y.Z` tag exactly matches package metadat
 also requires the repository variable `PYPI_PUBLISH_ENABLED=true` and approval in the protected
 `pypi` environment.
 
-Until an independent reviewer is configured and the PyPI pending publisher is changed from
-environment “Any” to `pypi`, `PYPI_PUBLISH_ENABLED` remains false. No tag, GitHub Release, or PyPI
-upload is permitted before all gates in [release readiness](release-readiness.md) pass.
+The pending publisher is configured for environment `pypi`. Its GitHub environment reviewer is
+`kadubon` with `prevent_self_review=false`. This is self-approval rather than independent release
+review. `PYPI_PUBLISH_ENABLED` remains false, and no tag, GitHub Release, or PyPI upload is
+permitted before all gates in [release readiness](release-readiness.md) pass.
 
 A pending publisher does not reserve the PyPI project name. The first upload occurs only after the
 repository, workflow filename, environment, project name, and OIDC claims match exactly.

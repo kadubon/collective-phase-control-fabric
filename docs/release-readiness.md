@@ -16,11 +16,11 @@ statistical validity, or general controllability.
 
 - Environment: `uv 0.11.28` with CPython 3.14.6 on Windows.
 - Frozen universal lock: base plus all extras, development, and security groups synchronize.
-- Regression suite: 292 tests passed; two PostgreSQL integration tests skipped because disposable
-  owner/application database URLs were not configured locally.
+- Regression suite: 425 tests passed; three integration tests skipped because disposable
+  PostgreSQL and object-store services were not configured locally.
 - Ruff formatting and lint: passed.
 - Strict mypy: passed across the core and all four optional import-package source trees.
-- Schema meta-validation: 200 schemas passed across v0.1–v0.6; the native v0.6 registry contains 40
+- Schema meta-validation: 207 schemas passed across v0.1–v0.6; the native v0.6 registry contains 47
   closed kinds.
 - Fixture consistency: nine compatibility fixtures passed.
 - Runtime-generated CLI, OpenAPI, error, and agent references match the checked-in documents.
@@ -39,10 +39,13 @@ statistical validity, or general controllability.
 
 ## Failing or unavailable release gates
 
-- Overall branch coverage is 81%, below the required 90%.
-- Focused v0.6 critical-subsystem branch coverage is 72.20%, below the required 95%.
-- The required 85% mutation score has not been established; native Windows Mutmut execution is not
-  supported, so the pinned Linux CI gate is authoritative.
+- PR #1 established 90.02% combined branch-enabled coverage, 96.44% for its configured critical
+  suite, and an 88.21% mutation score. The separately calculated pure branch ratio was about 84.3%,
+  so the final 90% pure-branch acceptance gate remains open. Every stacked implementation PR must
+  rerun coverage and mutation analysis rather than inherit the baseline result.
+- The current trust/storage changes pass 90.18% combined branch-enabled coverage and 96.04% for the
+  configured critical suite on Windows. The local WSL/NTFS mutation run timed out on 181 mutants
+  and therefore failed closed at 78.77%; the native-Linux PR job remains required and authoritative.
 - The initial public commit passed Gitleaks, Semgrep, CodeQL, and Trivy. These immutable-action jobs
   remain required on protected changes and do not replace an independent penetration test.
 - PostgreSQL RLS, serializable generation commits, object-store interruption, OIDC/KMS rotation,
@@ -61,6 +64,8 @@ The trusted-publishing workflow is `.github/workflows/workflow.yml`. Manual disp
 The PyPI job requires a non-prerelease GitHub Release, exact tag/metadata agreement, the protected
 `pypi` environment, and `PYPI_PUBLISH_ENABLED=true`.
 
-`PYPI_PUBLISH_ENABLED` must remain false. The PyPI pending publisher currently names environment
-“Any”; it must be changed to `pypi`, and an independent GitHub reviewer who cannot self-approve must
-be configured before publication can be enabled.
+`PYPI_PUBLISH_ENABLED` must remain false. The pending publisher claims are project
+`collective-phase-control-fabric`, repository `kadubon/collective-phase-control-fabric`, workflow
+`workflow.yml`, and environment `pypi`. Reviewer `kadubon` is configured with
+`prevent_self_review=false`; this is explicitly self-approval and is not independent release
+review. Stable publication remains blocked on the independent external gates above.

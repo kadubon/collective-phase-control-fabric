@@ -68,8 +68,10 @@ statement remains a bounded evidence-control analysis plus separately validated 
 
 Public source push is permitted only after the explicit staged allowlist, staged diff, staged
 hygiene scan, redacted Gitleaks scan, license/SPDX review, and built wheel/sdist scan pass. PyPI,
-tags, and GitHub Releases remain prohibited. The PyPI pending publisher still uses environment
-“Any”; it must be changed to `pypi`, and an independent GitHub environment reviewer must be supplied
-before publishing can be deliberately enabled.
+tags, and GitHub Releases remain prohibited. The pending publisher claims are project
+`collective-phase-control-fabric`, repository `kadubon/collective-phase-control-fabric`, workflow
+`workflow.yml`, and environment `pypi`. The GitHub environment requires reviewer `kadubon` with
+`prevent_self_review=false`. This is self-approval, not independent release review, and does not
+satisfy the independent-review release blocker. `PYPI_PUBLISH_ENABLED` remains false.
 
 Machine-readable status is in `audit/findings-v0.6.json`.

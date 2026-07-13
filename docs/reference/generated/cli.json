@@ -93,6 +93,21 @@
     },
     {
       "argv": [
+        "object"
+      ],
+      "description": "usage: cpcf object [-h] {upload} ...",
+      "help": "Upload immutable CAS material."
+    },
+    {
+      "argv": [
+        "object",
+        "upload"
+      ],
+      "description": "usage: cpcf object upload [-h] --generation GENERATION workspace path",
+      "help": null
+    },
+    {
+      "argv": [
         "schema"
       ],
       "description": "usage: cpcf schema [-h] {list,show} ...",
@@ -133,8 +148,8 @@
         "workspace",
         "create"
       ],
-      "description": "usage: cpcf workspace create [-h] workspace",
-      "help": null
+      "description": "usage: cpcf workspace create [-h]\n                             --root-spki-fingerprint ROOT_SPKI_FINGERPRINT\n                             --genesis-envelope-fingerprint GENESIS_ENVELOPE_FINGERPRINT\n                             workspace",
+      "help": "Create a workspace with two out-of-band genesis fingerprints."
     },
     {
       "argv": [

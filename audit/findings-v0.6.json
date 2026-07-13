@@ -35,7 +35,7 @@
       "severity": "critical",
       "exploit": "A manual workflow or mismatched tag can upload an unreviewed distribution.",
       "affected_claim": "PyPI release integrity",
-      "correction": "Release-only trusted-publishing job, exact artifact contract, version match, protected pypi environment, and disabled publication variable.",
+      "correction": "Release-only trusted-publishing job, exact artifact contract, version match, protected pypi environment, explicit kadubon self-review governance downgrade, and disabled publication variable.",
       "regression_test": "tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
       "status": "partial"
     },
@@ -44,18 +44,18 @@
       "severity": "critical",
       "exploit": "Previously admitted records can be used without recomputing signatures, time, source, lifecycle, and projection authority.",
       "affected_claim": "Authoritative evidence control",
-      "correction": "Kernel validators exist; complete authoritative-read integration remains required.",
-      "regression_test": "release gate: authoritative read integration suite",
-      "status": "open"
+      "correction": "A single loader now recomputes the ledger, DSSE, trusted time, lifecycle, source artifacts, evidence pointers, and quorum while rejecting unsigned native authority; API-wide integration remains required.",
+      "regression_test": "tests/test_v6_authority.py and release gate: authoritative read integration suite",
+      "status": "partial"
     },
     {
       "id": "V6-006",
       "severity": "critical",
       "exploit": "A crash can separate CAS references, ledger state, idempotency, outbox, audit, and current generation.",
       "affected_claim": "Serializable immutable generation",
-      "correction": "Complete one-transaction domain commit and crash injection remain required.",
-      "regression_test": "release gate: PostgreSQL generation crash matrix",
-      "status": "open"
+      "correction": "The PostgreSQL generation unit of work now groups ledger, generation, audit, idempotency, outbox, quarantine, and pointer changes under serializable optimistic locking; live crash-matrix evidence and API-wide use remain required.",
+      "regression_test": "tests/test_v6_db_worker_assurance.py::test_generation_unit_of_work_commits_all_database_effects_or_quarantines and release gate: PostgreSQL generation crash matrix",
+      "status": "partial"
     },
     {
       "id": "V6-007",
@@ -155,6 +155,15 @@
       "correction": "CI and release workflows pass an explicit Boolean value to Mutmut 3.6 and retain the 85 percent fail-closed score check.",
       "regression_test": "tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
       "status": "closed"
+    },
+    {
+      "id": "V6-018",
+      "severity": "high",
+      "exploit": "A repository owner can approve the pypi environment and bypass independent human release review.",
+      "affected_claim": "Independent release governance",
+      "correction": "The pypi environment records kadubon with prevent_self_review=false exactly as configured, and all audit and release documents label this as self-approval rather than independent review.",
+      "regression_test": "GitHub environment settings audit and docs/release.md",
+      "status": "accepted_risk"
     }
   ]
 }
