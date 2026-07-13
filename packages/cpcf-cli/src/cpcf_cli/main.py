@@ -36,6 +36,8 @@ from collective_phase_control_fabric.v6.registry import (
 from collective_phase_control_fabric.v6.runner import validate_receipt
 from cpcf_cli.auth import device_login, stored_token
 
+FALLBACK_CLAIM_KEY = "cpcf_token_environment_fallback_supported"
+
 LEGACY_READ_ONLY_COMMANDS = frozenset(
     {
         ("agent", "explain"),
@@ -512,7 +514,7 @@ def main(argv: list[str] | None = None) -> int:
                     "verification_uri": result.verification_uri,
                     "user_code": result.user_code,
                     "account": result.account,
-                    "cpcf_token_environment_fallback_supported": True,
+                    FALLBACK_CLAIM_KEY: True,
                 },
                 "unknowns": [],
                 "objects_written": [],
