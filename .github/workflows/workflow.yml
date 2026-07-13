@@ -40,9 +40,13 @@ jobs:
       - name: Critical subsystem branch coverage
         run: >-
           uv run --frozen pytest
-          tests/test_v6_models_trust.py tests/test_v6_science_planner.py
-          tests/test_v6_service_boundaries.py tests/test_v6_package_interfaces.py
-          tests/test_v6_release_surface.py tests/test_v6_structural_analysis.py
+          tests/test_v6_api_assurance.py tests/test_v6_assurance_branches.py
+          tests/test_v6_db_worker_assurance.py tests/test_v6_golden_semantics.py
+          tests/test_v6_model_assurance.py tests/test_v6_models_trust.py
+          tests/test_v6_package_interfaces.py tests/test_v6_planning_assurance.py
+          tests/test_v6_release_surface.py tests/test_v6_science_assurance.py
+          tests/test_v6_science_planner.py tests/test_v6_service_boundaries.py
+          tests/test_v6_structural_analysis.py
           --cov=collective_phase_control_fabric.v6 --cov=cpcf_api --cov=cpcf_cli
           --cov=cpcf_worker --cov=cpcf_runner_protocol --cov-branch
           --cov-report=term-missing --cov-fail-under=95

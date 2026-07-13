@@ -211,11 +211,20 @@ only_mutate = [
 ]
 pytest_add_cli_args = ["-q"]
 pytest_add_cli_args_test_selection = [
+  "tests/test_v6_api_assurance.py",
+  "tests/test_v6_assurance_branches.py",
+  "tests/test_v6_db_worker_assurance.py",
+  "tests/test_v6_golden_semantics.py",
+  "tests/test_v6_model_assurance.py",
   "tests/test_v6_models_trust.py",
+  "tests/test_v6_planning_assurance.py",
+  "tests/test_v6_science_assurance.py",
   "tests/test_v6_science_planner.py",
   "tests/test_v6_service_boundaries.py",
   "tests/test_v6_structural_analysis.py",
+  "-k",
+  "not test_kms_signers_normalize_provider_encodings and not test_p256_principals_sign_verify_and_reject_algorithm_or_encoding_substitution",
 ]
 mutate_only_covered_lines = true
-timeout_multiplier = 10.0
+timeout_multiplier = 2.0
 timeout_constant = 1.0

@@ -3,22 +3,32 @@
 
 from __future__ import annotations
 
+import builtins
 from fractions import Fraction
+
+import pytest
 
 from collective_phase_control_fabric.v6.models import (
     DOCUMENT_MODELS,
+    CatalystClause,
     Lifecycle,
     TransformationAttestation,
     TransformationSpec,
 )
 from collective_phase_control_fabric.v6.science import Budget
 from collective_phase_control_fabric.v6.structural_analysis import (
+    _interpolate,
+    _inverse_crossing,
+    _nullspace,
+    _proportional,
+    _stoichiometric_matrix,
     bounded_occurrence_prefix,
     deterministic_curve_bounds,
     enumerate_minimal_cut_sets,
     enumerate_minimal_enablement_sets,
     enumerate_minimal_siphons,
     exact_flux_coupling,
+    structural_closure,
     unfed_siphons,
 )
 from tests.v6_helpers import VALID_FROM, VALID_UNTIL, metadata
@@ -121,3 +131,159 @@ def test_bounded_occurrence_prefix_records_conflict_and_causality() -> None:
     assert right.conflict_event_ids == (left.event_id,)
     assert not left.causal_predecessor_ids
     assert not right.causal_predecessor_ids
+
+
+def test_structural_closure_bounds_unreachable_targets_and_allowed_edges() -> None:
+    network = {
+        "first": transformation("first", {"A": "1"}, {"B": "1", "zero": "0"}),
+        "second": transformation("second", {"B": "1"}, {"target": "1"}),
+    }
+    assert structural_closure({"A"}, network, budget=Budget(operations=100)) == {
+        "A",
+        "B",
+        "target",
+    }
+    assert structural_closure(
+        {"A"}, network, allowed_transformations={"first", "unknown"}, budget=Budget(operations=100)
+    ) == {"A", "B"}
+    unreachable = enumerate_minimal_cut_sets(set(), {"target"}, network, Budget(operations=100))
+    assert unreachable.values == ((),) and unreachable.exhaustive
+    assert not enumerate_minimal_cut_sets(
+        {"A"}, {"target"}, network, Budget(operations=100), maximum_transformations=1
+    ).exhaustive
+    assert not enumerate_minimal_enablement_sets(
+        {"A"}, {"target"}, network, Budget(operations=100), maximum_transformations=1
+    ).exhaustive
+    initially_enabled = enumerate_minimal_enablement_sets(
+        {"target"}, {"target"}, network, Budget(operations=100)
+    )
+    assert initially_enabled.values == ((),)
+
+
+def test_siphon_minimality_and_external_supply_paths_are_distinct() -> None:
+    network = {
+        "cycle-a": transformation("cycle-a", {"A": "1"}, {"B": "1"}),
+        "cycle-b": transformation("cycle-b", {"B": "1"}, {"A": "1"}),
+        "self": transformation("self", {"C": "1"}, {"C": "1"}),
+    }
+    siphons = enumerate_minimal_siphons(network, {"A", "B", "C"}, Budget(operations=1000))
+    assert siphons.values == (("C",), ("A", "B"))
+    assert unfed_siphons(siphons.values, {}, {"C"}) == (("A", "B"),)
+    assert unfed_siphons(siphons.values, {"A": Fraction(0)}, {"A"}) == (("C",),)
+
+
+def test_curve_helpers_cover_boundaries_flat_segments_and_incomplete_horizons() -> None:
+    points = [(Fraction(0), Fraction(0)), (Fraction(1), Fraction(1))]
+    assert _interpolate(points, Fraction(-1)) is None
+    assert _interpolate(points, Fraction(2)) is None
+    assert _interpolate(points, Fraction(0)) == 0
+    assert _interpolate(points, Fraction(1, 2)) == Fraction(1, 2)
+    assert _inverse_crossing(points, Fraction(2), Fraction(0)) is None
+    assert _inverse_crossing(points, Fraction(1), Fraction(2)) is None
+    flat = [(Fraction(0), Fraction(0)), (Fraction(1), Fraction(0))]
+    assert _inverse_crossing(flat, Fraction(1), Fraction(0)) is None
+    incomplete = deterministic_curve_bounds(
+        [(Fraction(0), Fraction(0)), (Fraction(1), Fraction(2))],
+        [(Fraction(0), Fraction(0)), (Fraction(1), Fraction(1))],
+        Budget(operations=100),
+    )
+    assert not incomplete.exhaustive
+    assert incomplete.delay is None
+    assert incomplete.backlog == 1
+
+
+def test_exact_linear_algebra_handles_pivots_free_columns_and_proportionality() -> None:
+    network = {
+        "forward": transformation("forward", {"A": "1"}, {"B": "1"}),
+        "reverse": transformation("reverse", {"B": "1"}, {"A": "1"}),
+    }
+    coordinates, matrix = _stoichiometric_matrix(network, ["forward", "reverse"])
+    assert coordinates == ("A", "B")
+    assert _nullspace(matrix, 2) == [[Fraction(1), Fraction(1)]]
+    assert _nullspace([], 2) == [
+        [Fraction(1), Fraction(0)],
+        [Fraction(0), Fraction(1)],
+    ]
+    assert _nullspace([[Fraction(0), Fraction(1)]], 2) == [[Fraction(1), Fraction(0)]]
+    assert _proportional([Fraction(1), Fraction(2)], [Fraction(2), Fraction(4)])
+    with pytest.raises(ValueError):
+        _proportional([Fraction(1)], [Fraction(1), Fraction(2)])
+    assert not _proportional([Fraction(1), Fraction(1)], [Fraction(1), Fraction(0)])
+    assert not _proportional([Fraction(1), Fraction(0)], [Fraction(1), Fraction(1)])
+    assert not _proportional([Fraction(0)], [Fraction(1)])
+    assert not _proportional([Fraction(1)], [Fraction(-1)])
+    assert not _proportional([Fraction(1), Fraction(2)], [Fraction(1), Fraction(3)])
+    assert not _proportional([Fraction(0)], [Fraction(0)])
+
+
+def test_flux_analysis_reports_empty_network_and_missing_optional_solver(
+    monkeypatch: object,
+) -> None:
+    assert exact_flux_coupling({}, Budget(operations=100)).status == "satisfied"
+    original_import = builtins.__import__
+
+    def fail_z3(name: str, *args: object, **kwargs: object) -> object:
+        if name == "z3":
+            raise ImportError
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fail_z3)  # type: ignore[attr-defined]
+    unavailable = exact_flux_coupling(
+        {"one": transformation("one", {"A": "1"}, {"A": "1"})},
+        Budget(operations=100),
+    )
+    assert unavailable.status == "unknown"
+    assert not unavailable.exact_models_rechecked
+
+
+def test_occurrence_prefix_rejects_non_unit_profiles_and_marks_cutoffs_and_limits() -> None:
+    non_unit = {"double": transformation("double", {"A": "2"}, {"B": "1"})}
+    assert not bounded_occurrence_prefix({"A"}, non_unit, Budget(operations=100)).exhaustive
+
+    cycle = {
+        "forward": transformation("forward", {"A": "1"}, {"B": "1"}),
+        "reverse": transformation("reverse", {"B": "1"}, {"A": "1"}),
+    }
+    prefix = bounded_occurrence_prefix({"A"}, cycle, Budget(operations=100))
+    assert prefix.cutoff_event_ids
+    assert prefix.events[1].causal_predecessor_ids == (prefix.events[0].event_id,)
+
+    limited = bounded_occurrence_prefix({"A"}, cycle, Budget(operations=100), maximum_events=0)
+    assert not limited.exhaustive and not limited.events
+
+    inhibited = transformation("inhibited", {"A": "1"}, {"B": "1"}).model_copy(
+        update={
+            "spec": transformation("inhibited", {"A": "1"}, {"B": "1"}).spec.model_copy(
+                update={"inhibitors": ["A"]}
+            )
+        }
+    )
+    assert not bounded_occurrence_prefix(
+        {"A"}, {"inhibited": inhibited}, Budget(operations=100)
+    ).events
+
+    catalyst_required = transformation("catalyst-required", {"A": "1"}, {"B": "1"}).model_copy(
+        update={
+            "spec": transformation("catalyst-required", {"A": "1"}, {"B": "1"}).spec.model_copy(
+                update={
+                    "uncatalyzed": False,
+                    "catalyst_clauses": [CatalystClause(all_of=["cat"])],
+                }
+            )
+        }
+    )
+    assert not bounded_occurrence_prefix(
+        {"A"}, {"catalyst-required": catalyst_required}, Budget(operations=100)
+    ).events
+    catalyzed = bounded_occurrence_prefix(
+        {"A", "cat"},
+        {"catalyst-required": catalyst_required},
+        Budget(operations=100),
+    )
+    assert len(catalyzed.events) == 1
+    assert len(catalyzed.events[0].preset_condition_ids) == 1
+
+    output_already_marked = transformation("duplicate-output", {"A": "1"}, {"B": "1"})
+    assert not bounded_occurrence_prefix(
+        {"A", "B"}, {"duplicate-output": output_already_marked}, Budget(operations=100)
+    ).events
