@@ -1,16 +1,37 @@
 # syntax=docker/dockerfile:1.7
-FROM ghcr.io/astral-sh/uv:0.11.28 AS uv
-FROM python:3.14.6-slim-bookworm AS runtime
+FROM ghcr.io/astral-sh/uv:0.11.28@sha256:0f36cb9361a3346885ca3677e3767016687b5a170c1a6b88465ec14aefec90aa AS uv
+FROM python:3.14.6-slim-bookworm@sha256:4ff4b92a68355dbdb52584ab3391dff8d371a61d4e063468bfd0130e3189c6d9 AS api-core
 COPY --from=uv /uv /usr/local/bin/uv
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UV_FROZEN=1 UV_NO_DEV=1
 WORKDIR /app
 COPY pyproject.toml uv.lock README.md LICENSE ./
+COPY AGENTS.md llms.txt agent-manifest.json SPEC.md FORMAL_MODEL.md ./
 COPY src ./src
 COPY schemas ./schemas
+COPY fixtures ./fixtures
+COPY docs ./docs
 COPY packages ./packages
-RUN uv sync --frozen --all-packages --no-group dev --no-group security && \
+RUN uv sync --frozen --all-packages --extra server --no-group dev --no-group security && \
     useradd --uid 65532 --create-home --shell /usr/sbin/nologin cpcf && \
     chown -R 65532:65532 /app
 USER 65532:65532
 EXPOSE 8080
 ENTRYPOINT ["uv", "run", "--frozen", "--no-sync", "cpcf-api"]
+
+FROM api-core AS migration
+COPY --chown=65532:65532 deploy ./deploy
+ENTRYPOINT ["uv", "run", "--frozen", "--no-sync", "alembic", "-c", "deploy/alembic.ini", "upgrade", "head"]
+
+FROM api-core AS api-aws-kms
+RUN uv sync --frozen --all-packages --extra server --extra aws-kms --no-group dev --no-group security
+
+FROM api-core AS api-gcp-kms
+RUN uv sync --frozen --all-packages --extra server --extra gcp-kms --no-group dev --no-group security
+
+FROM api-core AS api-azure-kms
+RUN uv sync --frozen --all-packages --extra server --extra azure-kms --no-group dev --no-group security
+
+FROM api-core AS api-pkcs11
+RUN uv sync --frozen --all-packages --extra server --extra pkcs11 --no-group dev --no-group security
+
+FROM api-core AS api

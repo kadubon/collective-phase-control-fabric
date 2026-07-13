@@ -12,7 +12,7 @@ Start with the path that matches the task:
   [operational profile](operational-profile.md).
 - Scientific reviewer: [scientific boundaries](scientific-boundaries.md),
   [research basis](research-basis.md), and [formal model](../FORMAL_MODEL.md).
-- Operator: [deployment](deployment.md), [security](security.md), and
+- Operator: [deployment](deployment.md), [operations evidence](operations-evidence.md), [security](security.md), and
   [release readiness](release-readiness.md).
 - Publisher: [release process](release.md) and the publication-hygiene checks in
   [security](security.md).

@@ -107,7 +107,12 @@ def _blocked_path(path: str) -> str | None:
     if any(part.lower() in BLOCKED_PARTS for part in pure.parts):
         return "generated_or_local_directory"
     name = pure.name.lower()
-    if name in BLOCKED_NAMES or name.startswith(".env") or name.startswith("coverage-"):
+    if (
+        name in BLOCKED_NAMES
+        or name.startswith(".env")
+        or name.startswith("coverage-")
+        or name.endswith("coverage.json")
+    ):
         return "generated_or_sensitive_file"
     if any(name.startswith(prefix) for prefix in ("dist-", "dist_")):
         return "nested_build_output"
@@ -184,17 +189,17 @@ def _staged_files(root: Path) -> Iterable[tuple[str, bytes]]:
 def _archive_files(path: Path) -> Iterable[tuple[str, bytes]]:
     if path.suffix == ".whl" or path.suffix == ".zip":
         with zipfile.ZipFile(path) as archive:
-            for info in archive.infolist():
-                if not info.is_dir():
-                    yield info.filename, archive.read(info)
+            for zip_info in archive.infolist():
+                if not zip_info.is_dir():
+                    yield zip_info.filename, archive.read(zip_info)
         return
     if path.name.endswith((".tar.gz", ".tgz", ".tar")):
         with tarfile.open(path, "r:*") as archive:
-            for info in archive.getmembers():
-                if info.isfile():
-                    source = archive.extractfile(info)
+            for tar_info in archive.getmembers():
+                if tar_info.isfile():
+                    source = archive.extractfile(tar_info)
                     if source is not None:
-                        yield info.name, source.read()
+                        yield tar_info.name, source.read()
         return
     raise ValueError(f"unsupported archive type: {path.name}")
 

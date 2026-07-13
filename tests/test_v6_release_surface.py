@@ -103,6 +103,10 @@ def test_release_workflow_is_fail_closed() -> None:
     assert "--cov-fail-under=95" in workflow
     assert "mutmut results --all true > mutation-results.txt" in workflow
     assert "mutmut results --all true > mutation-results.txt" in ci_workflow
+    for source in (workflow, ci_workflow):
+        assert "name: mutation-results" in source
+        assert "path: mutation-results.txt" in source
+        assert "retention-days: 14" in source
     assert "check_mutation_score.py mutation-results.txt --minimum 85" in workflow
 
 

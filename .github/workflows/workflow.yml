@@ -29,7 +29,7 @@ jobs:
       - run: uv sync --frozen --all-extras --group dev --group security
       - run: uv run --frozen ruff format --check .
       - run: uv run --frozen ruff check .
-      - run: uv run --frozen mypy src packages/cpcf-api/src packages/cpcf-cli/src packages/cpcf-worker/src packages/cpcf-runner-protocol/src
+      - run: uv run --frozen mypy src packages/cpcf-api/src packages/cpcf-cli/src packages/cpcf-worker/src packages/cpcf-runner-protocol/src scripts
       - run: uv run --frozen pytest
       - name: Overall branch coverage
         run: >-
@@ -44,7 +44,9 @@ jobs:
           tests/test_v6_authority.py
           tests/test_v6_db_worker_assurance.py tests/test_v6_golden_semantics.py
           tests/test_v6_intervention.py
+          tests/test_v6_cli_auth.py tests/test_v6_coordination_trial_assurance.py
           tests/test_v6_model_assurance.py tests/test_v6_models_trust.py
+          tests/test_v6_onboarding_repairs.py tests/test_v6_operations_release.py
           tests/test_v6_package_interfaces.py tests/test_v6_planning_assurance.py
           tests/test_v6_runner_gateway.py
           tests/test_v6_release_surface.py tests/test_v6_science_assurance.py
@@ -52,7 +54,12 @@ jobs:
           tests/test_v6_structural_analysis.py
           --cov=collective_phase_control_fabric.v6 --cov=cpcf_api --cov=cpcf_cli
           --cov=cpcf_worker --cov=cpcf_runner_protocol --cov-branch
-          --cov-report=term-missing --cov-fail-under=95
+          --cov-report=term-missing --cov-report=json:critical-coverage.json
+          --cov-fail-under=95
+      - name: Enforce every critical subsystem independently
+        run: >-
+          uv run --frozen python scripts/check_critical_coverage.py
+          critical-coverage.json --minimum 95
       - run: uv run --frozen python scripts/check_schemas.py
       - run: uv run --frozen python scripts/check_fixtures.py
       - run: uv run --frozen python scripts/generate_references.py --check
@@ -73,6 +80,13 @@ jobs:
       - run: >-
           uv run --frozen python scripts/check_publication_hygiene.py
           --archive dist/*.whl --archive dist/*.tar.gz
+      - name: Lint and render Helm chart with pinned Helm 3.21.1
+        run: |
+          curl --fail --silent --show-error --location --output /tmp/helm.tar.gz https://get.helm.sh/helm-v3.21.1-linux-amd64.tar.gz
+          echo "a349c62d6ab2d5d11f044fc0d3afa6deed7d27cc7d5c351f536b169d9fc2cc1a  /tmp/helm.tar.gz" | sha256sum --check
+          tar --extract --gzip --file /tmp/helm.tar.gz --directory /tmp
+          /tmp/linux-amd64/helm lint deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          /tmp/linux-amd64/helm template test deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >/dev/null
       - name: Clean installed-wheel smoke test
         run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf self-check --json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -138,11 +152,44 @@ jobs:
       - run: uv sync --frozen --all-extras --group dev --group security
       - run: uv run --frozen mutmut run
       - run: uv run --frozen mutmut results --all true > mutation-results.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: mutation-results
+          path: mutation-results.txt
+          retention-days: 14
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
+
+  external-gates:
+    name: Verify externally supplied stable-release evidence
+    needs: build
+    if: >-
+      github.event_name == 'release' &&
+      github.event.release.draft == false &&
+      github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+      - name: Require commit-bound external gate evidence
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        run: >-
+          uv run --no-project
+          python scripts/check_external_release_evidence.py
+          "release-evidence/${RELEASE_TAG}.json"
+          --version "${RELEASE_TAG#v}" --commit "$RELEASE_COMMIT"
 
   release-assets:
     name: Attach verified release assets
-    needs: [build, provenance, mutation]
+    needs: [build, provenance, mutation, external-gates]
     if: >-
       github.event_name == 'release' &&
       github.event.release.draft == false &&
@@ -171,7 +218,7 @@ jobs:
 
   publish:
     name: Publish to PyPI with trusted publishing
-    needs: [build, provenance, release-assets]
+    needs: [build, provenance, mutation, external-gates, release-assets]
     if: >-
       github.event_name == 'release' &&
       github.event.release.draft == false &&

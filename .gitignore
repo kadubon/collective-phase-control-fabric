@@ -6,6 +6,7 @@
 /.ruff_cache/
 /.venv*/
 /coverage*.json
+/*coverage*.json
 /coverage*.xml
 /dist*/
 /release-metadata*/

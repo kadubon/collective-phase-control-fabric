@@ -5,6 +5,7 @@ deploy/**
 docs/**
 fixtures/**
 packages/**
+release-evidence/**
 schemas/**
 scripts/**
 src/**

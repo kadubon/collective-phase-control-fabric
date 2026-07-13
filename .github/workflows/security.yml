@@ -72,6 +72,56 @@ jobs:
           ignore-unfixed: true
           exit-code: "1"
       - uses: github/codeql-action/upload-sarif@8096e4f9571939c23cbd19018c44c665f90096af
-        if: always()
+        if: ${{ always() && hashFiles('trivy-api-image.sarif') != '' }}
         with:
           sarif_file: trivy-results.sarif
+
+  trivy-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - name: Build pinned API and worker images
+        run: |
+          docker build --target api -f deploy/Dockerfile.api -t cpcf-api:${{ github.sha }} .
+          docker build --target worker -f deploy/Dockerfile.worker -t cpcf-worker:${{ github.sha }} .
+      - id: api-image-scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        with:
+          image-ref: cpcf-api:${{ github.sha }}
+          format: sarif
+          output: trivy-api-image.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+      - id: worker-image-scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        with:
+          image-ref: cpcf-worker:${{ github.sha }}
+          format: sarif
+          output: trivy-worker-image.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+      - uses: github/codeql-action/upload-sarif@8096e4f9571939c23cbd19018c44c665f90096af
+        if: ${{ always() && hashFiles('trivy-worker-image.sarif') != '' }}
+        with:
+          sarif_file: trivy-api-image.sarif
+          category: trivy-api-image
+      - uses: github/codeql-action/upload-sarif@8096e4f9571939c23cbd19018c44c665f90096af
+        if: always()
+        with:
+          sarif_file: trivy-worker-image.sarif
+          category: trivy-worker-image
+      - name: Enforce both image scans
+        if: always()
+        env:
+          API_SCAN: ${{ steps.api-image-scan.outcome }}
+          WORKER_SCAN: ${{ steps.worker-image-scan.outcome }}
+        run: test "$API_SCAN" = success && test "$WORKER_SCAN" = success

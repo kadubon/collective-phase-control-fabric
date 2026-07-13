@@ -10,6 +10,7 @@ from cpcf_api.app import create_app
 from cpcf_api.auth import OidcAuthenticator
 from cpcf_api.db import PostgresBackend, make_engine
 from cpcf_api.object_store import S3ObjectStore
+from cpcf_api.telemetry import configure_telemetry, telemetry_settings
 
 
 class _LazyS3Client:
@@ -48,3 +49,4 @@ app = create_app(
     authenticator=authenticator,
     object_store=object_store,
 )
+configure_telemetry(app, telemetry_settings())
