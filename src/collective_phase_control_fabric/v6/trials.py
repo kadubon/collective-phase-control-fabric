@@ -122,10 +122,9 @@ def assess_trial(
         amendment_decisions = _decisions(objects, "protocol_amendment", amendment_digest)
         if len(amendment_decisions) != 1:
             blockers.append(f"amendment_quorum_required:{amendment.spec.sequence}")
-        elif (
-            not amendment.spec.amended_at
-            <= amendment_decisions[0].spec.decided_at
-            < (protocol.spec.time_zero)
+        elif not (
+            amendment.spec.amended_at <= amendment_decisions[0].spec.decided_at
+            and amendment_decisions[0].spec.decided_at < protocol.spec.time_zero
         ):
             contradictions.append(f"amendment_time_quorum_invalid:{amendment.spec.sequence}")
         if signer_principals is not None and amendment.spec.author_principal_id not in (

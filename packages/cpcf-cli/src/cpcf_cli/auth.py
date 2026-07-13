@@ -12,6 +12,7 @@ from typing import Any, Protocol
 import httpx
 
 SERVICE_NAME = "collective-phase-control-fabric"
+OIDC_EXPIRED_ERROR = "expired_token"
 
 
 class Keyring(Protocol):
@@ -157,7 +158,7 @@ def device_login(
             elif error not in {"authorization_pending"}:
                 error_codes = {
                     "access_denied": "oidc_device_access_denied",
-                    "expired_token": "oidc_device_code_expired",
+                    OIDC_EXPIRED_ERROR: "oidc_device_code_expired",
                 }
                 code = error_codes.get(error or "", "oidc_token_response_invalid")
                 return DeviceLoginResult(
