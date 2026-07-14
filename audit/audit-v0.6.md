@@ -6,9 +6,10 @@ The repository now builds one installable distribution with a useful offline fir
 runtime-derived references, frozen `uv` resolution, and a fail-closed publication workflow. It is
 appropriate for public source review after the staged-content hygiene gate passes.
 
-It is not eligible for a stable tag, GitHub Release, PyPI upload, or operational-assurance label. Several
-authority paths remain incomplete, and the required coverage, mutation, integration, load, chaos,
-restore, soak, threat-model, and independent-penetration-test gates have not passed.
+It is eligible for Beta OSS package publication after automated release gates pass. That
+publication does not establish operational assurance. Several authority paths remain incomplete,
+and the required deployment, restore, soak, threat-model, and independent-penetration-test evidence
+has not been supplied.
 
 This audit lists known findings only. It does not assert that undiscovered defects are impossible.
 
@@ -27,8 +28,9 @@ This audit lists known findings only. It does not assert that undiscovered defec
   excluded. The prior absolute Windows source paths were replaced with symbolic paths.
 - The release workflow builds one wheel and one sdist in a non-OIDC job. PyPI upload is isolated,
   release-only, version-matched, protected by the `pypi` environment, disabled unless
-  `PYPI_PUBLISH_ENABLED=true`, and now depends on closed commit-bound external evidence. No release
-  manifest exists, so stable release assets and publication fail closed.
+  `PYPI_PUBLISH_ENABLED=true`. The explicit Beta publication class reports absent external evidence
+  without treating it as satisfied; the strict default validator still requires commit-bound
+  operational evidence.
 - The universal lock now resolves under Windows CPython 3.14.6. `pip-audit` was updated to 2.10.1;
   Semgrep remains a pinned external CI action because its Python dependency constraints conflict
   with the required runtime `jsonschema` baseline.

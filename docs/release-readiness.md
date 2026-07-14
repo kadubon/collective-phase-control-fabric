@@ -5,8 +5,9 @@ commitment, external experiment, deployment-assurance claim, or measured-acceler
 
 ## Verdict
 
-The source is eligible for public review only after the staged-content hygiene process succeeds.
-It is not eligible for a stable tag, GitHub Release, PyPI upload, or operational-assurance label.
+The source is eligible for Beta OSS package publication after the staged-content hygiene and
+automated release gates succeed. Package publication is distinct from operational assurance; the
+external evidence required for the latter is unavailable.
 
 The native result is a thirteen-dimensional operational organization profile. It does not infer
 intelligence, causal acceleration, a physical phase, entropy production, thermodynamic efficiency,
@@ -69,11 +70,12 @@ statistical validity, or general controllability.
 
 The trusted-publishing workflow is `.github/workflows/workflow.yml`. Manual dispatch verifies only.
 The PyPI job requires a non-prerelease GitHub Release, exact tag/metadata agreement, the protected
-`pypi` environment, `PYPI_PUBLISH_ENABLED=true`, and a commit-bound external release-evidence
-manifest. No versioned manifest exists, so stable release assets and publication fail closed.
+`pypi` environment, and `PYPI_PUBLISH_ENABLED=true`. The 0.6 workflow explicitly classifies the
+artifact as a Beta package and reports missing external operational evidence without treating that
+evidence as satisfied.
 
-`PYPI_PUBLISH_ENABLED` must remain false. The pending publisher claims are project
+The pending publisher claims are project
 `collective-phase-control-fabric`, repository `kadubon/collective-phase-control-fabric`, workflow
 `workflow.yml`, and environment `pypi`. Reviewer `kadubon` is configured with
 `prevent_self_review=false`; this is explicitly self-approval and is not independent release
-review. Stable publication remains blocked on the independent external gates above.
+review. Independent external gates remain mandatory for any later operational-assurance decision.
