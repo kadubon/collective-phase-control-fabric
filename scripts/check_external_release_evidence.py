@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Fail closed unless external commercial release gates are bound to the release commit."""
+"""Classify package publication separately from operational-assurance evidence."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from typing import Any
 
 DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
+VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 REQUIRED_GATES = {
     "availability_soak",
     "backup_restore",
@@ -98,7 +99,24 @@ def main() -> int:
     parser.add_argument("manifest", type=Path)
     parser.add_argument("--version", required=True)
     parser.add_argument("--commit", required=True)
+    parser.add_argument(
+        "--publication-class",
+        choices=("operational", "beta"),
+        default="operational",
+        help=(
+            "operational requires the complete external evidence manifest; beta permits package "
+            "publication without making an operational-assurance claim"
+        ),
+    )
     args = parser.parse_args()
+    if COMMIT.fullmatch(args.commit) is None or VERSION.fullmatch(args.version) is None:
+        raise SystemExit("release version or commit binding is invalid")
+    if not args.manifest.is_file() and args.publication_class == "beta":
+        print(
+            "beta package publication accepted; external operational-assurance evidence "
+            "is unavailable"
+        )
+        return 0
     try:
         value = json.loads(args.manifest.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:

@@ -160,7 +160,7 @@ jobs:
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 
   external-gates:
-    name: Verify externally supplied stable-release evidence
+    name: Classify package publication and operational evidence
     needs: build
     if: >-
       github.event_name == 'release' &&
@@ -177,7 +177,7 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           python-version: "3.14.6"
-      - name: Require commit-bound external gate evidence
+      - name: Classify the Beta package without claiming operational assurance
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_COMMIT: ${{ github.sha }}
@@ -186,6 +186,7 @@ jobs:
           python scripts/check_external_release_evidence.py
           "release-evidence/${RELEASE_TAG}.json"
           --version "${RELEASE_TAG#v}" --commit "$RELEASE_COMMIT"
+          --publication-class beta
 
   release-assets:
     name: Attach verified release assets

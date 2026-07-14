@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -125,6 +127,31 @@ def test_external_release_evidence_requires_every_bound_independent_gate() -> No
     )
 
 
+def test_beta_package_publication_does_not_invent_operational_evidence(tmp_path: Path) -> None:
+    command = [
+        sys.executable,
+        "scripts/check_external_release_evidence.py",
+        str(tmp_path / "absent.json"),
+        "--version",
+        "0.6.0",
+        "--commit",
+        COMMIT,
+    ]
+    strict = subprocess.run(command, check=False, capture_output=True, text=True)
+    assert strict.returncode == 1
+    assert "missing or invalid" in strict.stderr
+
+    beta = subprocess.run(
+        [*command, "--publication-class", "beta"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert beta.returncode == 0
+    assert "beta package publication accepted" in beta.stdout
+    assert "operational-assurance evidence is unavailable" in beta.stdout
+
+
 def test_reference_operations_harness_runs_exact_selected_scale_without_external_claims() -> None:
     load = asyncio.run(run_profile(100, 10_000, 100, 100))
     assert load["profile"] == {
@@ -164,6 +191,7 @@ def test_release_workflow_fails_closed_on_external_and_per_group_gates() -> None
         assert "critical-coverage.json" in source
     assert "external-gates:" in workflow
     assert "check_external_release_evidence.py" in workflow
+    assert "--publication-class beta" in workflow
     assert "needs: [build, provenance, mutation, external-gates]" in workflow
     assert "PYPI_PUBLISH_ENABLED == 'true'" in workflow
     security = Path(".github/workflows/security.yml").read_text(encoding="utf-8")

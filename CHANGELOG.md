@@ -14,6 +14,8 @@
   reconstruction, trial contradiction handling, and signed coordination validation.
 - Added an OIDC/RLS/S3-oriented FastAPI reference control plane, trusted analysis worker,
   PostgreSQL/Alembic schema, hardened Helm baseline, OCI build definitions, and frozen CI.
+- Separated Beta OSS package publication from the unavailable external evidence required for an
+  operational-assurance decision; the strict validator remains the default.
 - Stable operational-assurance labeling remains blocked by the recorded coverage, integration,
   load, chaos, availability-soak, restore, threat-model, and penetration-test gates.
 
