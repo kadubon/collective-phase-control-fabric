@@ -2,7 +2,7 @@
 
 The reference deployment targets a single-region, multi-availability-zone Kubernetes 1.36 cluster,
 PostgreSQL 18, an S3-compatible immutable object store, OIDC, and KMS/HSM-backed signing. It is a
-reference architecture, not a production-readiness claim.
+reference architecture, not evidence of deployment assurance.
 
 API and worker images install their explicit `server` and `worker` extras, use digest-pinned base
 images, and provide separate AWS, Google Cloud, Azure, and PKCS#11 KMS build targets. Pods run

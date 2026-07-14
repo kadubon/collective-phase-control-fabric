@@ -14,7 +14,7 @@
   reconstruction, trial contradiction handling, and signed coordination validation.
 - Added an OIDC/RLS/S3-oriented FastAPI reference control plane, trusted analysis worker,
   PostgreSQL/Alembic schema, hardened Helm baseline, OCI build definitions, and frozen CI.
-- Commercial production-ready labeling remains blocked by the recorded coverage, integration,
+- Stable operational-assurance labeling remains blocked by the recorded coverage, integration,
   load, chaos, availability-soak, restore, threat-model, and penetration-test gates.
 
 ## 0.5.0

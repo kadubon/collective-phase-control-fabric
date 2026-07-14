@@ -8,5 +8,5 @@ removes untrusted CPCF identity headers, and forwards only to `127.0.0.1:8081`.
 The Python gateway independently binds the resulting URI SAN and certificate fingerprint to a
 registered runner principal. The header is not accepted from an Internet-facing path that bypasses
 this Envoy listener. Kubernetes deployment of the sidecar and the multi-replica PostgreSQL lease
-repository remain release blockers; this file alone is not a containment or production-readiness
-claim.
+repository remain release blockers; this file alone is not evidence of containment or deployment
+assurance.

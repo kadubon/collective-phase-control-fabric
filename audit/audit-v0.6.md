@@ -6,7 +6,7 @@ The repository now builds one installable distribution with a useful offline fir
 runtime-derived references, frozen `uv` resolution, and a fail-closed publication workflow. It is
 appropriate for public source review after the staged-content hygiene gate passes.
 
-It is not eligible for a stable tag, GitHub Release, PyPI upload, or production-ready label. Several
+It is not eligible for a stable tag, GitHub Release, PyPI upload, or operational-assurance label. Several
 authority paths remain incomplete, and the required coverage, mutation, integration, load, chaos,
 restore, soak, threat-model, and independent-penetration-test gates have not passed.
 
