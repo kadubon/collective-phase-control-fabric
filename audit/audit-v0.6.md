@@ -52,6 +52,9 @@ This audit lists known findings only. It does not assert that undiscovered defec
 - The first OCI conformance run exposed missing package forced-includes in both service build
   contexts. Images now copy the same agent guidance, fixtures, and documentation required by the
   wheel, and missing SARIF files no longer produce a misleading upload error after a build failure.
+- The first release run exposed repository discovery in the intentionally no-checkout asset job.
+  The job now binds `GH_REPO` to the immutable workflow repository context, so artifact attachment
+  does not depend on local Git state.
 
 ## Open authority and scientific findings
 

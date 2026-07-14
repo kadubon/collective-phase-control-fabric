@@ -35,7 +35,7 @@
       "severity": "critical",
       "exploit": "A manual workflow or mismatched tag can upload an unreviewed distribution.",
       "affected_claim": "PyPI release integrity",
-      "correction": "Release-only trusted-publishing job, exact artifact contract, version match, protected pypi environment, explicit kadubon self-review governance downgrade, disabled publication variable, and a commit-bound external-evidence dependency.",
+      "correction": "Release-only trusted publishing enforces the exact artifact contract, version match, protected pypi environment, explicit publication variable, and recorded kadubon self-review governance downgrade. Beta package publication is distinct from the strict operational-evidence decision.",
       "regression_test": "tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
       "status": "partial"
     },
@@ -204,9 +204,9 @@
     {
       "id": "V6-023",
       "severity": "critical",
-      "exploit": "A stable release can reach the artifact or PyPI jobs after only automated source checks, without sustained availability, intended-deployment restore, threat review, or penetration evidence.",
-      "affected_claim": "Commercial stable-release governance",
-      "correction": "A closed commit- and version-bound manifest is required for release assets and PyPI. Independent review, a 30-day soak, intended-deployment restore, load, chaos, and zero-blocker penetration evidence are mandatory; no placeholder manifest is shipped.",
+      "exploit": "A package release could be represented as operational assurance after only automated source checks, without sustained availability, intended-deployment restore, threat review, or penetration evidence.",
+      "affected_claim": "Operational-assurance governance",
+      "correction": "Beta package publication is explicitly classified and reports unavailable external evidence without treating it as satisfied. The strict default operational validator still requires independent review, a 30-day soak, intended-deployment restore, load, chaos, and zero-blocker penetration evidence.",
       "regression_test": "tests/test_v6_operations_release.py::test_release_workflow_fails_closed_on_external_and_per_group_gates",
       "status": "closed"
     },
@@ -271,6 +271,15 @@
       "affected_claim": "Reproducible and scanned API/worker OCI artifacts",
       "correction": "Both service build contexts include every wheel-forced agent, fixture, and documentation input, and SARIF upload is conditional on the scanner output existing.",
       "regression_test": "tests/test_v6_operations_release.py::test_service_images_install_runtime_and_provider_extras and .github/workflows/security.yml",
+      "status": "closed"
+    },
+    {
+      "id": "V6-031",
+      "severity": "high",
+      "exploit": "The no-checkout release-assets job cannot infer a repository from Git state, causing verified artifacts to remain unattached and preventing the dependent trusted-publishing job.",
+      "affected_claim": "Release artifact delivery and trusted publication",
+      "correction": "The release-assets job now binds GH_REPO to the immutable GitHub repository context instead of relying on an absent checkout.",
+      "regression_test": "tests/test_v6_operations_release.py::test_release_workflow_fails_closed_on_external_and_per_group_gates",
       "status": "closed"
     }
   ]
