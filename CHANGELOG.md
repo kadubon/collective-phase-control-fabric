@@ -16,6 +16,8 @@
   PostgreSQL/Alembic schema, hardened Helm baseline, OCI build definitions, and frozen CI.
 - Separated Beta OSS package publication from the unavailable external evidence required for an
   operational-assurance decision; the strict validator remains the default.
+- Bound the no-checkout release-assets job to the workflow repository explicitly so verified
+  distributions, checksums, SBOM, and provenance can be attached before trusted publication.
 - Stable operational-assurance labeling remains blocked by the recorded coverage, integration,
   load, chaos, availability-soak, restore, threat-model, and penetration-test gates.
 
