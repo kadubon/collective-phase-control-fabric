@@ -25,7 +25,7 @@ AGENT_GUIDANCE: Final[dict[str, object]] = {
         "causality or statistical validity",
         "thermodynamic feasibility or physical phase behavior",
         "local process sandboxing",
-        "production readiness without completed release gates",
+        "operational assurance without completed release gates",
     ],
 }
 

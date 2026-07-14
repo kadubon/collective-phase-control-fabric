@@ -1,12 +1,12 @@
 # CPCF v0.6 Local Release-Gate Report
 
 This report records local evidence collected on 2026-07-13. It is not a release, service-level
-commitment, external experiment, production-readiness claim, or measured-acceleration claim.
+commitment, external experiment, deployment-assurance claim, or measured-acceleration claim.
 
 ## Verdict
 
 The source is eligible for public review only after the staged-content hygiene process succeeds.
-It is not eligible for a stable tag, GitHub Release, PyPI upload, or production-ready label.
+It is not eligible for a stable tag, GitHub Release, PyPI upload, or operational-assurance label.
 
 The native result is a thirteen-dimensional operational organization profile. It does not infer
 intelligence, causal acceleration, a physical phase, entropy production, thermodynamic efficiency,

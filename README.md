@@ -9,7 +9,7 @@ CPCF reports an `operational_organization_profile`. It does not create, detect, 
 collective-superintelligence phase. It also does not certify causality, statistical validity,
 thermodynamic feasibility, physical phase behavior, or runner isolation.
 
-> Release status: v0.6.0 source is a release candidate, not a production-ready claim. Stable PyPI
+> Release status: v0.6.0 source is a release candidate. Stable PyPI
 > publication is blocked until the automated, operational, security-review, restore, soak, and
 > independent-penetration-test gates in [release readiness](docs/release-readiness.md) pass.
 
