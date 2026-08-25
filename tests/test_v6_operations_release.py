@@ -200,7 +200,7 @@ def test_release_workflow_fails_closed_on_external_and_per_group_gates() -> None
     assert security.count("id: worker-image-scan") == 1
     assert "docker build --target api" in security
     assert "docker build --target worker" in security
-    assert "hashFiles('trivy-api-image.sarif') != ''" in security
+    assert "hashFiles('trivy-results.sarif') != ''" in security
     assert "hashFiles('trivy-worker-image.sarif') != ''" in security
     assert 'test "$API_SCAN" = success && test "$WORKER_SCAN" = success' in security
 
