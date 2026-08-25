@@ -115,6 +115,13 @@ The root project builds exactly one wheel and one source distribution named
 - [Complete installed-wheel tutorial](docs/tutorial-v0.6/README.md)
 - [Release readiness](docs/release-readiness.md)
 
+## Agent Skill
+
+Agents can follow the repository-native [Collective Phase Control Fabric Agent
+Skill](.agents/skills/collective-phase-control-fabric/SKILL.md). It routes offline inspection,
+remote control-plane work, external-runner evidence, and legacy compatibility without expanding
+the authority or scientific scope of the underlying records.
+
 ## License and security
 
 All repository content is English and licensed under Apache-2.0. Report vulnerabilities using the

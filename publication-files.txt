@@ -1,4 +1,5 @@
 # Explicit source-publication allowlist. Patterns are repository-relative.
+.agents/**
 .github/**
 audit/**
 deploy/**
