@@ -72,7 +72,7 @@ jobs:
           ignore-unfixed: true
           exit-code: "1"
       - uses: github/codeql-action/upload-sarif@8096e4f9571939c23cbd19018c44c665f90096af
-        if: ${{ always() && hashFiles('trivy-api-image.sarif') != '' }}
+        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
         with:
           sarif_file: trivy-results.sarif
 
@@ -109,6 +109,16 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           exit-code: "1"
+      - name: Preserve Trivy image reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: trivy-image-reports
+          path: |
+            trivy-api-image.sarif
+            trivy-worker-image.sarif
+          if-no-files-found: error
+          retention-days: 7
       - uses: github/codeql-action/upload-sarif@8096e4f9571939c23cbd19018c44c665f90096af
         if: ${{ always() && hashFiles('trivy-worker-image.sarif') != '' }}
         with:
