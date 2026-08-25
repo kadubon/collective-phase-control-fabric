@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1.7
 FROM ghcr.io/astral-sh/uv:0.11.33@sha256:77280f2f771df71f90786c314fe1bbc1e023feac652969bbf139c280babf2eb7 AS uv
-FROM python:3.14.7-slim-bookworm@sha256:416f0db2a2b561945630cef9877a7ea0581b27449eb9fd9df42f03e1b74b5b63 AS api-core
+FROM python:3.14.7-alpine3.23@sha256:6b8f06d04d5305c1d1288435388df9165ab41e681fae6439d6349d8053cc3f83 AS api-core
 COPY --from=uv /uv /usr/local/bin/uv
+RUN uv pip install --system --no-cache "msgpack==1.2.1" "setuptools==80.9.0"
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UV_FROZEN=1 UV_NO_DEV=1
 WORKDIR /app
 COPY pyproject.toml uv.lock README.md LICENSE ./
@@ -12,7 +13,8 @@ COPY fixtures ./fixtures
 COPY docs ./docs
 COPY packages ./packages
 RUN uv sync --frozen --all-packages --extra server --no-group dev --no-group security && \
-    useradd --uid 65532 --create-home --shell /usr/sbin/nologin cpcf && \
+    addgroup -S -g 65532 cpcf && \
+    adduser -S -D -H -u 65532 -G cpcf cpcf && \
     chown -R 65532:65532 /app
 USER 65532:65532
 EXPOSE 8080
