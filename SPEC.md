@@ -77,3 +77,13 @@ and quality floors. It does not validate the statistical method or certify causa
 protocol deviation overrides favorable evidence tiers. The current trial evaluator checks typed
 artifact bindings and contradictions but does not independently recompute all registration and
 amendment DSSE quorums; strongest-tier promotion remains blocked on that path.
+
+## Offline growth documents and commands
+
+Four closed native kinds, `growth-contract`, `growth-plan`, `growth-observation` and
+`growth-assessment`, support explicit `cpcf growth` planning, independent checking,
+comparison, read-only replay, proposal export and freshly admitted evidence reassessment.
+They use the existing canonical registry, action/capability, trust, runner and trial
+protocols. A growth proposal cannot authorize a runner or project an admitted capability.
+The [growth contract guide](docs/growth-planning.md) specifies the finite model, exactness
+limits, command arguments and separate model/arithmetic/evidence/attribution outcomes.

@@ -13,9 +13,23 @@
   "source_of_record_migration": false,
   "legacy_workspace_execution": false,
   "first_safe_commands": [
-    ["cpcf", "agent", "explain", "--json"],
-    ["cpcf", "self-check", "--json"],
-    ["cpcf", "schema", "list", "--json"]
+    [
+      "cpcf",
+      "agent",
+      "explain",
+      "--json"
+    ],
+    [
+      "cpcf",
+      "self-check",
+      "--json"
+    ],
+    [
+      "cpcf",
+      "schema",
+      "list",
+      "--json"
+    ]
   ],
   "schemas": [
     "schemas/v0.1.0",
@@ -36,5 +50,13 @@
     "thermodynamic feasibility",
     "runner containment",
     "operational assurance without release-gate evidence"
-  ]
+  ],
+  "growth_mode": {
+    "command": "cpcf growth",
+    "scope": "bounded exact offline finite model",
+    "comparison": "reoptimized worst-case scalar within declared catalogue",
+    "adapters_executed": false,
+    "measurement_or_causality_authority": false,
+    "guide": "docs/growth-planning.md"
+  }
 }

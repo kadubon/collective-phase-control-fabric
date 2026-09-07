@@ -179,6 +179,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"cpcf {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
+    from cpcf_cli.growth import add_parser
+
+    add_parser(commands)
 
     self_check = commands.add_parser(
         "self-check", help="Validate the installed offline core without contacting an API."
@@ -500,6 +503,10 @@ def _explain() -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "growth":
+        from cpcf_cli.growth import run
+
+        return run(args)
     if args.command == "self-check":
         return _self_check()
     if args.command == "auth":

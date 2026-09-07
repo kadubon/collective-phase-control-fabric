@@ -24,3 +24,12 @@ Mutation responses with status `accepted` are queue receipts, not scientific or 
 Re-read onboarding after the resulting generation commits. An unbound repair describes missing
 evidence or authority and cannot be executed; only a repair carrying a signed action digest can
 have effect class `execute`.
+
+## Explicit finite growth mode
+
+For capability investment planning, use `cpcf growth example --scenario preparation --json`
+and follow [the growth guide](growth-planning.md). Preserve the ordinary repair planner
+and operational organization profile. Inspect search completeness and the independent
+checker before presenting a policy; distinguish predicted entry from compatible past
+observations and from a prospective funded continuation. Export is an unsigned proposal.
+Do not execute adapters or fabricate receipts, signatures or measurement attestations.

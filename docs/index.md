@@ -6,6 +6,9 @@ Start with the path that matches the task:
   [five-minute offline orientation](offline-orientation.md).
 - New agent: [agent guidance](for-agents.md) and the
   [installed-wheel tutorial](tutorial-v0.6/README.md).
+- Offline capacity planning: [finite growth planning](growth-planning.md),
+  [theory mapping](growth-research-mapping.md), and [synthetic comparisons](examples/growth-comparison.json).
+  [Validation scope](growth-validation.md) records the changed surfaces and reproduction commands.
 - Control-plane user: [remote workspaces](remote-workspaces.md) and the
   [CLI/API reference](reference/README.md).
 - Evidence author: [evidence model](evidence-model.md) and

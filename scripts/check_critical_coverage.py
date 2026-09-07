@@ -34,6 +34,10 @@ GROUPS: dict[str, tuple[str, ...]] = {
         "src/collective_phase_control_fabric/v6/intervention.py",
     ),
     "planning": ("src/collective_phase_control_fabric/v6/planning.py",),
+    "growth-planning": (
+        "src/collective_phase_control_fabric/v6/growth.py",
+        "src/collective_phase_control_fabric/v6/growth_evidence.py",
+    ),
     "trials": ("src/collective_phase_control_fabric/v6/trials.py",),
     "coordination": ("src/collective_phase_control_fabric/v6/coordination.py",),
     "repairs": ("src/collective_phase_control_fabric/v6/repairs.py",),

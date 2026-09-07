@@ -35,6 +35,780 @@
       "Validate the object against the installed schema digest."
     ]
   },
+  "growth_action_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_action_expired": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_action_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_backlog_limit": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_calibration_domain": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_calibration_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_capability_effect": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_capability_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_capability_schema": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_capacity_prerequisite": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_charge_category": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_checker_budget": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_checkpoint_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_cli_cas_digest": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_cli_cas_limit": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_cli_document_kind": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_cli_duplicate_object": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_cli_input_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_cli_object_limit": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_comparator_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_comparison_completed": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_completion_exceeds_work": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_completion_late": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_completion_without_work": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_continuation_state_stale": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_contract_inspected": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_coverage_floor": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_credit_blocked_by_work": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_deadline": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_domain_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_domains_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_domains_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_duplicate_evidence": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_duration_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_evidence_compatible": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_example_unknown": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_factor_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_hazard": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_hypothetical_replay": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_inconsistent_models": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_interval_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_job_not_admitted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_model_domain": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_model_policy_found": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_negative_quantity": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_no_guaranteed_entry": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_nonrepeatable_reuse": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_object_digest": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_objective": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_contract_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_expired": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_not_admitted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_outside_model": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_seed_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_time_order": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_trace_incomplete": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_versions_changed": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observation_window_changed": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observed_block_not_supported": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observed_evidence_pending": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_observed_work_blocked": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_action_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_branches_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_checked": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_comparison_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_continuation_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_digest_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_effect_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_entry_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_input_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_objective_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_policy_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_state_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_plan_terminal_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_premise_expires_during_action": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_premise_missing_or_expired": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_proposal_binding_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_proposal_generation_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_proposal_inputs_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_proposed_external_job": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_protected_object": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_quality_floor": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_queue_domain": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_reassessment_inconclusive": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_receipt_action_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_receipt_nonconformant": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_receipt_not_admitted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_receipt_physical_time_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_receipt_principal_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_receipt_time_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_replan_state_unavailable": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_replanned_proposal": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_replay_after_terminal": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_required_object": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_required_object_expired": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_reservation_domain": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_reservation_expired": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_resource_domain": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_resource_floor": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_runner_materials_not_admitted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_scalar_endpoint_required": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_service_floor": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_service_overbooked": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_shared_resource_double_booking": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_snapshot_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_source_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_source_not_admitted": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_source_receipt_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_successor_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_successor_incomplete": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_synthetic_comparison": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_time_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_trial_binding_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_trial_incompatible": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_trial_measurement_incomplete": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_trial_measurement_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_trial_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_trial_time_origin_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_unaccounted_obligation": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_undeclared_successor": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_unfunded_monetary_cost": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_units_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_units_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_unknown_due_to_budget": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_window_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_witness_limit": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_work_deadline": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_work_duplicate": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "growth_work_invalid": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
   "legacy_mutation_blocked": {
     "effect_class": "none",
     "recovery": [

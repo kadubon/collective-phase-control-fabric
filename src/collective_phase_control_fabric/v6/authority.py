@@ -21,6 +21,7 @@ from collective_phase_control_fabric.v6.models import (
     Document,
     DsseEnvelope,
     EvidenceAttestation,
+    GrowthObservation,
     Lifecycle,
     MeasurementProtocol,
     PendingProjection,
@@ -111,7 +112,7 @@ def _claimed_signer(document: Document) -> tuple[str, str] | None:
         return document.spec.author_principal_id, "protocol_author"
     if isinstance(document, ProtocolAmendment):
         return document.spec.author_principal_id, "protocol_author"
-    if isinstance(document, TrialResult):
+    if isinstance(document, (TrialResult, GrowthObservation)):
         return document.spec.evaluator_principal_id, "evaluator"
     return None
 
@@ -121,7 +122,7 @@ def _required_quorum(document: Document) -> str | None:
         return "protocol_registration"
     if isinstance(document, ProtocolAmendment):
         return "protocol_amendment"
-    if isinstance(document, TrialResult):
+    if isinstance(document, (TrialResult, GrowthObservation)):
         return "acceleration_compatibility"
     return None
 

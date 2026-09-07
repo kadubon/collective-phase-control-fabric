@@ -87,3 +87,12 @@ physical phase, causal treatment, or intelligent super-organism.
   time, and role-quorum semantics.
 - SLSA 1.2 defines build provenance levels: <https://slsa.dev/spec/v1.2/>. CPCF targets Build L2 and
   makes no L3 claim without a verified hardened builder.
+
+## Capability growth planning reference
+
+The finite growth implementation follows the explicitly bounded P0 domain documented in
+[growth planning](growth-planning.md). The full-text correspondence to Takahashi (2026),
+*Observing and Accelerating Collective Capability Growth*,
+[DOI 10.5281/zenodo.22604358](https://doi.org/10.5281/zenodo.22604358), is recorded in
+[the mapping](growth-research-mapping.md). The paper's expected-vector, confidence,
+supporting-price and broader operational results are not implemented claims.

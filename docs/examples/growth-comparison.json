@@ -1,0 +1,832 @@
+{
+  "all-failure": {
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:3cc7325b339ee01c14871602ff7a0e60b0ff44a985a4b7cb8d1ae3ebd8dc2585",
+        "policy_digest": "sha256:4defba88f6fcd036109bd11680520ee6c1042964b3fa69110fb7cd01e1c10425",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 14,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 11,
+          "states": 15
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:3cc7325b339ee01c14871602ff7a0e60b0ff44a985a4b7cb8d1ae3ebd8dc2585",
+        "policy_digest": "sha256:fe3b0ee8812fc54352d5289b2a4a31af78db3f9ee5e5f0a630b3413db4289eef",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 30,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 25,
+          "states": 28
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:3cc7325b339ee01c14871602ff7a0e60b0ff44a985a4b7cb8d1ae3ebd8dc2585",
+        "policy_digest": "sha256:e59c2efd4fff48e23e7138e23193ea296bcc86c80a58c9af3ed4fcbd7e3c47b0",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 52,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 45,
+          "states": 43
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      }
+    ],
+    "example": "all-failure",
+    "greedy_immediate_output": {
+      "actions": [
+        "greedy",
+        "idle",
+        "idle",
+        "idle",
+        "idle"
+      ],
+      "capacities": {
+        "research": {
+          "lower": "1",
+          "upper": "1"
+        },
+        "task": {
+          "lower": "1",
+          "upper": "1"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {},
+      "queue": [],
+      "remaining_resources": {
+        "credits": "1"
+      },
+      "time_to_modelled_entry": null
+    },
+    "growth": {
+      "capacities": null,
+      "code": "growth_no_guaranteed_entry",
+      "continuation_feasible": false,
+      "debt": null,
+      "evidence_cost": null,
+      "primary_action": null,
+      "queue": null,
+      "remaining_resources": null,
+      "time_to_modelled_entry": null
+    },
+    "initial_budget": {
+      "credits": "8"
+    },
+    "reoptimized_interaction_restricted": {
+      "capacities": {
+        "research": {
+          "lower": "1",
+          "upper": "1"
+        },
+        "task": {
+          "lower": "1",
+          "upper": "1"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {
+        "calibration": {
+          "credits": "1"
+        }
+      },
+      "queue": [],
+      "remaining_resources": {
+        "credits": "2"
+      },
+      "time_to_modelled_entry": null
+    },
+    "repair": {
+      "code": "no_intervention_required",
+      "growth_objective": "outside-repair-scope",
+      "metrics": null
+    },
+    "scope": "synthetic finite ledgers; no empirical claim"
+  },
+  "communication": {
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:9681db8b35baf11706f8aa5dfd0159516fc9acd4f5c8af895f33ec4872fc0aa9",
+        "policy_digest": "sha256:c58304e0dac8cf8a422820ec6a88a74dc3d700e3b419b8e7403e23da47e91575",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 14,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 11,
+          "states": 15
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:9681db8b35baf11706f8aa5dfd0159516fc9acd4f5c8af895f33ec4872fc0aa9",
+        "policy_digest": "sha256:72c34819fd1d8e53df3b1c27c8c80623fdc8431ac7cf4658e32d7d8a8099fa9c",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 30,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 25,
+          "states": 28
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:9681db8b35baf11706f8aa5dfd0159516fc9acd4f5c8af895f33ec4872fc0aa9",
+        "policy_digest": "sha256:62342a93e1d48242c8ae875ddb3d6a88322281a7a6c5f911d94caca243a9f37a",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 67,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 55,
+          "states": 63
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "example": "communication",
+    "greedy_immediate_output": {
+      "actions": [
+        "dense",
+        "continue"
+      ],
+      "capacities": {
+        "research": {
+          "lower": "5",
+          "upper": "5"
+        },
+        "task": {
+          "lower": "5",
+          "upper": "5"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {},
+      "queue": [],
+      "remaining_resources": {
+        "credits": "0"
+      },
+      "time_to_modelled_entry": null
+    },
+    "growth": {
+      "capacities": {
+        "research": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "task": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "code": "growth_model_policy_found",
+      "continuation_feasible": true,
+      "debt": [],
+      "evidence_cost": {
+        "calibration": {
+          "credits": "1"
+        },
+        "joint-activity": {
+          "credits": "2"
+        }
+      },
+      "primary_action": "prepare",
+      "queue": [],
+      "remaining_resources": {
+        "credits": "3"
+      },
+      "time_to_modelled_entry": "2"
+    },
+    "initial_budget": {
+      "credits": "8"
+    },
+    "reoptimized_interaction_restricted": {
+      "capacities": {
+        "research": {
+          "lower": "3",
+          "upper": "3"
+        },
+        "task": {
+          "lower": "3",
+          "upper": "3"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {
+        "calibration": {
+          "credits": "1"
+        }
+      },
+      "queue": [],
+      "remaining_resources": {
+        "credits": "2"
+      },
+      "time_to_modelled_entry": null
+    },
+    "repair": {
+      "code": "no_intervention_required",
+      "growth_objective": "outside-repair-scope",
+      "metrics": null
+    },
+    "scope": "synthetic finite ledgers; no empirical claim"
+  },
+  "no-advantage": {
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "5/3",
+        "matched_basis_digest": "sha256:4b28f66eacc1ade0331bfd0f3f92aec6ff185c9c1107c0a75a7e32ce2de37104",
+        "policy_digest": "sha256:c64ae3ba1e4419a241bd66a6388ca390b930ae568c260f6131d10a7b83b003af",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 23,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 19,
+          "states": 24
+        },
+        "status": "supported",
+        "upper_bound": "5/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "7/3",
+        "matched_basis_digest": "sha256:4b28f66eacc1ade0331bfd0f3f92aec6ff185c9c1107c0a75a7e32ce2de37104",
+        "policy_digest": "sha256:304e376069af49605151fc05c0b6a0ed7e74173e9b9b59d0d85158d95a09e23b",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 62,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 53,
+          "states": 57
+        },
+        "status": "supported",
+        "upper_bound": "7/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "3",
+        "matched_basis_digest": "sha256:4b28f66eacc1ade0331bfd0f3f92aec6ff185c9c1107c0a75a7e32ce2de37104",
+        "policy_digest": "sha256:1bb5859b42e7ed7c99f68f9451c39f502026b96aeb2876e053ad86965fa3953d",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 191,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 160,
+          "states": 183
+        },
+        "status": "supported",
+        "upper_bound": "3"
+      }
+    ],
+    "example": "no-advantage",
+    "greedy_immediate_output": {
+      "actions": [
+        "single-process",
+        "single-process",
+        "single-process",
+        "single-process",
+        "single-process"
+      ],
+      "capacities": {
+        "research": {
+          "lower": "11",
+          "upper": "11"
+        },
+        "task": {
+          "lower": "11",
+          "upper": "11"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {},
+      "queue": [],
+      "remaining_resources": {
+        "credits": "2"
+      },
+      "time_to_modelled_entry": null
+    },
+    "growth": {
+      "capacities": null,
+      "code": "growth_no_guaranteed_entry",
+      "continuation_feasible": false,
+      "debt": null,
+      "evidence_cost": null,
+      "primary_action": null,
+      "queue": null,
+      "remaining_resources": null,
+      "time_to_modelled_entry": null
+    },
+    "initial_budget": {
+      "credits": "8"
+    },
+    "reoptimized_interaction_restricted": {
+      "capacities": {
+        "research": {
+          "lower": "11",
+          "upper": "11"
+        },
+        "task": {
+          "lower": "11",
+          "upper": "11"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {},
+      "queue": [],
+      "remaining_resources": {
+        "credits": "2"
+      },
+      "time_to_modelled_entry": null
+    },
+    "repair": {
+      "code": "no_intervention_required",
+      "growth_objective": "outside-repair-scope",
+      "metrics": null
+    },
+    "scope": "synthetic finite ledgers; no empirical claim"
+  },
+  "preparation": {
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:9475b4c581f014e4480bc0921d41b94c3bef9df5f1635c764b401f2f606dc77d",
+        "policy_digest": "sha256:6e283e398c2de0664a32fc3dd5bcea6f4f052552a14513e8a3ef0155fc648e7f",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 14,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 11,
+          "states": 15
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:9475b4c581f014e4480bc0921d41b94c3bef9df5f1635c764b401f2f606dc77d",
+        "policy_digest": "sha256:efae8118c54d2043d415aa0d9bf59fcc66eba01e75bdb207e1221921fa43b934",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 30,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 25,
+          "states": 28
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:9475b4c581f014e4480bc0921d41b94c3bef9df5f1635c764b401f2f606dc77d",
+        "policy_digest": "sha256:849e32e768dbbb705c36d0e6b979e81cd15533060da15e5a3ee8b1e7b2938e1a",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 67,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 55,
+          "states": 63
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "example": "preparation",
+    "greedy_immediate_output": {
+      "actions": [
+        "greedy",
+        "serial",
+        "continue",
+        "continue"
+      ],
+      "capacities": {
+        "research": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "task": {
+          "lower": "6",
+          "upper": "6"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {},
+      "queue": [],
+      "remaining_resources": {
+        "credits": "1"
+      },
+      "time_to_modelled_entry": null
+    },
+    "growth": {
+      "capacities": {
+        "research": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "task": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "code": "growth_model_policy_found",
+      "continuation_feasible": true,
+      "debt": [],
+      "evidence_cost": {
+        "calibration": {
+          "credits": "1"
+        },
+        "joint-activity": {
+          "credits": "2"
+        }
+      },
+      "primary_action": "prepare",
+      "queue": [],
+      "remaining_resources": {
+        "credits": "3"
+      },
+      "time_to_modelled_entry": "2"
+    },
+    "initial_budget": {
+      "credits": "8"
+    },
+    "reoptimized_interaction_restricted": {
+      "capacities": {
+        "research": {
+          "lower": "3",
+          "upper": "3"
+        },
+        "task": {
+          "lower": "3",
+          "upper": "3"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {
+        "calibration": {
+          "credits": "1"
+        }
+      },
+      "queue": [],
+      "remaining_resources": {
+        "credits": "2"
+      },
+      "time_to_modelled_entry": null
+    },
+    "repair": {
+      "code": "no_intervention_required",
+      "growth_objective": "outside-repair-scope",
+      "metrics": null
+    },
+    "scope": "synthetic finite ledgers; no empirical claim"
+  },
+  "verification": {
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:22fff3bf7ffe05615aea3b5a0d1adad80fe82e9144cdc07194a264648c984482",
+        "policy_digest": "sha256:f8b0f9a58cfd06c25b219999f796b7421a60f30e0fc4578077d886b4d0557ab7",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 22,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 18,
+          "states": 23
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:22fff3bf7ffe05615aea3b5a0d1adad80fe82e9144cdc07194a264648c984482",
+        "policy_digest": "sha256:9c5362d85dbc5ba55e6d979b8a9901f99635bc4afb7ff68494c2e428ae26a3cb",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 53,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 45,
+          "states": 48
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:22fff3bf7ffe05615aea3b5a0d1adad80fe82e9144cdc07194a264648c984482",
+        "policy_digest": "sha256:db1ec3aeb6b266ed43b63cb93c77f6a8628ae2ecac62c81db9f13992182e2437",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 139,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 115,
+          "states": 131
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "example": "verification",
+    "greedy_immediate_output": {
+      "actions": [
+        "greedy",
+        "serial",
+        "continue",
+        "continue"
+      ],
+      "capacities": {
+        "research": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "task": {
+          "lower": "6",
+          "upper": "6"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {},
+      "queue": [],
+      "remaining_resources": {
+        "credits": "1"
+      },
+      "time_to_modelled_entry": null
+    },
+    "growth": {
+      "capacities": {
+        "research": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "task": {
+          "lower": "4",
+          "upper": "4"
+        },
+        "verification": {
+          "lower": "4",
+          "upper": "4"
+        }
+      },
+      "code": "growth_model_policy_found",
+      "continuation_feasible": true,
+      "debt": [],
+      "evidence_cost": {
+        "joint-activity": {
+          "credits": "2"
+        }
+      },
+      "primary_action": "verifier",
+      "queue": [],
+      "remaining_resources": {
+        "credits": "3"
+      },
+      "time_to_modelled_entry": "2"
+    },
+    "initial_budget": {
+      "credits": "8"
+    },
+    "reoptimized_interaction_restricted": {
+      "capacities": {
+        "research": {
+          "lower": "3",
+          "upper": "3"
+        },
+        "task": {
+          "lower": "3",
+          "upper": "3"
+        },
+        "verification": {
+          "lower": "1",
+          "upper": "1"
+        }
+      },
+      "continuation_feasible": false,
+      "debt": [],
+      "evidence_cost": {},
+      "queue": [],
+      "remaining_resources": {
+        "credits": "2"
+      },
+      "time_to_modelled_entry": null
+    },
+    "repair": {
+      "code": "no_intervention_required",
+      "growth_objective": "outside-repair-scope",
+      "metrics": null
+    },
+    "scope": "synthetic finite ledgers; no empirical claim"
+  }
+}

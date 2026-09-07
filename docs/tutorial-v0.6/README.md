@@ -85,3 +85,11 @@ cpcf runner conformance runner-job.json runner-receipt.json adapter-capability.j
 
 This command executes no adapter and promotes no projection. Successful execution still creates a
 pending projection that requires independent, source-pointer-reconstructing approval.
+
+## Offline growth extension
+
+For capability investment planning, the base wheel also provides the explicit `cpcf growth`
+path. Follow [the finite growth tutorial](../growth-planning.md) for executable preparation,
+verification, communication and counterexample models, then inspect
+[validation and limits](../growth-validation.md). The ordinary onboarding and profile commands
+above retain their meanings.

@@ -23,3 +23,8 @@ Critical semantics:
 - CPCF does not create, detect, or certify collective superintelligence or a physical phase.
 
 Documentation: README.md, SPEC.md, FORMAL_MODEL.md, SECURITY.md, docs/research-basis.md.
+
+Offline growth: cpcf growth inspect/plan/check-plan/compare/export/replay/ingest/reassess/replan.
+Synthetic input: cpcf growth example growth-demo --json.
+Growth guide: docs/growth-planning.md; theory mapping: docs/growth-research-mapping.md.
+Growth is an explicit finite model mode; predictions never update observed capacity or the profile.

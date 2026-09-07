@@ -281,6 +281,33 @@
       "correction": "The release-assets job now binds GH_REPO to the immutable GitHub repository context instead of relying on an absent checkout.",
       "regression_test": "tests/test_v6_operations_release.py::test_release_workflow_fails_closed_on_external_and_per_group_gates",
       "status": "closed"
+    },
+    {
+      "id": "V6-032",
+      "severity": "high",
+      "exploit": "Immediate repair progress or a weak baseline can be mistaken for exact funded capability growth, including after search exhaustion or on empty model sets.",
+      "affected_claim": "Finite model-conditional growth planning",
+      "correction": "An explicit finite AND-OR growth mode, exact rational ledger, reoptimized scalar comparator, independent tree checker, funded continuation and fail-closed budget/model statuses preserve the existing repair and scientific boundaries.",
+      "regression_test": "tests/test_v6_growth.py, tests/test_v6_growth_evidence.py and tests/test_v6_growth_cli.py",
+      "status": "closed"
+    },
+    {
+      "id": "V6-033",
+      "severity": "high",
+      "exploit": "JSON-shaped raw source artifacts can be misclassified as typed ledger records and either reject a valid receipt closure or acquire unintended document semantics.",
+      "affected_claim": "Opaque source bytes and explicit authority admission",
+      "correction": "Digest-verified raw-artifact entries remain opaque; only explicitly typed ledger records are parsed for native kind semantics, and fresh DSSE/quorum admission remains required.",
+      "regression_test": "tests/test_v6_growth_cli.py::test_typed_raw_source_never_becomes_an_unsigned_authority",
+      "status": "closed"
+    },
+    {
+      "id": "V6-034",
+      "severity": "high",
+      "exploit": "A finite synthetic growth policy or signed external result may be represented as valid measurement, causal endogenous growth, general collective advantage or indefinite continuation.",
+      "affected_claim": "Empirical capability growth and attribution",
+      "correction": "Arithmetic, external evidence compatibility and model conditions are separate; attribution stays undetermined. Real refinements, statistical construct/coverage validity and intended-deployment evidence remain external obligations outside P0.",
+      "regression_test": "tests/test_v6_growth_evidence.py::test_evidence_weakening_never_strengthens_empirical_verdict and docs/growth-research-mapping.md",
+      "status": "partial"
     }
   ]
 }

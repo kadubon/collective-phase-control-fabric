@@ -43,6 +43,7 @@ from collective_phase_control_fabric.v6.trust import (
     sign_document,
     verify_envelope,
 )
+from tests import v6_helpers
 from tests.test_v6_models_trust import state
 from tests.test_v6_science_planner import (
     action,
@@ -52,6 +53,24 @@ from tests.test_v6_science_planner import (
 from tests.test_v6_service_boundaries import trial_fixture
 from tests.test_v6_structural_analysis import transformation
 from tests.v6_helpers import NOW, metadata, trust_fixture
+
+GROWTH_EXTENSION_KINDS = {
+    "growth-contract",
+    "growth-plan",
+    "growth-observation",
+    "growth-assessment",
+}
+
+
+@pytest.fixture(autouse=True)
+def preserve_original_golden_authority_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Goldens bind the original signed input bytes. Extending the registry must not
+    # silently add new allowed kinds to the principals in those frozen fixtures.
+    monkeypatch.setattr(
+        v6_helpers,
+        "DOCUMENT_MODELS",
+        {k: v for k, v in v6_helpers.DOCUMENT_MODELS.items() if k not in GROWTH_EXTENSION_KINDS},
+    )
 
 
 def test_native_digest_and_encoding_goldens_are_stable() -> None:
@@ -76,7 +95,11 @@ def test_native_digest_and_encoding_goldens_are_stable() -> None:
     assert generation_digest(generation) == (
         "sha256:134da671f3f3f573195def58972a3192edd4c35611718cf0b33d0eb8fea52706"
     )
-    assert digest_bytes(canonical_bytes(registry_manifest())) == (
+    manifest = registry_manifest()
+    manifest["schemas"] = [
+        x for x in manifest["schemas"] if x["kind"] not in GROWTH_EXTENSION_KINDS
+    ]
+    assert digest_bytes(canonical_bytes(manifest)) == (
         "sha256:dcda07eb822cc417b50444f5a65e785b5cd3e32fc44c818d0b70d41429aad6d7"
     )
     assert dsse_pae("type", b"abc") == b"DSSEv1 4 type 3 abc"

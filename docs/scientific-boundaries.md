@@ -22,3 +22,14 @@ planning does not establish general controllability or eventual success.
 
 The [concept-to-code mapping](concept-mapping.md) states which distinctions are executable and which
 remain release blockers. Citations and scope limits are in [research basis](research-basis.md).
+
+## Finite growth planning boundary
+
+`growth` output is conditional on a finite declared action and model catalogue. Its
+adversarial worst-case scalar comparison is not an expected-vector theorem, randomized
+advantage, empirical reliability estimate or general collective advantage. A model label
+and a feasible policy are not empirical evidence. Budget exhaustion stays unknown;
+empty model sets are inconsistent. Even a fully admitted registered measurement can only
+support finite arithmetic/evidence compatibility. Statistical validity, construct validity,
+causality, endogenous attribution and indefinite continuation remain unestablished.
+See [growth planning](growth-planning.md) and [the research mapping](growth-research-mapping.md).

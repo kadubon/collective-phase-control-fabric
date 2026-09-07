@@ -78,9 +78,12 @@ def validate_ledger(
             if digest_bytes(raw) != entry.object_digest:
                 reasons.append(f"ledger_raw_digest_mismatch:{entry.object_digest}")
                 continue
-            document = parse_document_bytes(raw)
-            if document.kind != entry.object_kind:
-                reasons.append(f"ledger_kind_mismatch:{entry.object_digest}")
+            # Source bytes remain opaque even when they happen to be valid native JSON.
+            # The authoritative loader skips raw-artifact entries until independent admission.
+            if entry.object_kind != "raw-artifact":
+                document = parse_document_bytes(raw)
+                if document.kind != entry.object_kind:
+                    reasons.append(f"ledger_kind_mismatch:{entry.object_digest}")
         except ValueError:
             # Raw artifacts are represented by source-artifact-envelope entries and do not parse as
             # documents. Only an explicit raw-artifact kind may use opaque bytes.

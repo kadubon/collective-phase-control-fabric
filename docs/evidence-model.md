@@ -19,3 +19,14 @@ preregistration order.
 Unknown evidence never receives favorable treatment. Cached validation fields are diagnostic only;
 an authoritative reader must recompute signatures, schema identity, source pointers, lifecycle,
 quorum, and projection chains.
+
+## Growth observation admission
+
+Growth plans preserve hypothetical output, pending results, receipt-backed observations
+and independently admitted capability as separate states. The new observation kind
+requires the existing evaluator/quality-safety/timestamp quorum and full admission material.
+Reassessment reuses authoritative-generation loading, runner receipt validation, and
+registered trial compatibility; a cached assessment Boolean has no admission role.
+Raw CAS artifacts remain opaque even when their bytes parse as a native document. Only
+explicitly typed, admitted ledger records participate in authority evaluation.
+See [the complete external evidence path](growth-planning.md#independently-admitted-external-evidence).

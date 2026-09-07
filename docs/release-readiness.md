@@ -1,81 +1,64 @@
-# CPCF v0.6 Local Release-Gate Report
+# CPCF growth extension release-gate report
 
-This report records local evidence collected on 2026-07-13. It is not a release, service-level
-commitment, external experiment, deployment-assurance claim, or measured-acceleration claim.
+Local evidence was collected on 2026-09-08 (Japan Standard Time). This report concerns a
+Beta research package. It is not operational assurance or evidence of measured acceleration.
+The [growth validation record](growth-validation.md) lists the changed surfaces, commands,
+synthetic comparison results and exactness limits. The previous report is retained in the
+[v0.6.0 release tree](https://github.com/kadubon/collective-phase-control-fabric/blob/v0.6.0/docs/release-readiness.md).
 
-## Verdict
+## Local verification
 
-The source is eligible for Beta OSS package publication after the staged-content hygiene and
-automated release gates succeed. Package publication is distinct from operational assurance; the
-external evidence required for the latter is unavailable.
+- Frozen environment: uv 0.11.28 and CPython 3.14.6 on Windows; all extras and development/security
+  groups synchronize without dependency changes to `uv.lock`.
+- Full suite after the final functional changes: 615 passed and 3 skipped, with 90.95% branch
+  coverage across all five import packages. Skips require disposable external integration services.
+- Final focused critical suite, including five additional complete-growth golden checks:
+  349 passed, 95.81% branch coverage. Every one of the 13 critical groups passes its separate 95%
+  gate; growth is 97.68%, repair planning 97.05%, and parsing/schemas 95.93%.
+- Ruff format/lint, strict mypy across core/packages/scripts, and Bandit pass. OSV-backed
+  `pip-audit` reports no known vulnerabilities in the synchronized Python environment.
+- All 212 schemas validate, including 52 native closed kinds; all 9 existing fixtures validate.
+  Generated CLI, schema, agent and error references match runtime registries.
+- All five deterministic growth comparisons reproduce. Independent sequence and contingent-policy
+  oracles, prefix constraints, all outcome branches, receipt/registration weakening, physical
+  clocks and stale-continuation regressions are included.
+- The repository skill validates. Source-content hygiene, allowlisted Gitleaks content, Git-history
+  Gitleaks, Wiki Gitleaks and staged-content/archive hygiene are required before each source push.
+- Packaging produces one wheel and one source distribution; Twine checks and isolated base-wheel
+  self-check/growth commands pass. Distribution version/tag/hash checks are repeated for release.
 
-The native result is a thirteen-dimensional operational organization profile. It does not infer
-intelligence, causal acceleration, a physical phase, entropy production, thermodynamic efficiency,
-statistical validity, or general controllability.
+## Remote verification and publication
 
-## Passing local evidence
+The final-commit GitHub CI, platform matrix, PostgreSQL service, mutation gate and image/security
+jobs remain required; local successes do not substitute for their results. Native Linux mutation
+is running with the expanded growth selection and the unchanged 85% threshold. Its result is
+not yet claimed in this local record. Refer to the final commit's
+[GitHub Actions runs](https://github.com/kadubon/collective-phase-control-fabric/actions).
 
-- Environment: `uv 0.11.28` with CPython 3.14.6 on Windows.
-- Frozen universal lock: base plus all extras, development, and security groups synchronize.
-- Regression suite: 547 tests passed; three integration tests skipped because disposable
-  PostgreSQL and object-store services were not configured locally.
-- Full branch-enabled coverage is 90.46 percent. The focused native assurance run is 95.38 percent,
-  and the fail-closed per-group checker reports every critical subsystem at or above 95 percent;
-  it does not permit a stronger group to mask a weaker group.
-- Ruff formatting and lint: passed.
-- Strict mypy: passed across the core and all four optional import-package source trees.
-- Schema meta-validation: 208 schemas passed across v0.1–v0.6; the native v0.6 registry contains 48
-  closed kinds.
-- Fixture consistency: nine compatibility fixtures passed.
-- Runtime-generated CLI, OpenAPI, error, and agent references match the checked-in documents.
-- Bandit: no issues; two line-scoped checks are disabled at documented legacy read-only boundaries.
-- Dependency audit: the initial scan detected vulnerable Click and pytest versions. The lock was
-  updated to Click 8.4.2 and pytest 9.1.1; a subsequent OSV-backed `pip-audit` scan reported no known
-  vulnerabilities in the synchronized local environment.
-- Packaging: exactly one wheel and one source distribution are produced for
-  `collective-phase-control-fabric`; Twine metadata validation passes.
-- Reproducibility: two builds with the same `SOURCE_DATE_EPOCH` produced identical SHA-256 hashes.
-- Installed base-wheel conformance: offline explanation, self-check, schema inspection, all five
-  import packages, PEP 561 markers, and exact missing-extra guidance passed in isolated environments.
-- Publication hygiene: source allowlist and rebuilt wheel/sdist scans passed without printing
-  matched values. Generated coverage, local paths, caches, databases, credentials, and build output
-  are excluded.
-- CI and release mutation jobs retain the names and statuses of evaluated mutants for 14 days as a
-  non-distribution diagnostic artifact, so a failed score can be corrected without weakening the
-  gate or repeating a full run merely to recover the survivor list.
+The pre-existing scheduled image scan reported vulnerable Alpine OpenSSL and libuuid packages.
+API/worker recipes now pin libcrypto3/libssl3 3.5.8-r0 and libuuid 2.42.3-r1 from the
+[Alpine v3.24 package repository](https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/).
+Image build/scanner results are verified separately from the Python dependency audit.
 
-## Failing or unavailable release gates
+The trusted publisher requires a non-prerelease GitHub Release, matching package/tag version,
+the protected `pypi` environment and `PYPI_PUBLISH_ENABLED=true`. The workflow reports absent
+external operational evidence under its explicit Beta publication class. Environment reviewer
+`kadubon` permits self-review; this authorizes package distribution, not independent review.
+PyPI publication is established only after the actual release workflow and a clean installation
+from the public index succeed. See [the release process](release.md).
 
-- The final tree passes the configured combined branch-enabled thresholds locally. The native-Linux
-  mutation job and platform matrix remain authoritative; results from an earlier stacked branch do
-  not establish the final commit's mutation or cross-platform status.
-- An exact Linux ext4 reproduction of the parent commit reported 83.64 percent across 7,617
-  mutants and exposed an overlapping repair-prefix defect. Exact namespace tests killed 151 of 159
-  repair-routing mutants after the correction. The parent native-Linux PR job then passed at 85.37
-  percent across 7,623 mutants. The child PR must repeat this gate for its final commit.
-- The initial public commit passed Gitleaks, Semgrep, CodeQL, and Trivy. These immutable-action jobs
-  remain required on protected changes and do not replace an independent penetration test.
-- PostgreSQL RLS, serializable generation commits, object-store interruption, OIDC/KMS rotation,
-  mTLS runner leasing, and complete crash injection require live integration evidence.
-- The 100-tenant, 10,000-workspace, 100-concurrent-audit in-memory reference profile passed. It is
-  not PostgreSQL, object-store, Kubernetes, availability, or production-latency evidence.
-- API/worker/database/object-store/KMS/OIDC chaos tests, backup restoration, and the sustained 99.9%
-  availability soak are absent.
-- Independent threat-model review and penetration testing are absent.
-- Complete authoritative DSSE/quorum recomputation, full-state planner successors, full
-  perturbation classes, live onboarding aggregation, and runner transport remain implementation
-  blockers listed in `audit/findings-v0.6.json`.
+## Unavailable external evidence and retained boundaries
 
-## Publication controls
+The native result remains the thirteen-dimensional operational organization profile. Growth
+output is a separate conditional finite-model result. CPCF does not certify consciousness,
+collective superintelligence, a physical phase, thermodynamics, statistical validity, causality,
+endogenous attribution or measured acceleration. Synthetic oracles and signed fixtures do not
+close those scientific obligations.
 
-The trusted-publishing workflow is `.github/workflows/workflow.yml`. Manual dispatch verifies only.
-The PyPI job requires a non-prerelease GitHub Release, exact tag/metadata agreement, the protected
-`pypi` environment, and `PYPI_PUBLISH_ENABLED=true`. The 0.6 workflow explicitly classifies the
-artifact as a Beta package and reports missing external operational evidence without treating that
-evidence as satisfied.
-
-The pending publisher claims are project
-`collective-phase-control-fabric`, repository `kadubon/collective-phase-control-fabric`, workflow
-`workflow.yml`, and environment `pypi`. Reviewer `kadubon` is configured with
-`prevent_self_review=false`; this is explicitly self-approval and is not independent release
-review. Independent external gates remain mandatory for any later operational-assurance decision.
+Real action-model refinement, measurement construct/coverage validity, independently registered
+trials, production availability, intended-deployment restore, a sustained soak, independent
+threat review and penetration evidence remain unavailable. Live OIDC/KMS/S3/runner containment
+and transport require separate integration evidence. The existing partial findings in
+`audit/findings-v0.6.json` remain open; fresh admission in the new read-only path does not imply
+complete conformance of every existing control-plane path. No adapter or deployment is executed
+by this growth feature.

@@ -1494,6 +1494,308 @@ class RepairRecord(Document):
     spec: RepairRecordSpec
 
 
+class GrowthInterval(StrictModel):
+    lower: Rational
+    upper: Rational
+
+
+class GrowthDomain(StrictModel):
+    unit: UnitName
+    target: Rational
+    service_floor: Rational
+    quality_floor: Rational
+    coverage_floor: Rational
+
+
+class GrowthVersions(StrictModel):
+    model_digest: Digest
+    evaluator_digest: Digest
+    ontology_digest: Digest
+    protocol_digest: Digest
+    checkpoint_digest: Digest
+    information_digest: Digest
+    task_distribution_digest: Digest
+    coverage_digest: Digest
+
+
+class GrowthWork(StrictModel):
+    work_id: Identifier
+    stage: Identifier
+    remaining: Rational
+    deadline: Rational
+
+
+class GrowthReservation(StrictModel):
+    resource: Identifier
+    owner: Identifier
+    quantity: Rational
+    until: Rational
+
+
+class GrowthCheckpoint(StrictModel):
+    time: Rational
+    capacities: dict[Identifier, GrowthInterval] = Field(min_length=3, max_length=32)
+
+
+class GrowthState(StrictModel):
+    """A model ledger, never an attestation or cached scientific profile."""
+
+    capacities: dict[Identifier, GrowthInterval] = Field(min_length=3, max_length=32)
+    quality: dict[Identifier, Rational] = Field(min_length=3, max_length=32)
+    coverage: dict[Identifier, Rational] = Field(min_length=3, max_length=32)
+    resources: dict[Identifier, Rational] = Field(min_length=1, max_length=32)
+    reservations: list[GrowthReservation] = Field(default_factory=list, max_length=128)
+    queue: list[GrowthWork] = Field(default_factory=list, max_length=128)
+    obligations: list[GrowthWork] = Field(default_factory=list, max_length=128)
+    elapsed: Rational = "0"
+    checkpoints: list[GrowthCheckpoint] = Field(default_factory=list, max_length=64)
+    evidence: dict[Identifier, Rational] = Field(default_factory=dict, max_length=128)
+    pending_results: list[Identifier] = Field(default_factory=list, max_length=128)
+    used_actions: list[Identifier] = Field(default_factory=list, max_length=32)
+    assumptions: dict[Identifier, Rational] = Field(default_factory=dict, max_length=128)
+    model_ids: list[Identifier] = Field(max_length=32)
+    spent: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    charges: dict[Identifier, dict[Identifier, Rational]] = Field(
+        default_factory=dict, max_length=16
+    )
+    offered: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    completed: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    attribution: Literal["endogenous", "external", "attribution-unresolved"] = (
+        "attribution-unresolved"
+    )
+    actual_evidence_digests: list[Digest] = Field(default_factory=list, max_length=128)
+    live_object_digests: list[Digest] = Field(default_factory=list, max_length=10_000)
+    hazards: list[Identifier] = Field(default_factory=list, max_length=128)
+
+
+class GrowthSuccessor(StrictModel):
+    successor_id: Identifier
+    outcome: OutcomeName
+    applicable_model_ids: list[Identifier] = Field(min_length=1, max_length=32)
+    duration: Rational
+    capacity_delta: dict[Identifier, GrowthInterval] = Field(default_factory=dict, max_length=32)
+    quality: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    coverage: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    # Categories partition actual cost: joint productive/evidence activity is charged once.
+    charges: dict[Identifier, dict[Identifier, Rational]] = Field(min_length=1, max_length=16)
+    reservations: list[GrowthReservation] = Field(default_factory=list, max_length=128)
+    arrivals: list[GrowthWork] = Field(default_factory=list, max_length=128)
+    debt_added: list[GrowthWork] = Field(default_factory=list, max_length=128)
+    offered_service: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    completed_work: dict[Identifier, Rational] = Field(default_factory=dict, max_length=128)
+    evidence_added: dict[Identifier, Rational] = Field(default_factory=dict, max_length=128)
+    evidence_removed: list[Identifier] = Field(default_factory=list, max_length=128)
+    pending_added: list[Identifier] = Field(default_factory=list, max_length=128)
+    pending_resolved: list[Identifier] = Field(default_factory=list, max_length=128)
+    assumptions_added: dict[Identifier, Rational] = Field(default_factory=dict, max_length=128)
+    assumptions_removed: list[Identifier] = Field(default_factory=list, max_length=128)
+    attribution: Literal["endogenous", "external", "attribution-unresolved"] = (
+        "attribution-unresolved"
+    )
+
+
+class GrowthAction(StrictModel):
+    action_digest: Digest
+    required_evidence: list[Identifier] = Field(default_factory=list, max_length=128)
+    required_assumptions: list[Identifier] = Field(default_factory=list, max_length=128)
+    minimum_capacities: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    interactions: list[Identifier] = Field(default_factory=list, max_length=32)
+    earliest: Rational = "0"
+    expires: Rational
+    successors: list[GrowthSuccessor] = Field(min_length=4, max_length=32)
+
+
+class GrowthWindow(StrictModel):
+    start: Rational
+    end: Rational
+    task_factor: Rational
+    research_factor: Rational
+
+
+class GrowthSearchLimits(StrictModel):
+    max_witness_nodes: int = Field(default=4096, ge=1, le=4096)
+    max_states: Annotated[int, Field(ge=1, le=100_000)] = 10_000
+    max_expansions: Annotated[int, Field(ge=1, le=1_000_000)] = 100_000
+    max_policies: Annotated[int, Field(ge=1, le=100_000)] = 10_000
+    max_depth: Annotated[int, Field(ge=1, le=32)] = 8
+
+
+class GrowthComparator(StrictModel):
+    comparator_id: Identifier
+    excluded_interactions: list[Identifier] = Field(min_length=1, max_length=32)
+    single_process_allowed: Literal[True] = True
+    randomized_policies: Literal[False] = False
+
+
+class GrowthContractSpec(StrictModel):
+    analysis_snapshot_digest: Digest
+    unit_registry_digest: Digest
+    versions: GrowthVersions
+    model_time_origin: datetime
+    domains: dict[Identifier, GrowthDomain] = Field(min_length=3, max_length=32)
+    resource_units: dict[Identifier, UnitName] = Field(min_length=1, max_length=32)
+    resource_floors: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    shared_resources: dict[Identifier, Rational] = Field(min_length=1, max_length=32)
+    # resource -> capacity coordinate -> shared units per capacity unit
+    joint_coefficients: dict[Identifier, dict[Identifier, Rational]] = Field(
+        min_length=1, max_length=32
+    )
+    joint_service_until: Rational
+    queue_limits: dict[Identifier, Rational] = Field(min_length=1, max_length=32)
+    debt_limits: dict[Identifier, Rational] = Field(min_length=1, max_length=32)
+    blocking_obligation_ids: list[Identifier] = Field(default_factory=list, max_length=128)
+    required_entry_evidence: list[Identifier] = Field(min_length=1, max_length=128)
+    model_catalogue: list[Identifier] = Field(min_length=1, max_length=32)
+    uncertainty_semantics: Literal["rectangular-adversarial"] = "rectangular-adversarial"
+    observation_semantics: Literal["successor-id-is-observed"] = "successor-id-is-observed"
+    initial_state: GrowthState
+    windows: list[GrowthWindow] = Field(min_length=1, max_length=16)
+    continuation_horizon: Rational
+    continuation_task_factor: Rational
+    continuation_research_factor: Rational
+    deadline: Rational
+    max_decisions: Annotated[int, Field(ge=1, le=16)] = 6
+    action_catalogue: list[GrowthAction] = Field(min_length=1, max_length=16)
+    comparators: list[GrowthComparator] = Field(min_length=1, max_length=8)
+    comparison_margin: Rational
+    comparison_rule: Literal["worst-case-min-attainment"] = "worst-case-min-attainment"
+    cost_order: list[Identifier] = Field(min_length=1, max_length=32)
+    monetary_resource: Identifier | None = None
+    search_limits: GrowthSearchLimits
+    # Fixed, prepaid allowance for candidate + comparator + checker computation.
+    planning_charge: dict[Identifier, Rational] = Field(min_length=1, max_length=32)
+    planning_duration: Rational
+    planning_boundary: Literal["shared-budget", "external-paid"] = "shared-budget"
+
+
+class GrowthContract(Document):
+    kind: Literal["growth-contract"] = "growth-contract"
+    spec: GrowthContractSpec
+
+
+class GrowthPolicyNode(StrictModel):
+    state_digest: Digest
+    action_id: Identifier | None = None
+    entry: bool = False
+    branches: dict[Identifier, GrowthPolicyNode] = Field(default_factory=dict, max_length=32)
+    effect_digests: dict[Identifier, Digest] = Field(default_factory=dict, max_length=32)
+
+
+class GrowthObjective(StrictModel):
+    worst_entry_time: Rational
+    terminal_min_attainment: Rational
+    worst_cost: dict[Identifier, Rational] = Field(max_length=32)
+    worst_debt: dict[Identifier, Rational] = Field(max_length=32)
+    worst_duration: Rational
+
+
+class GrowthSearchReport(StrictModel):
+    complete: bool
+    states: int
+    expansions: int
+    policies: int
+    maximum_depth: int
+    limits: GrowthSearchLimits
+
+
+class GrowthComparison(StrictModel):
+    comparator_id: Identifier
+    endpoint: Rational
+    status: Literal["supported", "excluded", "undetermined", "inconsistent"]
+    lower_bound: Rational | None = None
+    upper_bound: Rational | None = None
+    search: GrowthSearchReport
+    scope: Literal["finite-worst-case-scalar-catalogue"] = "finite-worst-case-scalar-catalogue"
+    matched_basis_digest: Digest
+    policy_digest: Digest | None = None
+
+
+class GrowthPlanSpec(StrictModel):
+    contract_digest: Digest
+    input_digest: Digest
+    initial_state_digest: Digest
+    code: Identifier
+    solution_class: Literal["exact", "incomplete", "none"]
+    predicted_entry: Literal["supported", "undetermined", "inconsistent"]
+    observed_entry: Literal["undetermined"] = "undetermined"
+    continuation: Literal["model-witness", "unavailable"]
+    policy: GrowthPolicyNode | None = None
+    policy_digest: Digest | None = None
+    objective: GrowthObjective | None = None
+    safe_fallback: GrowthPolicyNode | None = None
+    search: GrowthSearchReport
+    fallback_search: GrowthSearchReport | None = None
+    comparisons: list[GrowthComparison] = Field(default_factory=list, max_length=128)
+    alternatives: list[Identifier] = Field(default_factory=list, max_length=16)
+    counterexamples: list[Identifier] = Field(default_factory=list, max_length=256)
+    model_predicted_terminal: list[GrowthState] = Field(default_factory=list, max_length=4096)
+    current_measured_bounds: dict[Identifier, GrowthInterval] = Field(
+        default_factory=dict, max_length=32
+    )
+    required_authority: list[Identifier] = Field(default_factory=list, max_length=128)
+    next_evidence: list[Identifier] = Field(default_factory=list, max_length=128)
+    witness_expires: Rational
+    invalidate_on: list[Identifier] = Field(min_length=1, max_length=32)
+    checker_digest: Digest | None = None
+
+
+class GrowthPlan(Document):
+    kind: Literal["growth-plan"] = "growth-plan"
+    spec: GrowthPlanSpec
+
+
+class GrowthObservationSpec(StrictModel):
+    contract_digest: Digest
+    versions: GrowthVersions
+    lifecycle: Lifecycle
+    window: GrowthWindow
+    # Complete boundary ledger, with quantities measured externally, not planner effects.
+    states: list[GrowthState] = Field(min_length=2, max_length=64)
+    source_artifact_digests: list[Digest] = Field(min_length=1, max_length=128)
+    runner_receipt_digests: list[Digest] = Field(min_length=1, max_length=128)
+    trial_result_digest: Digest
+    evaluator_principal_id: Identifier
+    measurement_target: Literal["joint-service-capacity"] = "joint-service-capacity"
+    calibration_allowance: dict[Identifier, Rational] = Field(min_length=3, max_length=32)
+    drift_allowance: dict[Identifier, Rational] = Field(min_length=3, max_length=32)
+    coverage_meaning: Annotated[str, StringConstraints(min_length=1, max_length=2048)]
+    simultaneous_assumptions: Annotated[str, StringConstraints(min_length=1, max_length=2048)]
+    monitoring: Literal["preregistered-boundaries", "unprotected-selection"]
+
+
+class GrowthObservation(Document):
+    kind: Literal["growth-observation"] = "growth-observation"
+    spec: GrowthObservationSpec
+
+
+class GrowthAssessmentSpec(StrictModel):
+    contract_digest: Digest
+    input_digest: Digest
+    code: Identifier
+    model_condition: Literal["supported", "excluded", "undetermined", "inconsistent"]
+    arithmetic_check: Literal["satisfied", "violated", "unknown"]
+    external_evidence_compatibility: Literal["compatible", "unknown", "incompatible"]
+    empirical_attribution: Literal["undetermined"] = "undetermined"
+    observed_entry: Literal["compatible", "undetermined"] = "undetermined"
+    observation_digest: Digest | None = None
+    measured_bounds: dict[Identifier, GrowthInterval] = Field(default_factory=dict, max_length=32)
+    continuation: Literal["recheck-required", "model-witness", "unavailable"]
+    continuation_policy: GrowthPolicyNode | None = None
+    continuation_model_state: GrowthState | None = None
+    continuation_expires: Rational | None = None
+    continuation_search: GrowthSearchReport | None = None
+    reasons: list[Identifier] = Field(default_factory=list, max_length=256)
+    comparisons: list[GrowthComparison] = Field(default_factory=list, max_length=128)
+    reassessed_state: GrowthState | None = None
+    statistics_certified: Literal[False] = False
+    causality_certified: Literal[False] = False
+
+
+class GrowthAssessment(Document):
+    kind: Literal["growth-assessment"] = "growth-assessment"
+    spec: GrowthAssessmentSpec
+
+
 type DocumentType = (
     UnitRegistryDocument
     | PhaseContract
@@ -1543,6 +1845,10 @@ type DocumentType = (
     | TrialResult
     | TrialAssessmentDocument
     | RepairRecord
+    | GrowthContract
+    | GrowthObservation
+    | GrowthPlan
+    | GrowthAssessment
 )
 
 DOCUMENT_MODELS: dict[str, type[Document]] = {
@@ -1596,6 +1902,10 @@ DOCUMENT_MODELS: dict[str, type[Document]] = {
         TrialResult,
         TrialAssessmentDocument,
         RepairRecord,
+        GrowthContract,
+        GrowthObservation,
+        GrowthPlan,
+        GrowthAssessment,
     )
 }
 

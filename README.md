@@ -43,6 +43,23 @@ cpcf bundle verify PATH_TO_BUNDLE --json
 An unsigned bundle can establish content consistency only. Distribution authenticity remains
 unknown unless the bundle carries an admitted root attestation and a trust policy is supplied.
 
+## Offline growth planning
+
+The explicit growth mode plans paid task/research capacity investment, measurement,
+verification and repair under a finite budget, and independently checks every policy branch
+and its funded continuation. It preserves the existing repair mode and operational profile.
+
+```text
+cpcf growth example growth-demo --json
+cpcf growth plan growth-demo/contract.json --objects growth-demo/objects --output growth-plan.json
+cpcf growth check-plan growth-demo/contract.json --objects growth-demo/objects --plan growth-plan.json --json
+```
+
+Results are conditional on a declared finite model. Predictions do not admit measured capacity,
+and an incomplete comparator search cannot establish superiority. See the
+[growth workflow](docs/growth-planning.md), [paper mapping](docs/growth-research-mapping.md),
+and [synthetic comparisons](docs/examples/growth-comparison.json).
+
 ## Remote workspace use
 
 Remote operations require a configured control plane and a short-lived OIDC access token. The CLI

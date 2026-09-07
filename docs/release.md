@@ -23,10 +23,12 @@ intended-deployment restore, load, chaos, independent threat-model, and independ
 penetration-test evidence. The manifest remains absent until those activities have actually
 completed.
 
-The pending publisher is configured for environment `pypi`. Its GitHub environment reviewer is
+The trusted publisher is configured for environment `pypi`. Its GitHub environment reviewer is
 `kadubon` with `prevent_self_review=false`. This is self-approval rather than independent release
 review. It can authorize Beta package distribution, but it cannot satisfy the independent
 operational-review requirements in [release readiness](release-readiness.md).
 
-A pending publisher does not reserve the PyPI project name. The first upload occurs only after the
-repository, workflow filename, environment, project name, and OIDC claims match exactly.
+Every upload requires the repository, workflow filename, environment, project name and OIDC
+claims to match exactly. The growth extension also runs deterministic examples and an installed
+base-wheel growth command in the release gate. Neither publication nor a model witness establishes
+the external operational evidence listed above.

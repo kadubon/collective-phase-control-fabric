@@ -22,3 +22,10 @@ cpcf bundle verify CPCF_BUNDLE --trust-policy TRUST_POLICY.json --json
 
 Content consistency and distribution authenticity are separate. Without an admitted root
 attestation and trust policy, authenticity is `unknown`, even when every object digest matches.
+
+## Offline investment planning
+
+The base wheel also provides `cpcf growth` without a server or solver extra. Start with
+`cpcf growth example --scenario preparation --json`; the [guide](growth-planning.md) covers
+inspect, plan, check-plan, compare, replay, export, ingest, reassess and replan. Synthetic
+examples contain unsigned modelling inputs and do not change the actual evidence ledger.

@@ -1,11 +1,11 @@
 ---
 name: collective-phase-control-fabric
-description: Inspect, validate, and project Collective Phase Control Fabric (CPCF) v0.6 evidence records without treating the fabric, adapters, or incomplete evidence as operational or scientific authority. Use for offline schema and bundle checks, evidence and trust review, remote control-plane workflows, externally run receipt handling, and read-only legacy compatibility.
+description: Inspect CPCF v0.6 evidence and plan bounded offline capability growth while preserving model, observation, and authority boundaries. Use for schema and bundle checks, finite growth planning, evidence and trust review, control-plane workflows, external receipts, and read-only legacy compatibility.
 license: Apache-2.0
 metadata:
   author: Collective Phase Control Fabric contributors
   repository: https://github.com/kadubon/collective-phase-control-fabric
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Collective Phase Control Fabric
@@ -63,6 +63,30 @@ cpcf bundle verify CPCF_BUNDLE --trust-policy TRUST_POLICY.json --json
 
 Matching object digests establish content consistency only. Without an admitted root attestation
 and trust policy, report authenticity as `unknown`.
+
+### Offline growth planning
+
+For investment beyond blocker repair, use the explicit `cpcf growth` family. Read the
+[finite growth guide](../../../docs/growth-planning.md) and
+[paper mapping](../../../docs/growth-research-mapping.md) before interpreting a guarantee.
+
+```text
+cpcf growth example growth-demo --json
+cpcf growth plan growth-demo/contract.json --objects growth-demo/objects --output growth-plan.json
+cpcf growth check-plan growth-demo/contract.json --objects growth-demo/objects --plan growth-plan.json --json
+```
+
+Keep model-predicted entry, receipt-backed observation, admitted capacity and the operational
+profile separate. A safe fallback is not growth continuation. Empty models are inconsistent;
+budget exhaustion is unknown. A comparator incumbent is a lower bound, so incomplete comparison
+cannot certify superiority. The reference game has observed successor IDs and a rectangular
+adversary; it does not establish statistical coverage or fixed-parameter optimality.
+
+Use `growth export` only with an operator-prepared job draft; it does not execute, lease, sign or
+authorize anything. `growth ingest`, `reassess` and `replan` require original admission materials
+and independently supplied root pins. They recompute DSSE, quorum, trial and runner bindings.
+Never replace those inputs with a cached successful assessment. Replanning produces a new unsigned
+model proposal; it does not edit a registered or signed contract in place.
 
 ### 2. Evidence, trust, and scientific review
 

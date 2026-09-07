@@ -11,7 +11,8 @@ COPY schemas ./schemas
 COPY fixtures ./fixtures
 COPY docs ./docs
 COPY packages ./packages
-RUN uv sync --frozen --all-packages --extra worker --no-group dev --no-group security && \
+RUN apk add --no-cache libcrypto3=3.5.8-r0 libssl3=3.5.8-r0 libuuid=2.42.3-r1 && \
+    uv sync --frozen --all-packages --extra worker --no-group dev --no-group security && \
     rm -rf /usr/local/lib/python3.14/ensurepip \
       /usr/local/lib/python3.14/site-packages/pip \
       /usr/local/lib/python3.14/site-packages/pip-26.2.1.dist-info \

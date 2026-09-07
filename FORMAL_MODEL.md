@@ -74,3 +74,18 @@ is introduced. The current planner searches this structure over abstract capabil
 not yet recompute the full snapshot kernel per successor and is not a conformance proof. Pareto
 comparison preserves resource, time, cost, quality, debt, verification, independence, cut exposure,
 and evidence dimensions separately.
+
+## Finite growth control
+
+The separate opt-in growth mode models a finite game with exact rational time, nonempty
+applicable successors, and rectangular adversarial uncertainty. Each decision preserves
+joint task/research service, verification, shared resources, queues, deadlines and evidence
+premises at every prefix. Its lexicographic objective minimizes worst-case entry time with
+a funded growth continuation, then maximizes terminal minimum normalized task/research
+attainment, then orders typed costs, typed debt, time and canonical identifiers.
+
+The checker recomputes the submitted tree and reoptimized finite scalar comparator bounds.
+Computational exhaustion is unknown, not nonexistence. Model-predicted states and clocks
+never become observed attestations. See [the exact domain and equations](docs/growth-planning.md)
+and [the paper-to-code mapping](docs/growth-research-mapping.md). These additions do not close
+the repair planner's existing full-snapshot conformance gap or establish empirical acceleration.

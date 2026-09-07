@@ -1,9 +1,23 @@
 # Changelog
 
-## 0.6.0 (unreleased)
+## Unreleased
 
-- Split CPCF into a universal-lock `uv` workspace containing core, CLI, API, worker, and
-  external-runner protocol distributions; development is pinned to uv 0.11.28 and Python 3.14.6,
+- Added the explicit offline `growth` mode with four closed document kinds, exact rational
+  finite AND-OR planning, reoptimized scalar comparators, independent all-prefix checking,
+  and paid growth continuation witnesses. Existing repair and profile semantics are preserved.
+- Added the full inspect/plan/check/compare/export/replay/ingest/reassess/replan CLI path,
+  deterministic comparisons, independent small-catalogue oracles and adversarial regressions.
+- Reused DSSE/quorum, trial registration and runner receipt checks for growth observations;
+  model predictions never become actual attestations or empirical/causal authority.
+- Kept digest-verified raw artifacts opaque even when their bytes parse as a typed document.
+- Extended critical coverage and mutation checks to the growth kernel, and updated the
+  documentation, agent skill, schema/error references and Wiki.
+- Pinned API/worker Alpine security fixes to libcrypto3/libssl3 3.5.8-r0 and libuuid 2.42.3-r1.
+
+## 0.6.0 (2026-07-14)
+
+- Preserved five import packages in one `collective-phase-control-fabric` distribution with
+  a universal `uv` lock; development is pinned to uv 0.11.28 and Python 3.14.6,
   with CPython 3.12-3.14 declared for Windows and Linux.
 - Replaced native generic records with a closed Pydantic kind registry and mechanically generated
   JSON Schema 2020-12 documents.

@@ -163,6 +163,93 @@
     },
     {
       "argv": [
+        "growth"
+      ],
+      "description": "Plan and check finite model growth offline.",
+      "help": "Plan and check finite model growth offline."
+    },
+    {
+      "argv": [
+        "growth",
+        "check-plan"
+      ],
+      "description": "Independently replay every submitted policy branch.",
+      "help": "Independently replay every submitted policy branch."
+    },
+    {
+      "argv": [
+        "growth",
+        "compare"
+      ],
+      "description": "Reoptimize the interaction-restricted comparator catalogue.",
+      "help": "Reoptimize the interaction-restricted comparator catalogue."
+    },
+    {
+      "argv": [
+        "growth",
+        "example"
+      ],
+      "description": "Run a deterministic synthetic comparison; optionally write its inputs.",
+      "help": "Run a deterministic synthetic comparison; optionally write its inputs."
+    },
+    {
+      "argv": [
+        "growth",
+        "export"
+      ],
+      "description": "Export an operator-supplied proposed runner job; never execute.",
+      "help": "Export an operator-supplied proposed runner job; never execute."
+    },
+    {
+      "argv": [
+        "growth",
+        "ingest"
+      ],
+      "description": "Recompute independent receipt admission and observation compatibility.",
+      "help": "Recompute independent receipt admission and observation compatibility."
+    },
+    {
+      "argv": [
+        "growth",
+        "inspect"
+      ],
+      "description": "Inspect the finite contract and separate operational profile.",
+      "help": "Inspect the finite contract and separate operational profile."
+    },
+    {
+      "argv": [
+        "growth",
+        "plan"
+      ],
+      "description": "Enumerate a bounded exact contingent growth policy.",
+      "help": "Enumerate a bounded exact contingent growth policy."
+    },
+    {
+      "argv": [
+        "growth",
+        "reassess"
+      ],
+      "description": "Recheck external observation, arithmetic and model scope.",
+      "help": "Recheck external observation, arithmetic and model scope."
+    },
+    {
+      "argv": [
+        "growth",
+        "replan"
+      ],
+      "description": "Reassess first, then propose a new unsigned model contract and plan.",
+      "help": "Reassess first, then propose a new unsigned model contract and plan."
+    },
+    {
+      "argv": [
+        "growth",
+        "replay"
+      ],
+      "description": "Read-only hypothetical replay; never admit an observation.",
+      "help": "Read-only hypothetical replay; never admit an observation."
+    },
+    {
+      "argv": [
         "intervention"
       ],
       "description": "Queue bounded intervention analysis.",

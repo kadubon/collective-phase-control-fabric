@@ -45,6 +45,8 @@ deployment integration tests, never for offline core inspection.
 - `v6/trust.py`, `v6/kms.py`: DSSE, historical time, pinned identity, and role quorum.
 - `v6/science.py`, `v6/coordination.py`: shared exact snapshot and perturbation audit.
 - `v6/planning.py`: branch-safe Pareto and strong AND–OR planning.
+- `v6/growth.py`, `v6/growth_evidence.py`: separate finite growth game, independent policy
+  checks, and read-only external evidence reassessment. Model clocks and ledgers are not attestations.
 - `v6/runner.py`, `v6/projection.py`: external runner receipts and independent projection.
 - `v6/trials.py`: registration and external evidence compatibility.
 - `v6/storage.py`: immutable ledger and copy-on-write legacy boundary.
