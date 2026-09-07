@@ -10,11 +10,11 @@ synthetic comparison results and exactness limits. The previous report is retain
 
 - Frozen environment: uv 0.11.28 and CPython 3.14.6 on Windows; all extras and development/security
   groups synchronize without dependency changes to `uv.lock`.
-- Full suite after the final functional changes: 615 passed and 3 skipped, with 90.95% branch
+- Full suite after the evidence-boundary correction: 642 passed and 3 skipped, with 90.95% branch
   coverage across all five import packages. Skips require disposable external integration services.
-- Final focused critical suite, including five additional complete-growth golden checks:
-  349 passed, 95.81% branch coverage. Every one of the 13 critical groups passes its separate 95%
-  gate; growth is 97.68%, repair planning 97.05%, and parsing/schemas 95.93%.
+- Final focused critical suite, including the strict comparator-margin boundary regression:
+  372 passed, 95.82% branch coverage. Every one of the 13 critical groups passes its separate 95%
+  gate; growth is 97.69%, repair planning 97.05%, and parsing/schemas 95.93%.
 - Ruff format/lint, strict mypy across core/packages/scripts, and Bandit pass. OSV-backed
   `pip-audit` reports no known vulnerabilities in the synchronized Python environment.
 - All 212 schemas validate, including 52 native closed kinds; all 9 existing fixtures validate.
@@ -31,8 +31,8 @@ synthetic comparison results and exactness limits. The previous report is retain
 
 The final-commit GitHub CI, platform matrix, PostgreSQL service, mutation gate and image/security
 jobs remain required; local successes do not substitute for their results. Native Linux mutation
-is running with the expanded growth selection and the unchanged 85% threshold. Its result is
-not yet claimed in this local record. Refer to the final commit's
+uses the expanded growth selection and the unchanged 85% threshold. Its final result belongs
+to the exact release commit's CI evidence and release notes. Refer to the final commit's
 [GitHub Actions runs](https://github.com/kadubon/collective-phase-control-fabric/actions).
 
 The pre-existing scheduled image scan reported vulnerable Alpine OpenSSL and libuuid packages.

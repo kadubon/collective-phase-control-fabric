@@ -630,6 +630,15 @@ def test_scalar_search_requires_an_explicit_endpoint() -> None:
         Search(c, o, Budget(c.spec.search_limits)).scalar(initial_state(c))
 
 
+def test_comparator_margin_requires_strict_superiority_at_the_boundary() -> None:
+    c, o = example()
+    # Candidate minimum 1 equals baseline upper 2/3 plus the declared 1/3 margin.
+    # Equality supplies no superiority certificate; later entry cannot fund growth here.
+    result = plan_growth(modify(c, comparison_margin="1/3"), o)
+    assert result.spec.code == "growth_no_guaranteed_entry"
+    assert result.spec.policy is None
+
+
 @pytest.mark.parametrize(
     "name,digest",
     [

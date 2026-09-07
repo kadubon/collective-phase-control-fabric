@@ -287,7 +287,7 @@
       "severity": "high",
       "exploit": "Immediate repair progress or a weak baseline can be mistaken for exact funded capability growth, including after search exhaustion or on empty model sets.",
       "affected_claim": "Finite model-conditional growth planning",
-      "correction": "An explicit finite AND-OR growth mode, exact rational ledger, reoptimized scalar comparator, independent tree checker, funded continuation and fail-closed budget/model statuses preserve the existing repair and scientific boundaries.",
+      "correction": "An explicit finite AND-OR growth mode, exact rational ledger, reoptimized scalar comparator, independent tree checker, funded continuation and fail-closed budget/model statuses preserve the existing repair and scientific boundaries. An empty model set remains inconsistent during evidence reassessment even when the submitted observation is unusable.",
       "regression_test": "tests/test_v6_growth.py, tests/test_v6_growth_evidence.py and tests/test_v6_growth_cli.py",
       "status": "closed"
     },

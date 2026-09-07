@@ -197,7 +197,9 @@ def reassess(
     reasons: list[str] = []
     arithmetic = "unknown"
     compatible = False
-    model = "undetermined"
+    model = "undetermined" if c.initial_state.model_ids else "inconsistent"
+    if model == "inconsistent":
+        reasons.append("growth_inconsistent_models")
     measured: dict[str, GrowthInterval] = {}
     final: GrowthState | None = None
     comparisons = compare(contract, objects)
