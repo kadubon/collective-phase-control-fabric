@@ -9,4 +9,4 @@ __all__ = ["__version__", "analyze"]
 try:
     __version__ = version("collective-phase-control-fabric")
 except PackageNotFoundError:  # Source-tree execution before installation.
-    __version__ = "0.6.0"
+    __version__ = "0.6.1"
