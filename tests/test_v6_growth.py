@@ -39,6 +39,7 @@ from collective_phase_control_fabric.v6.models import (
     CapabilityDocument,
     Document,
     GrowthAction,
+    GrowthCheckpoint,
     GrowthContract,
     GrowthInterval,
     GrowthPlan,
@@ -48,6 +49,7 @@ from collective_phase_control_fabric.v6.models import (
     Lifecycle,
     ResourceObservationAttestation,
     ResourceObservationSpec,
+    UnitRegistryDocument,
 )
 from collective_phase_control_fabric.v6.registry import (
     document_digest,
@@ -84,6 +86,608 @@ def step(
 def planned() -> tuple[GrowthContract, dict[str, Document], GrowthPlan]:
     contract, objects = example()
     return contract, objects, plan_growth(contract, objects)
+
+
+def bind_growth_recipe(
+    c: GrowthContract,
+    o: dict[str, Document],
+    r: GrowthAction,
+    *,
+    recipe: dict[str, Any] | None = None,
+    action: dict[str, Any] | None = None,
+    capability: dict[str, Any] | None = None,
+) -> tuple[GrowthContract, dict[str, Document], GrowthAction]:
+    """Rebind real immutable model objects after changing a declared contract."""
+    o = dict(o)
+    a = cast(ActionDocument, o[r.action_digest])
+    cap = cast(CapabilityDocument, o[a.spec.capability_digest])
+    if capability is not None:
+        cap = cap.model_copy(update={"spec": cap.spec.model_copy(update=capability)})
+        o[document_digest(cap)] = cap
+        a = a.model_copy(
+            update={"spec": a.spec.model_copy(update={"capability_digest": document_digest(cap)})}
+        )
+    if action is not None:
+        a = a.model_copy(update={"spec": a.spec.model_copy(update=action)})
+    o[document_digest(a)] = a
+    changed = r.model_copy(update={"action_digest": document_digest(a), **(recipe or {})})
+    c = modify(c, action_catalogue=[changed if x == r else x for x in c.spec.action_catalogue])
+    return c, o, changed
+
+
+@pytest.mark.parametrize(
+    "field,value,code",
+    [
+        ("resource_floors", {"phantom": "0"}, "growth_resource_domain"),
+        ("planning_charge", {"phantom": "0"}, "growth_resource_domain"),
+        ("resource_units", {}, "growth_resource_domain"),
+        ("cost_order", ["credits", "credits"], "growth_resource_domain"),
+        ("shared_resources", {}, "growth_reservation_domain"),
+        ("queue_limits", {}, "growth_queue_domain"),
+        ("debt_limits", {}, "growth_queue_domain"),
+        ("deadline", "0", "growth_time_invalid"),
+        ("continuation_horizon", "0", "growth_time_invalid"),
+        ("joint_service_until", "4", "growth_time_invalid"),
+        ("planning_duration", "-1", "growth_time_invalid"),
+        ("continuation_task_factor", "1", "growth_factor_invalid"),
+        ("continuation_research_factor", "1", "growth_factor_invalid"),
+        ("comparison_margin", "0", "growth_factor_invalid"),
+        ("model_catalogue", ["nominal", "nominal"], "growth_model_domain"),
+        ("joint_coefficients", {"gpu": {"phantom": "1"}}, "growth_reservation_domain"),
+        ("shared_resources", {"gpu": "-1"}, "growth_negative_quantity"),
+        ("monetary_resource", "phantom", "growth_resource_domain"),
+    ],
+)
+def test_contract_rejects_invalid_domains_budgets_and_growth_boundaries(
+    field: str, value: Any, code: str
+) -> None:
+    c, o = example()
+    with pytest.raises(GrowthError) as caught:
+        validate_contract(modify(c, **{field: value}), o)
+    assert caught.value.code == code
+
+
+@pytest.mark.parametrize("field", ["target", "service_floor", "quality_floor", "coverage_floor"])
+@pytest.mark.parametrize("value", ["0", "-1", "3/2"])
+def test_domain_boundaries_are_checked_independently(field: str, value: str) -> None:
+    c, o = example()
+    d = c.spec.domains["task"].model_copy(update={field: value})
+    c = modify(c, domains={**c.spec.domains, "task": d})
+    allowed = F(value) > 0 if field in {"target", "service_floor"} else 0 <= F(value) <= 1
+    if allowed:
+        if field == "service_floor":
+            c = modify(
+                c,
+                initial_state=c.spec.initial_state.model_copy(
+                    update={
+                        "capacities": {
+                            **c.spec.initial_state.capacities,
+                            "task": GrowthInterval(lower="2", upper="2"),
+                        }
+                    }
+                ),
+            )
+        validate_contract(c, o)
+    else:
+        with pytest.raises(GrowthError) as caught:
+            validate_contract(c, o)
+        assert caught.value.code == "growth_domain_invalid"
+
+
+@pytest.mark.parametrize(
+    "change,code",
+    [
+        ("digest", "growth_object_digest"),
+        ("snapshot", "growth_snapshot_missing"),
+        ("units", "growth_units_missing"),
+        ("snapshot-units", "growth_units_mismatch"),
+        ("domains", "growth_domains_missing"),
+        ("capacity-domain", "growth_domains_mismatch"),
+        ("unit-name", "growth_units_mismatch"),
+        ("unit-scale", "growth_units_mismatch"),
+        ("time-dimension", "growth_units_mismatch"),
+        ("undefined-unit", "growth_units_mismatch"),
+        ("naive-origin", "growth_time_invalid"),
+        ("window-duplicate", "growth_window_invalid"),
+        ("window-empty", "growth_window_invalid"),
+        ("window-task", "growth_window_invalid"),
+        ("window-research", "growth_window_invalid"),
+        ("window-deadline", "growth_window_invalid"),
+        ("comparator-duplicate", "growth_comparator_duplicate"),
+    ],
+)
+def test_closed_growth_contract_bindings_and_registered_windows(change: str, code: str) -> None:
+    c, o = example()
+    if change in {"digest", "snapshot", "units"}:
+        digest = (
+            c.spec.unit_registry_digest if change == "units" else c.spec.analysis_snapshot_digest
+        )
+        doc = o.pop(digest)
+        if change == "digest":
+            o["sha256:" + "0" * 64] = doc
+    elif change == "snapshot-units":
+        snapshot = o[c.spec.analysis_snapshot_digest]
+        snapshot = snapshot.model_copy(
+            update={
+                "spec": snapshot.spec.model_copy(
+                    update={"unit_registry_digest": "sha256:" + "0" * 64}
+                )
+            }
+        )
+        o[document_digest(snapshot)] = snapshot
+        c = modify(c, analysis_snapshot_digest=document_digest(snapshot))
+    elif change == "domains":
+        c = modify(c, domains={k: v for k, v in c.spec.domains.items() if k != "task"})
+    elif change == "capacity-domain":
+        c = modify(c, initial_state=c.spec.initial_state.model_copy(update={"capacities": {}}))
+    elif change == "naive-origin":
+        c = modify(c, model_time_origin=c.spec.model_time_origin.replace(tzinfo=None))
+    elif change.startswith("window-"):
+        window = c.spec.windows[0]
+        updates = {
+            "window-empty": {"start": window.end},
+            "window-task": {"task_factor": "1"},
+            "window-research": {"research_factor": "1"},
+            "window-deadline": {"end": "6"},
+        }
+        windows = (
+            [window, window]
+            if change == "window-duplicate"
+            else [window.model_copy(update=updates[change])]
+        )
+        c = modify(c, windows=windows)
+    elif change == "comparator-duplicate":
+        c = modify(c, comparators=[c.spec.comparators[0], c.spec.comparators[0]])
+    else:
+        units = cast(UnitRegistryDocument, o[c.spec.unit_registry_digest])
+        definitions = dict(units.spec.units)
+        if change == "unit-name":
+            c = modify(
+                c,
+                domains={
+                    **c.spec.domains,
+                    "task": c.spec.domains["task"].model_copy(update={"unit": "credit"}),
+                },
+            )
+        elif change == "undefined-unit":
+            definitions.pop(c.spec.domains["task"].unit)
+        else:
+            key = units.spec.time_unit
+            updates = {"scale": "0"} if change == "unit-scale" else {"dimensions": {"length": 1}}
+            definitions[key] = definitions[key].model_copy(update=updates)
+        units = units.model_copy(
+            update={"spec": units.spec.model_copy(update={"units": definitions})}
+        )
+        o[document_digest(units)] = units
+        snapshot = o[c.spec.analysis_snapshot_digest]
+        snapshot = snapshot.model_copy(
+            update={
+                "spec": snapshot.spec.model_copy(
+                    update={"unit_registry_digest": document_digest(units)}
+                )
+            }
+        )
+        o[document_digest(snapshot)] = snapshot
+        c = modify(
+            c,
+            unit_registry_digest=document_digest(units),
+            analysis_snapshot_digest=document_digest(snapshot),
+        )
+    with pytest.raises(GrowthError) as caught:
+        validate_contract(c, o)
+    assert caught.value.code == code
+
+
+@pytest.mark.parametrize(
+    "change,code",
+    [
+        ("action", "growth_action_missing"),
+        ("capability", "growth_capability_missing"),
+        ("schema", "growth_capability_schema"),
+        ("duplicate-action", "growth_action_duplicate"),
+        ("empty-lifetime", "growth_time_invalid"),
+        ("minimum-domain", "growth_domains_mismatch"),
+        ("missing-outcome", "growth_successor_incomplete"),
+        ("missing-model", "growth_successor_incomplete"),
+        ("duplicate-successor", "growth_successor_duplicate"),
+        ("unregistered-model", "growth_model_domain"),
+        ("capacity-domain", "growth_domains_mismatch"),
+        ("quality-domain", "growth_domains_mismatch"),
+        ("coverage-domain", "growth_domains_mismatch"),
+        ("charge-category", "growth_charge_category"),
+        ("charge-domain", "growth_resource_domain"),
+        ("branch-domain", "growth_resource_domain"),
+        ("unfunded-arrival", "growth_capability_effect"),
+    ],
+)
+def test_catalogue_cannot_weaken_action_capability_or_successor_bindings(
+    change: str, code: str
+) -> None:
+    c, o = example()
+    r = c.spec.action_catalogue[0]
+    a = cast(ActionDocument, o[r.action_digest])
+    cap = cast(CapabilityDocument, o[a.spec.capability_digest])
+    e = r.successors[0]
+    recipe: dict[str, Any] = {}
+    capability: dict[str, Any] | None = None
+    if change in {"action", "capability"}:
+        o.pop(r.action_digest if change == "action" else a.spec.capability_digest)
+    elif change == "duplicate-action":
+        c = modify(c, action_catalogue=[r, r])
+    else:
+        if change == "schema":
+            capability = {"output_schema_digest": "sha256:" + "0" * 64}
+        elif change == "empty-lifetime":
+            recipe = {"earliest": r.expires}
+        elif change == "minimum-domain":
+            recipe = {"minimum_capacities": {"phantom": "1"}}
+        elif change == "missing-outcome":
+            recipe = {"successors": r.successors[1:]}
+        elif change == "duplicate-successor":
+            recipe = {"successors": [*r.successors, e]}
+        elif change == "missing-model":
+            recipe = {
+                "successors": [
+                    s.model_copy(update={"applicable_model_ids": ["nominal"]}) for s in r.successors
+                ]
+            }
+        elif change == "branch-domain":
+            capability = {
+                "branches": [
+                    b.model_copy(update={"resource_delta_lower": {"phantom": "-1"}})
+                    for b in cap.spec.branches
+                ]
+            }
+        else:
+            updates = {
+                "unregistered-model": {
+                    "applicable_model_ids": [*e.applicable_model_ids, "phantom"]
+                },
+                "capacity-domain": {
+                    "capacity_delta": {"phantom": GrowthInterval(lower="0", upper="0")}
+                },
+                "quality-domain": {"quality": {"phantom": "1"}},
+                "coverage-domain": {"coverage": {"phantom": "1"}},
+                "charge-category": {"charges": {"phantom": {"credits": "1"}}},
+                "charge-domain": {"charges": {"evidence": {"phantom": "1"}}},
+                "unfunded-arrival": {
+                    "arrivals": [
+                        GrowthWork(
+                            work_id="arrival", stage="verification", remaining="2", deadline="3"
+                        )
+                    ]
+                },
+            }
+            recipe = {"successors": [e.model_copy(update=updates[change]), *r.successors[1:]]}
+        c, o, _ = bind_growth_recipe(c, o, r, recipe=recipe, capability=capability)
+    with pytest.raises(GrowthError) as caught:
+        validate_contract(c, o)
+    assert caught.value.code == code
+
+
+def test_valid_boundary_models_include_zero_quality_full_domains_and_paid_monetary_cost() -> None:
+    c, o = example()
+    c = modify(
+        c,
+        domains={
+            k: d.model_copy(update={"quality_floor": "0", "coverage_floor": "0"})
+            for k, d in c.spec.domains.items()
+        },
+        initial_state=c.spec.initial_state.model_copy(update={"model_ids": c.spec.model_catalogue}),
+        windows=[c.spec.windows[0].model_copy(update={"end": c.spec.deadline})],
+        monetary_resource="credits",
+    )
+    r = c.spec.action_catalogue[0]
+    a = cast(ActionDocument, o[r.action_digest])
+    cap = cast(CapabilityDocument, o[a.spec.capability_digest])
+    e = r.successors[0].model_copy(
+        update={
+            "applicable_model_ids": c.spec.model_catalogue,
+            "capacity_delta": {k: GrowthInterval(lower="-1/4", upper="0") for k in c.spec.domains},
+            "quality": {k: "1/2" for k in c.spec.domains},
+            "coverage": {k: "1/2" for k in c.spec.domains},
+            "charges": {"generation": {"credits": "1/2"}, "evidence": {"credits": "1/2"}},
+        }
+    )
+    c, o, _ = bind_growth_recipe(
+        c,
+        o,
+        r,
+        recipe={
+            "minimum_capacities": {k: "1" for k in c.spec.domains},
+            "successors": [e, *r.successors[1:]],
+        },
+        capability={
+            "branches": [b.model_copy(update={"cost_upper": "1"}) for b in cap.spec.branches]
+        },
+    )
+    validate_contract(c, o)
+
+
+@pytest.mark.parametrize(
+    "updates,code",
+    [
+        ({"elapsed": "-1"}, "growth_deadline"),
+        ({"resources": {}}, "growth_resource_domain"),
+        ({"quality": {}}, "growth_domains_mismatch"),
+        ({"capacities": {}}, "growth_domains_mismatch"),
+        ({"coverage": {}}, "growth_domains_mismatch"),
+        (
+            {"quality": {"task": "3/2", "research": "1", "verification": "1"}},
+            "growth_quality_floor",
+        ),
+        (
+            {"coverage": {"task": "3/2", "research": "1", "verification": "1"}},
+            "growth_coverage_floor",
+        ),
+        (
+            {"queue": [GrowthWork(work_id="q", stage="task", remaining="-1", deadline="2")]},
+            "growth_work_invalid",
+        ),
+        (
+            {"queue": [GrowthWork(work_id="q", stage="phantom", remaining="1", deadline="2")]},
+            "growth_work_invalid",
+        ),
+        (
+            {
+                "reservations": [
+                    GrowthReservation(resource="phantom", owner="a", quantity="1", until="2")
+                ]
+            },
+            "growth_reservation_domain",
+        ),
+        (
+            {
+                "reservations": [
+                    GrowthReservation(resource="gpu", owner="a", quantity="-1", until="2")
+                ]
+            },
+            "growth_reservation_domain",
+        ),
+    ],
+)
+def test_state_contract_errors_have_exact_stable_codes(updates: dict[str, Any], code: str) -> None:
+    c, _ = example()
+    with pytest.raises(GrowthError) as caught:
+        check_state(c, c.spec.initial_state.model_copy(update=updates))
+    assert caught.value.code == code
+
+
+def test_checkpoint_work_and_interval_boundaries_reject_ambiguous_ledgers() -> None:
+    c, _ = example()
+    s = c.spec.initial_state
+    checkpoint = GrowthCheckpoint(time="0", capacities=s.capacities)
+    work = GrowthWork(work_id="q", stage="task", remaining="1", deadline="1")
+    for updates, code in [
+        ({"checkpoints": [checkpoint, checkpoint]}, "growth_checkpoint_invalid"),
+        (
+            {"checkpoints": [checkpoint.model_copy(update={"time": "-1"})]},
+            "growth_checkpoint_invalid",
+        ),
+        (
+            {"checkpoints": [checkpoint.model_copy(update={"time": "1"})]},
+            "growth_checkpoint_invalid",
+        ),
+        ({"queue": [work], "obligations": [work]}, "growth_work_duplicate"),
+        (
+            {"capacities": {**s.capacities, "task": GrowthInterval(lower="2", upper="1")}},
+            "growth_interval_invalid",
+        ),
+        (
+            {"capacities": {**s.capacities, "task": GrowthInterval(lower="-1", upper="1")}},
+            "growth_interval_invalid",
+        ),
+    ]:
+        with pytest.raises(GrowthError) as caught:
+            check_state(c, s.model_copy(update=updates))
+        assert caught.value.code == code
+    check_state(
+        c,
+        s.model_copy(
+            update={"queue": [work.model_copy(update={"remaining": "0", "deadline": "0"})]}
+        ),
+    )
+
+
+def test_two_time_unit_work_conserves_partial_debt_cost_and_expiring_evidence() -> None:
+    c, o = example()
+    c = modify(
+        c,
+        domains={
+            k: d.model_copy(update={"quality_floor": "1/2", "coverage_floor": "1/2"})
+            for k, d in c.spec.domains.items()
+        },
+    )
+    r = recipe_for(c, o, "idle")
+    a = cast(ActionDocument, o[r.action_digest])
+    cap = cast(CapabilityDocument, o[a.spec.capability_digest])
+    removed = [c.spec.unit_registry_digest, a.spec.capability_digest]
+    added = ["sha256:" + letter * 64 for letter in ("d", "e")]
+    old_reservation = GrowthReservation(resource="gpu", owner="old", quantity="1", until="4")
+    new_reservation = GrowthReservation(resource="gpu", owner="new", quantity="1", until="3")
+    values = {"removed": "4", "expired": "1", "boundary": "2", "retained": "4"}
+    s = initial_state(c).model_copy(
+        update={
+            "queue": [
+                GrowthWork(work_id="q1", stage="verification", remaining="2", deadline="4"),
+                GrowthWork(work_id="q2", stage="verification", remaining="1", deadline="2"),
+            ],
+            "obligations": [GrowthWork(work_id="debt", stage="task", remaining="2", deadline="4")],
+            "completed": {"verification": "3"},
+            "offered": {"verification": "4"},
+            "evidence": values,
+            "assumptions": values,
+            "reservations": [
+                old_reservation,
+                old_reservation.model_copy(update={"owner": "expired", "until": "1"}),
+            ],
+            "pending_results": ["done", "kept"],
+            "hazards": ["old"],
+            "attribution": "external",
+        }
+    )
+    e = r.successors[0].model_copy(
+        update={
+            "duration": "2",
+            "quality": {"task": "3/4"},
+            "coverage": {"research": "4/5"},
+            "completed_work": {"q1": "1", "q2": "1", "debt": "1"},
+            "offered_service": {"task": "1", "research": "0", "verification": "2"},
+            "charges": {"generation": {"credits": "1/2"}, "evidence": {"credits": "1/2"}},
+            "reservations": [
+                new_reservation,
+                new_reservation.model_copy(update={"owner": "at-boundary", "until": "2"}),
+            ],
+            "evidence_removed": ["removed"],
+            "evidence_added": {"new": "4"},
+            "assumptions_removed": ["removed"],
+            "assumptions_added": {"new": "4"},
+            "pending_resolved": ["done"],
+            "pending_added": ["fresh"],
+            "attribution": "endogenous",
+        }
+    )
+    c, o, r = bind_growth_recipe(
+        c,
+        o,
+        r,
+        recipe={
+            "expires": "2",
+            "required_evidence": ["boundary"],
+            "required_assumptions": ["boundary"],
+            "successors": [e, *r.successors[1:]],
+        },
+        action={
+            "prohibited_hazards": ["blocked"],
+            "protected_object_digests": ["sha256:" + "f" * 64],
+        },
+        capability={
+            "branches": [
+                b.model_copy(
+                    update={
+                        "time_upper": "2",
+                        "must_remove": removed[:1],
+                        "may_remove": removed[1:],
+                        "must_add": added[:1],
+                        "may_add": added[1:],
+                        "hazards_removed": ["old"],
+                        "hazards_added": ["new"],
+                    }
+                )
+                if b.outcome == "success"
+                else b
+                for b in cap.spec.branches
+            ]
+        },
+    )
+    after = transition(c, s, r, e, o)
+    assert after.elapsed == "2" and after.resources == {"credits": "6"}
+    assert after.spent == {"credits": "2"}
+    assert after.charges == {
+        "planner": {"credits": "1"},
+        "generation": {"credits": "1/2"},
+        "evidence": {"credits": "1/2"},
+    }
+    assert [(w.work_id, w.remaining) for w in after.queue] == [("q1", "1")]
+    assert [(w.work_id, w.remaining) for w in after.obligations] == [("debt", "1")]
+    assert after.completed == {"task": "1", "research": "0", "verification": "5"}
+    assert after.offered == {"task": "1", "research": "0", "verification": "6"}
+    assert after.quality == {**s.quality, "task": "3/4"}
+    assert after.coverage == {**s.coverage, "research": "4/5"}
+    assert after.evidence == after.assumptions == {"boundary": "2", "retained": "4", "new": "4"}
+    assert sorted(x.owner for x in after.reservations) == ["new", "old"]
+    assert set(after.pending_results) == {"kept", "fresh", *added}
+    assert set(after.live_object_digests) == set(s.live_object_digests) - set(removed)
+    assert after.hazards == ["new"] and after.attribution == "attribution-unresolved"
+    assert [(x.time, x.capacities) for x in after.checkpoints] == [
+        ("0", s.capacities),
+        ("2", s.capacities),
+    ]
+
+
+@pytest.mark.parametrize(
+    "change,code",
+    [
+        ("reservation", "growth_reservation_expired"),
+        ("reservation-overbooked", "growth_shared_resource_double_booking"),
+        ("expired-action", "growth_deadline"),
+        ("late-completion", "growth_completion_late"),
+        ("negative-completion", "growth_completion_exceeds_work"),
+        ("unoffered-completion", "growth_service_overbooked"),
+        ("offered-domain", "growth_queue_domain"),
+        ("debt-burst", "growth_backlog_limit"),
+        ("protected-removal", "growth_protected_object"),
+        ("new-hazard", "growth_hazard"),
+    ],
+)
+def test_transition_rejects_unfunded_transient_effects(change: str, code: str) -> None:
+    c, o = example()
+    r = recipe_for(c, o, "idle")
+    a = cast(ActionDocument, o[r.action_digest])
+    cap = cast(CapabilityDocument, o[a.spec.capability_digest])
+    s = initial_state(c).model_copy(
+        update={"queue": [GrowthWork(work_id="q", stage="task", remaining="1", deadline="3")]}
+    )
+    updates: dict[str, Any] = {}
+    recipe: dict[str, Any] = {}
+    action: dict[str, Any] | None = None
+    capability: dict[str, Any] | None = None
+    if change.startswith("reservation"):
+        updates = {
+            "reservations": [
+                GrowthReservation(
+                    resource="gpu",
+                    owner="transient",
+                    quantity="1000" if change.endswith("overbooked") else "1",
+                    until="1" if change.endswith("overbooked") else "1/2",
+                )
+            ]
+        }
+    elif change == "expired-action":
+        recipe = {"expires": "1/2"}
+    elif change == "late-completion":
+        s = s.model_copy(update={"queue": [s.queue[0].model_copy(update={"deadline": "1/2"})]})
+        updates = {"completed_work": {"q": "1"}, "offered_service": {"task": "1"}}
+    elif change in {"negative-completion", "unoffered-completion"}:
+        updates = {"completed_work": {"q": "-1" if change == "negative-completion" else "1"}}
+    elif change == "offered-domain":
+        updates = {"offered_service": {"phantom": "0"}}
+    elif change == "debt-burst":
+        updates = {
+            "debt_added": [GrowthWork(work_id="debt", stage="task", remaining="11", deadline="3")],
+            "completed_work": {"debt": "11"},
+            "offered_service": {"task": "11"},
+        }
+    else:
+        digest = c.spec.unit_registry_digest
+        action = (
+            {"protected_object_digests": [digest]}
+            if change == "protected-removal"
+            else {"prohibited_hazards": ["blocked"]}
+        )
+        effect = (
+            {"must_remove": [digest]}
+            if change == "protected-removal"
+            else {"hazards_added": ["blocked"]}
+        )
+        capability = {
+            "branches": [
+                b.model_copy(update=effect) if b.outcome == "success" else b
+                for b in cap.spec.branches
+            ]
+        }
+    e = r.successors[0].model_copy(update=updates)
+    c, o, r = bind_growth_recipe(
+        c,
+        o,
+        r,
+        recipe={**recipe, "successors": [e, *r.successors[1:]]},
+        action=action,
+        capability=capability,
+    )
+    with pytest.raises(GrowthError) as caught:
+        transition(c, s, r, e, o)
+    assert caught.value.code == code
 
 
 def test_blocker_free_preparation_has_no_immediate_gain_and_opens_funded_entry(
@@ -124,7 +728,7 @@ def test_temporary_contraction_above_floor_is_allowed_only_in_registered_block(
     assert contracted.capacities["task"].lower == "1/2"
     grown = step(c, o, contracted, "reuse")
     assert block_supported(grown, c.spec.windows[0])
-    with pytest.raises(GrowthError, match="growth_service_floor"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_service_floor\Z"):
         check_state(planned[0], contracted)
 
 
@@ -171,11 +775,11 @@ def test_double_reservation_wrong_units_and_hidden_budget_fail_closed(
                 ]
             }
         )
-        with pytest.raises(GrowthError, match="growth_shared_resource_double_booking"):
+        with pytest.raises(GrowthError, match=r"\Agrowth_shared_resource_double_booking\Z"):
             check_state(c, s)
     elif which == "unit":
         c = modify(c, resource_units={"credits": "task/s"})
-        with pytest.raises(GrowthError, match="growth_units_mismatch"):
+        with pytest.raises(GrowthError, match=r"\Agrowth_units_mismatch\Z"):
             validate_contract(c, o)
     else:
         r = c.spec.action_catalogue[0]
@@ -187,7 +791,7 @@ def test_double_reservation_wrong_units_and_hidden_budget_fail_closed(
                 *c.spec.action_catalogue[1:],
             ],
         )
-        with pytest.raises(GrowthError, match="growth_capability_effect"):
+        with pytest.raises(GrowthError, match=r"\Agrowth_capability_effect\Z"):
             validate_contract(c, o)
 
 
@@ -302,7 +906,7 @@ def test_search_exhaustion_is_unknown_and_comparator_incumbent_is_not_an_upper_b
 def test_nonrepeatable_and_zero_duration_cycle_do_not_create_progress(planned: Any) -> None:
     c, o, _ = planned
     s = step(c, o, initial_state(c), "prepare")
-    with pytest.raises(GrowthError, match="growth_nonrepeatable_reuse"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_nonrepeatable_reuse\Z"):
         step(c, o, s, "prepare")
     r = c.spec.action_catalogue[0]
     e = r.successors[0].model_copy(update={"duration": "0"})
@@ -313,7 +917,7 @@ def test_nonrepeatable_and_zero_duration_cycle_do_not_create_progress(planned: A
             *c.spec.action_catalogue[1:],
         ],
     )
-    with pytest.raises(GrowthError, match="growth_duration_invalid"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_duration_invalid\Z"):
         validate_contract(c, o)
 
 
@@ -330,14 +934,14 @@ def test_model_resource_and_time_changes_invalidate_old_policy_and_expiry(planne
     changed = modify(
         c, initial_state=c.spec.initial_state.model_copy(update={"resources": {"credits": "2"}})
     )
-    with pytest.raises(GrowthError, match="growth_plan_input_mismatch"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_plan_input_mismatch\Z"):
         check_plan(changed, o, p)
     s = step(c, o, initial_state(c), "prepare")
     s = s.model_copy(update={"evidence": {"calibrated": "1"}})
-    with pytest.raises(GrowthError, match="growth_premise_missing_or_expired"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_premise_missing_or_expired\Z"):
         step(c, o, s, "reuse")
     s = s.model_copy(update={"evidence": {"calibrated": "3/2"}})
-    with pytest.raises(GrowthError, match="growth_premise_expires_during_action"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_premise_expires_during_action\Z"):
         step(c, o, s, "reuse")
 
 
@@ -377,7 +981,7 @@ def test_independent_checker_detects_plan_tampering(planned: Any, change: str, c
     if change == "terminal":
         updates["model_predicted_terminal"] = []
     altered = p.model_copy(update={"spec": p.spec.model_copy(update=updates)})
-    with pytest.raises(GrowthError, match=code):
+    with pytest.raises(GrowthError, match=rf"\A{code}\Z"):
         check_plan(c, o, altered)
 
 
@@ -523,7 +1127,7 @@ def test_closed_document_schemas_and_unregistered_successors(planned: Any) -> No
             parse_document(payload)
         assert schema_for_kind(doc.kind)["additionalProperties"] is False
     r = c.spec.action_catalogue[0]
-    with pytest.raises(GrowthError, match="growth_undeclared_successor"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_undeclared_successor\Z"):
         transition(
             c, initial_state(c), r, r.successors[0].model_copy(update={"successor_id": "new"}), o
         )
@@ -552,7 +1156,7 @@ def test_closed_document_schemas_and_unregistered_successors(planned: Any) -> No
 )
 def test_prefix_constraints_recomputed(planned: Any, updates: dict[str, Any], code: str) -> None:
     c, _, _ = planned
-    with pytest.raises(GrowthError, match=code):
+    with pytest.raises(GrowthError, match=rf"\A{code}\Z"):
         check_state(c, initial_state(c).model_copy(update=updates))
 
 
@@ -581,11 +1185,11 @@ def test_offered_completion_repair_deadlines_and_blocking_credit(planned: Any) -
     ]:
         bad = e.model_copy(update=fields)
         altered = r.model_copy(update={"successors": [bad, *r.successors[1:]]})
-        with pytest.raises(GrowthError, match=code):
+        with pytest.raises(GrowthError, match=rf"\A{code}\Z"):
             transition(c, s, altered, bad, o)
     c = modify(c, blocking_obligation_ids=["d"])
     prepared = step(c, o, s, "prepare")
-    with pytest.raises(GrowthError, match="growth_credit_blocked_by_work"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_credit_blocked_by_work\Z"):
         step(c, o, prepared, "reuse")
 
 
@@ -626,8 +1230,17 @@ def test_scalar_backward_induction_matches_complete_contingent_policy_enumeratio
 
 def test_scalar_search_requires_an_explicit_endpoint() -> None:
     c, o = example()
-    with pytest.raises(GrowthError, match="growth_scalar_endpoint_required"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_scalar_endpoint_required\Z"):
         Search(c, o, Budget(c.spec.search_limits)).scalar(initial_state(c))
+
+
+def test_comparator_margin_requires_strict_superiority_at_the_boundary() -> None:
+    c, o = example()
+    # Candidate minimum 1 equals baseline upper 2/3 plus the declared 1/3 margin.
+    # Equality supplies no superiority certificate; later entry cannot fund growth here.
+    result = plan_growth(modify(c, comparison_margin="1/3"), o)
+    assert result.spec.code == "growth_no_guaranteed_entry"
+    assert result.spec.policy is None
 
 
 @pytest.mark.parametrize(
@@ -707,11 +1320,11 @@ def test_inherited_capability_obligations_and_model_clock_are_rechecked(failure:
             if failure == "cost"
             else "growth_unaccounted_obligation"
         )
-        with pytest.raises(GrowthError, match=code):
+        with pytest.raises(GrowthError, match=rf"\A{code}\Z"):
             validate_contract(c, o)
     else:
         validate_contract(c, o)
-        with pytest.raises(GrowthError, match="growth_required_object_expired"):
+        with pytest.raises(GrowthError, match=r"\Agrowth_required_object_expired\Z"):
             step(c, o, initial_state(c), "idle")
 
 
@@ -729,14 +1342,14 @@ def test_arrival_burst_precedes_completion_and_fallback_is_rechecked() -> None:
     r = r.model_copy(
         update={"successors": [e if x.outcome == "failure" else x for x in r.successors]}
     )
-    with pytest.raises(GrowthError, match="growth_backlog_limit"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_backlog_limit\Z"):
         transition(c, initial_state(c), r, e, o)
     p = plan_growth(c, o)
     assert p.spec.safe_fallback is not None and p.spec.fallback_search.complete
     state = initial_state(c)
     result = check_tree(c, o, p.spec.safe_fallback, state, endpoint=F(c.spec.deadline))
     assert all(s.elapsed == c.spec.deadline for s in result.terminals)
-    with pytest.raises(GrowthError, match="growth_plan_state_mismatch"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_plan_state_mismatch\Z"):
         check_tree(
             c,
             o,
@@ -748,5 +1361,5 @@ def test_arrival_burst_precedes_completion_and_fallback_is_rechecked() -> None:
     assert report["model_state_digest"] == state_digest(state)
     assert not report["resource_and_time_forecasts_are_attestations"]
     changed = state.model_copy(update={"resources": {"credits": "-1"}})
-    with pytest.raises(GrowthError, match="growth_resource_floor"):
+    with pytest.raises(GrowthError, match=r"\Agrowth_resource_floor\Z"):
         audit_model_boundary(c, o, changed)

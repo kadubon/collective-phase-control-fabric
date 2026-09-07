@@ -11,7 +11,7 @@ import pytest
 
 from collective_phase_control_fabric.v6 import growth_examples
 from collective_phase_control_fabric.v6.canonical import canonical_bytes, digest_bytes
-from collective_phase_control_fabric.v6.growth import initial_state, plan_growth
+from collective_phase_control_fabric.v6.growth import GrowthError, initial_state, plan_growth
 from collective_phase_control_fabric.v6.growth_evidence import (
     _bounded_measurement,
     _within_prediction,
@@ -68,6 +68,8 @@ def admitted_case(
     omit_observation_quorum: bool = False,
     observation_lag: int = 1,
     receipt_start_shift_us: int = 0,
+    job_updates: dict[str, Any] | None = None,
+    receipt_updates: dict[str, Any] | None = None,
 ) -> tuple[Any, ...]:
     monkeypatch.setattr(growth_examples, "metadata", metadata)
     c, objects = growth_examples.example()
@@ -323,6 +325,8 @@ def admitted_case(
                 filesystem_policy="none",
             ),
         )
+        if job_updates:
+            job = job.model_copy(update={"spec": job.spec.model_copy(update=job_updates)})
         statement(job, "job_dispatcher", "root")
         jobs.append(job)
         receipt = RunnerReceipt(
@@ -355,6 +359,10 @@ def admitted_case(
                 completed_at=NOW - timedelta(seconds=1 + observation_lag - index),
             ),
         )
+        if receipt_updates:
+            receipt = receipt.model_copy(
+                update={"spec": receipt.spec.model_copy(update=receipt_updates)}
+            )
         statement(receipt, "runner_receipt", "runner")
         receipt_digests.append(document_digest(receipt))
     observation = GrowthObservation(
@@ -526,6 +534,138 @@ def test_receipt_physical_time_cannot_be_substituted_by_model_step_count(
     assert assessed.spec.reasons == ["growth_receipt_physical_time_mismatch"]
     assert assessed.spec.external_evidence_compatibility == "unknown"
     assert assessed.spec.continuation == "unavailable"
+
+
+@pytest.mark.parametrize(
+    "change,code",
+    [
+        ("contract", "growth_observation_contract_mismatch"),
+        ("trace", "growth_observation_trace_incomplete"),
+        ("source-missing", "growth_source_missing"),
+        ("source-untyped", "growth_source_not_admitted"),
+        ("trial-missing", "growth_trial_missing"),
+        ("measurement-missing", "growth_trial_measurement_incomplete"),
+        ("measurement-changed", "growth_trial_measurement_mismatch"),
+        ("seed-budget", "growth_observation_seed_mismatch"),
+        ("receipt-missing", "growth_receipt_not_admitted"),
+        ("hidden-budget", "growth_observation_outside_model"),
+        ("negative-bias", "growth_calibration_invalid"),
+        ("bias-domain", "growth_calibration_domain"),
+    ],
+)
+def test_signed_incompatible_measurement_material_cannot_admit_growth(
+    monkeypatch: pytest.MonkeyPatch,
+    change: str,
+    code: str,
+) -> None:
+    _, _, original, _, _ = admitted_case(monkeypatch)
+    obs = original.spec
+    zero = "sha256:" + "0" * 64
+    updates: dict[str, Any] = {}
+    if change == "contract":
+        updates["contract_digest"] = zero
+    elif change == "trace":
+        updates["runner_receipt_digests"] = obs.runner_receipt_digests[:1]
+    elif change == "source-missing":
+        updates["source_artifact_digests"] = [zero]
+    elif change == "source-untyped":
+        updates["source_artifact_digests"] = [digest_bytes(b"")]
+    elif change == "trial-missing":
+        updates["trial_result_digest"] = zero
+    elif change == "measurement-missing":
+        updates["states"] = [*obs.states, obs.states[-1]]
+        updates["runner_receipt_digests"] = [*obs.runner_receipt_digests, zero]
+    elif change == "measurement-changed":
+        updates["states"] = [
+            obs.states[0].model_copy(update={"quality": {**obs.states[0].quality, "task": "1/2"}}),
+            *obs.states[1:],
+        ]
+    elif change == "seed-budget":
+        updates["states"] = [
+            obs.states[0].model_copy(update={"resources": {"credits": "999"}}),
+            *obs.states[1:],
+        ]
+    elif change == "receipt-missing":
+        updates["runner_receipt_digests"] = [zero, obs.runner_receipt_digests[1]]
+    elif change == "hidden-budget":
+        updates["states"] = [
+            obs.states[0],
+            obs.states[1].model_copy(update={"resources": {"credits": "999"}}),
+            obs.states[2],
+        ]
+    elif change == "negative-bias":
+        updates["calibration_allowance"] = {**obs.calibration_allowance, "task": "-1"}
+    else:
+        updates["calibration_allowance"] = {"task": "0", "research": "0", "unregistered": "0"}
+    c, o, observation, kwargs, _ = admitted_case(monkeypatch, observation_updates=updates)
+    assessed = reassess(c, o, observation, **kwargs)
+    assert code in assessed.spec.reasons
+    assert assessed.spec.observed_entry == "undetermined"
+    assert assessed.spec.continuation_policy is None
+    assert assessed.spec.empirical_attribution == "undetermined"
+
+
+@pytest.mark.parametrize(
+    "job_change,receipt_change,code",
+    [
+        ({}, {"job_digest": "sha256:" + "0" * 64}, "growth_job_not_admitted"),
+        ({"capability_digest": "sha256:" + "0" * 64}, {}, "growth_runner_materials_not_admitted"),
+        ({}, {"return_code": 1}, "growth_receipt_nonconformant"),
+        ({"action_digest": "sha256:" + "0" * 64}, {}, "growth_receipt_action_mismatch"),
+    ],
+)
+def test_signed_receipt_and_job_bindings_are_recomputed(
+    monkeypatch: pytest.MonkeyPatch,
+    job_change: dict[str, Any],
+    receipt_change: dict[str, Any],
+    code: str,
+) -> None:
+    c, o, obs, kwargs, _ = admitted_case(
+        monkeypatch, job_updates=job_change, receipt_updates=receipt_change
+    )
+    assessed = reassess(c, o, obs, **kwargs)
+    assert assessed.spec.reasons == [code]
+    assert assessed.spec.external_evidence_compatibility == "unknown"
+    assert assessed.spec.observed_entry == "undetermined"
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "action_digest",
+        "capability_digest",
+        "execution_policy_digest",
+        "image_digest",
+        "generation_digest",
+    ],
+)
+def test_unsigned_export_does_not_accept_an_unbound_runner_request(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+) -> None:
+    c, o, _, _, jobs = admitted_case(monkeypatch)
+    plan = plan_growth(c, o)
+    job = jobs[0].model_copy(
+        update={"spec": jobs[0].spec.model_copy(update={field: "sha256:" + "0" * 64})}
+    )
+    code = (
+        "growth_proposal_generation_mismatch"
+        if field == "generation_digest"
+        else "growth_proposal_binding_mismatch"
+    )
+    with pytest.raises(GrowthError, match=rf"\A{code}\Z"):
+        export_proposal(c, o, plan, job)
+
+
+def test_empty_reassessment_model_is_inconsistent_even_when_evidence_is_unusable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    c, o, obs, kwargs, _ = admitted_case(monkeypatch)
+    c = modify(c, initial_state=c.spec.initial_state.model_copy(update={"model_ids": []}))
+    assessed = reassess(c, o, obs, **kwargs)
+    assert assessed.spec.model_condition == "inconsistent"
+    assert "growth_inconsistent_models" in assessed.spec.reasons
+    assert assessed.spec.observed_entry == "undetermined"
 
 
 def write_admission_fixture(directory: Path, case: tuple[Any, ...]) -> list[str]:

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.1 (2026-09-08)
 
 - Added the explicit offline `growth` mode with four closed document kinds, exact rational
   finite AND-OR planning, reoptimized scalar comparators, independent all-prefix checking,

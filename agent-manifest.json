@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.6.0",
   "name": "cpcf",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "cli": "cpcf",
   "development_environment": "uv 0.11.28 with Python 3.14.6",
   "distribution": "collective-phase-control-fabric",
