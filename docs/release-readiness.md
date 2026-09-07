@@ -10,10 +10,10 @@ synthetic comparison results and exactness limits. The previous report is retain
 
 - Frozen environment: uv 0.11.28 and CPython 3.14.6 on Windows; all extras and development/security
   groups synchronize without dependency changes to `uv.lock`.
-- Full suite after the evidence-boundary correction: 642 passed and 3 skipped, with 90.95% branch
+- Full suite after the evidence and contract-boundary regressions: 731 passed and 3 skipped, with 90.95% branch
   coverage across all five import packages. Skips require disposable external integration services.
-- Final focused critical suite, including the strict comparator-margin boundary regression:
-  372 passed, 95.82% branch coverage. Every one of the 13 critical groups passes its separate 95%
+- Final focused critical suite, including exact failure-code and transient-ledger regressions:
+  460 passed, 95.82% branch coverage. Every one of the 13 critical groups passes its separate 95%
   gate; growth is 97.69%, repair planning 97.05%, and parsing/schemas 95.93%.
 - Ruff format/lint, strict mypy across core/packages/scripts, and Bandit pass. OSV-backed
   `pip-audit` reports no known vulnerabilities in the synchronized Python environment.

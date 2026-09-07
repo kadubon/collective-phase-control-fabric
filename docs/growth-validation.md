@@ -59,6 +59,14 @@ shared reservations, queue/debt retention, measurement costs, model/evidence wea
 computational limits and witness size, comparator upper bounds, policy tampering, object expiry,
 raw-source authority, physical receipt time and stale continuation.
 
+Boundary regressions independently reject malformed contract domains, units, time windows,
+action/capability bindings, successor catalogues and transient work/reservation effects. Failure
+codes are checked exactly, including when a rejected object could otherwise fail later for a
+different reason. Positive boundaries retain zero quality floors, a full registered model set,
+paid monetary costs and a window ending at the deadline. A two-time-unit ledger example checks
+partial work/debt, accumulated service and costs, expiring reservations, evidence and assumptions,
+pending outputs, object removal and hazards against explicit expected quantities.
+
 ## Scope and remaining risks
 
 Exactness is conditional on the finite catalogue, decision bound, rational piecewise constant

@@ -653,7 +653,7 @@ def test_unsigned_export_does_not_accept_an_unbound_runner_request(
         if field == "generation_digest"
         else "growth_proposal_binding_mismatch"
     )
-    with pytest.raises(GrowthError, match=code):
+    with pytest.raises(GrowthError, match=rf"\A{code}\Z"):
         export_proposal(c, o, plan, job)
 
 
