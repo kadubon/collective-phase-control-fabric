@@ -9,7 +9,7 @@ CPCF reports an `operational_organization_profile`. It does not create, detect, 
 collective-superintelligence phase. It also does not certify causality, statistical validity,
 thermodynamic feasibility, physical phase behavior, or runner isolation.
 
-> Release status: v0.6.1 is a Beta research package. Package publication does not establish
+> Release status: v0.7.0 is a Beta research package. Package publication does not establish
 > deployment assurance. Operational evidence remains unavailable until the external security,
 > restore, soak, and independent-review gates in [release readiness](docs/release-readiness.md) pass.
 
@@ -44,6 +44,13 @@ An unsigned bundle can establish content consistency only. Distribution authenti
 unknown unless the bundle carries an admitted root attestation and a trust policy is supplied.
 
 ## Offline growth planning
+
+Version 0.7.0 adds **Bounded Endogenous Capability Frontier Expansion**: an immutable finite
+super-catalogue with conditional model activation of latent actions, multi-step activation
+lineage, independent checking and reoptimized comparators. Try
+`cpcf growth example --scenario frontier-chain --json` and read the
+[frontier guide](docs/endogenous-capability-frontier.md). Model activation grants no capability
+admission or execution authority. No external empirical acceleration experiment was performed.
 
 The explicit growth mode plans paid task/research capacity investment, measurement,
 verification and repair under a finite budget, and independently checks every policy branch

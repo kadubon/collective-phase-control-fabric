@@ -32,6 +32,18 @@ def test_root_distribution_is_single_and_complete() -> None:
     assert not list((ROOT / "packages").glob("*/pyproject.toml"))
 
 
+def test_sbom_and_generated_cli_expose_current_distribution_and_frontier_option() -> None:
+    from scripts.generate_references import documents
+    from scripts.generate_sbom import generate
+
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    component = generate(ROOT / "uv.lock")["metadata"]["component"]
+    assert component["name"] == project["name"] and component["version"] == project["version"]
+    assert component["bom-ref"] == f"pkg:pypi/{project['name']}@{project['version']}"
+    plan = next(c for c in documents()["cli.json"]["commands"] if c["argv"] == ["growth", "plan"])
+    assert any("--frontier" in a["flags"] for a in plan["arguments"])
+
+
 def test_offline_cli_orientation_and_schema_registry(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

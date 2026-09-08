@@ -1,64 +1,51 @@
-# CPCF growth extension release-gate report
+# CPCF 0.7.0 release readiness
 
-Local evidence was collected on 2026-09-08 (Japan Standard Time). This report concerns a
-Beta research package. It is not operational assurance or evidence of measured acceleration.
-The [growth validation record](growth-validation.md) lists the changed surfaces, commands,
-synthetic comparison results and exactness limits. The previous report is retained in the
-[v0.6.0 release tree](https://github.com/kadubon/collective-phase-control-fabric/blob/v0.6.0/docs/release-readiness.md).
+This is the Beta package release for Bounded Endogenous Capability Frontier Expansion.
+Its local, CI and publication results must belong to the exact release commit. Historical
+0.6.1 results remain in the [0.6.1 release tree](https://github.com/kadubon/collective-phase-control-fabric/blob/v0.6.1/docs/release-readiness.md).
 
-## Local verification
+## Required verification
 
-- Frozen environment: uv 0.11.28 and CPython 3.14.6 on Windows; all extras and development/security
-  groups synchronize without dependency changes to `uv.lock`.
-- Full suite after the evidence and contract-boundary regressions: 731 passed and 3 skipped, with 90.95% branch
-  coverage across all five import packages. Skips require disposable external integration services.
-- Final focused critical suite, including exact failure-code and transient-ledger regressions:
-  460 passed, 95.82% branch coverage. Every one of the 13 critical groups passes its separate 95%
-  gate; growth is 97.69%, repair planning 97.05%, and parsing/schemas 95.93%.
-- Ruff format/lint, strict mypy across core/packages/scripts, and Bandit pass. OSV-backed
-  `pip-audit` reports no known vulnerabilities in the synchronized Python environment.
-- All 212 schemas validate, including 52 native closed kinds; all 9 existing fixtures validate.
-  Generated CLI, schema, agent and error references match runtime registries.
-- All five deterministic growth comparisons reproduce. Independent sequence and contingent-policy
-  oracles, prefix constraints, all outcome branches, receipt/registration weakening, physical
-  clocks and stale-continuation regressions are included.
-- The repository skill validates. Source-content hygiene, allowlisted Gitleaks content, Git-history
-  Gitleaks, Wiki Gitleaks and staged-content/archive hygiene are required before each source push.
-- Packaging produces one wheel and one source distribution; Twine checks and isolated base-wheel
-  self-check/growth commands pass. Distribution version/tag/hash checks are repeated for release.
+The release keeps the frozen lock, full branch-enabled coverage floor of 90%, aggregate and
+per-critical-subsystem floor of 95%, and mutation floor of 85%. The new endogenous-frontier
+critical group covers model activation and fresh evidence advancement. The existing growth
+group retains search, transition accounting, independent checking and observation reassessment.
+CI/release test selections and mutation sources include the new code and tests.
 
-## Remote verification and publication
+Required gates include formatting, lint, strict types across core/packages/scripts, full and
+focused tests, schema/fixture/reference checks, old and new executable examples, Bandit,
+OSV pip-audit, source/staged/history/content/archive publication hygiene, package metadata,
+Twine, and clean installed-wheel CLI checks. Remote checks additionally include the protected
+platform matrix, PostgreSQL integration and security/image jobs. No threshold is reduced.
 
-The final-commit GitHub CI, platform matrix, PostgreSQL service, mutation gate and image/security
-jobs remain required; local successes do not substitute for their results. Native Linux mutation
-uses the expanded growth selection and the unchanged 85% threshold. Its final result belongs
-to the exact release commit's CI evidence and release notes. Refer to the final commit's
-[GitHub Actions runs](https://github.com/kadubon/collective-phase-control-fabric/actions).
+The [frontier validation record](frontier-validation.md) records implementation scope, test
+families and final measurements. The original [growth validation record](growth-validation.md)
+describes the 0.6.1 work and is not new release evidence.
 
-The pre-existing scheduled image scan reported vulnerable Alpine OpenSSL and libuuid packages.
-API/worker recipes now pin libcrypto3/libssl3 3.5.8-r0 and libuuid 2.42.3-r1 from the
-[Alpine v3.24 package repository](https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/).
-Image build/scanner results are verified separately from the Python dependency audit.
+## Publication and review
 
-The trusted publisher requires a non-prerelease GitHub Release, matching package/tag version,
-the protected `pypi` environment and `PYPI_PUBLISH_ENABLED=true`. The workflow reports absent
-external operational evidence under its explicit Beta publication class. Environment reviewer
-`kadubon` permits self-review; this authorizes package distribution, not independent review.
-PyPI publication is established only after the actual release workflow and a clean installation
-from the public index succeed. See [the release process](release.md).
+Normal branch policy applies: required checks, current-head review, linear history and resolved
+conversations. The Wiki must be committed and pushed before release. The exact merged main
+commit must expose package version 0.7.0; `v0.7.0` and PyPI 0.7.0 must be unused beforehand.
 
-## Unavailable external evidence and retained boundaries
+The existing release workflow uses OIDC trusted publishing, the protected `pypi` environment
+and `PYPI_PUBLISH_ENABLED=true`. A verification-only workflow dispatch does not publish.
+The package remains `Development Status :: 4 - Beta`; absent operational evidence is reported
+as unavailable under the existing Beta publication class. Publication is complete only after
+the exact release run succeeds, release assets/provenance are verified, and a fresh public-index
+installation of all five import packages passes version, dependency and CLI checks.
 
-The native result remains the thirteen-dimensional operational organization profile. Growth
-output is a separate conditional finite-model result. CPCF does not certify consciousness,
-collective superintelligence, a physical phase, thermodynamics, statistical validity, causality,
-endogenous attribution or measured acceleration. Synthetic oracles and signed fixtures do not
-close those scientific obligations.
+## Scientific and operational limits
 
-Real action-model refinement, measurement construct/coverage validity, independently registered
-trials, production availability, intended-deployment restore, a sustained soak, independent
-threat review and penetration evidence remain unavailable. Live OIDC/KMS/S3/runner containment
-and transport require separate integration evidence. The existing partial findings in
-`audit/findings-v0.6.json` remain open; fresh admission in the new read-only path does not imply
-complete conformance of every existing control-plane path. No adapter or deployment is executed
-by this growth feature.
+No external empirical acceleration experiment was performed. The endogenous capability frontier
+is a finite model and software-control mechanism. It does not establish real-world capability
+reproduction, collective intelligence, AGI, ASI, causal acceleration or indefinite growth.
+Model clocks are not attestations, model enablement is not admission, and admission is not
+external execution authorization.
+
+External model refinement, measurement constructs/coverage, statistical or causal validity,
+production availability, intended-deployment restore, sustained soak, independent threat review,
+penetration testing and live provider/runner containment evidence remain external obligations.
+Existing partial audit findings remain partial. No receipts, trials or operational-assurance
+records are fabricated for package publication. See [release procedures](release.md) and the
+[frontier specification](endogenous-capability-frontier.md).

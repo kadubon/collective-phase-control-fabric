@@ -42,8 +42,10 @@ from collective_phase_control_fabric.v6.models import (
     ExecutionPolicy,
     GrowthAssessment,
     GrowthAssessmentSpec,
+    GrowthCapabilityFrontier,
     GrowthCheckpoint,
     GrowthContract,
+    GrowthFrontierPlan,
     GrowthInterval,
     GrowthObservation,
     GrowthPlan,
@@ -67,10 +69,14 @@ from collective_phase_control_fabric.v6.trials import assess_trial
 
 
 def replay(
-    contract: GrowthContract, objects: dict[str, Document], plan: GrowthPlan, branch_ids: list[str]
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    plan: GrowthPlan | GrowthFrontierPlan,
+    branch_ids: list[str],
+    frontier: GrowthCapabilityFrontier | None = None,
 ) -> dict[str, Any]:
-    checked = check_plan(contract, objects, plan)
-    state = initial_state(contract)
+    checked = check_plan(contract, objects, plan, frontier)
+    state = initial_state(contract, frontier)
     node = plan.spec.policy
     states = [state]
     for branch_id in branch_ids:
@@ -83,7 +89,7 @@ def replay(
             if cast(ActionDocument, objects[r.action_digest]).spec.action_id == node.action_id
         )
         effect = next(e for e in recipe.successors if e.successor_id == branch_id)
-        state = transition(contract, state, recipe, effect, objects)
+        state = transition(contract, state, recipe, effect, objects, frontier)
         states.append(state)
         node = node.branches[branch_id]
     return {
@@ -98,10 +104,14 @@ def replay(
 
 
 def export_proposal(
-    contract: GrowthContract, objects: dict[str, Document], plan: GrowthPlan, job: RunnerJob
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    plan: GrowthPlan | GrowthFrontierPlan,
+    job: RunnerJob,
+    frontier: GrowthCapabilityFrontier | None = None,
 ) -> dict[str, Any]:
     """Check an operator-supplied unsigned job draft; do not sign, dispatch or lease it."""
-    checked = check_plan(contract, objects, plan)
+    checked = check_plan(contract, objects, plan, frontier)
     root = cast(GrowthPolicyNode, plan.spec.policy)
     recipe = next(
         r

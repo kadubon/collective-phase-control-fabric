@@ -1,11 +1,11 @@
 ---
 name: collective-phase-control-fabric
-description: Inspect CPCF v0.6 evidence and plan bounded offline capability growth while preserving model, observation, and authority boundaries. Use for schema and bundle checks, finite growth planning, evidence and trust review, control-plane workflows, external receipts, and read-only legacy compatibility.
+description: Inspect CPCF v0.6 evidence and plan bounded offline capability growth with finite endogenous frontiers while preserving model, observation, and authority boundaries. Use for schema and bundle checks, finite growth planning, evidence and trust review, control-plane workflows, external receipts, and read-only legacy compatibility.
 license: Apache-2.0
 metadata:
   author: Collective Phase Control Fabric contributors
   repository: https://github.com/kadubon/collective-phase-control-fabric
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Collective Phase Control Fabric
@@ -87,6 +87,21 @@ authorize anything. `growth ingest`, `reassess` and `replan` require original ad
 and independently supplied root pins. They recompute DSSE, quorum, trial and runner bindings.
 Never replace those inputs with a cached successful assessment. Replanning produces a new unsigned
 model proposal; it does not edit a registered or signed contract in place.
+
+### Bounded endogenous frontier expansion (package 0.7)
+
+Read [the frontier semantics](../../../docs/endogenous-capability-frontier.md) when a
+finite super-catalogue contains latent actions. Pass the separate `--frontier` document
+consistently to inspect, plan, check-plan, compare, replay, export and evidence commands.
+Use `cpcf growth example frontier-demo --scenario frontier-chain --json` for a synthetic
+depth-two chain. Omission of `--frontier` retains the fixed-catalogue behavior.
+
+Model enablement is neither a receipt-backed candidate nor admitted capability nor
+execution authority. Interpret activation diagnostics only within the selected finite
+policy; no causal marginal effect or universal intelligence score is computed. Replanning
+requires fresh original evidence, the existing protocol-registration quorum for the
+frontier, and admitted capability/action/execution-policy subjects. Preserve carried
+lineage, depth, prerequisite expiry and immutable signed history in a new unsigned proposal.
 
 ### 2. Evidence, trust, and scientific review
 

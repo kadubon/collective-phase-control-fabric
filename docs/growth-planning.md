@@ -1,5 +1,11 @@
 # Finite collective capability growth planning
 
+Package 0.7.0 adds an optional [endogenous capability frontier](endogenous-capability-frontier.md).
+Its immutable super-catalogue is finite while the active subset can expand after declared
+successors. Pass `--frontier frontier.json` consistently to this command family. The original
+contracts, ledgers and no-frontier outputs retain their previous semantics. Frontier plans use
+the additive `growth-frontier-plan` kind and include independently reconstructed model lineage.
+
 The explicit offline `growth` mode chooses a paid intervention and a contingent continuation
 within a declared finite model. It keeps task capacity, research capacity, verification,
 quality, coverage, shared reservations, work queues, repair obligations, evidence costs and

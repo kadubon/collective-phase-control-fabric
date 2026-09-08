@@ -28,6 +28,11 @@ from collective_phase_control_fabric.v6.models import (
     EffectInterval,
     ExecutionPolicy,
     ExecutionPolicySpec,
+    GrowthActivation,
+    GrowthActivationRule,
+    GrowthCapabilityFrontier,
+    GrowthCapabilityFrontierSpec,
+    GrowthFrontierBinding,
     GrowthObservation,
     GrowthObservationSpec,
     Lifecycle,
@@ -70,6 +75,7 @@ def admitted_case(
     receipt_start_shift_us: int = 0,
     job_updates: dict[str, Any] | None = None,
     receipt_updates: dict[str, Any] | None = None,
+    frontier_mode: str | None = None,
 ) -> tuple[Any, ...]:
     monkeypatch.setattr(growth_examples, "metadata", metadata)
     c, objects = growth_examples.example()
@@ -159,6 +165,37 @@ def admitted_case(
             update={"live_object_digests": sorted(objects)}
         ),
     )
+    if frontier_mode is not None:
+        objects[document_digest(execution)] = execution
+        c = modify(
+            c,
+            initial_state=c.spec.initial_state.model_copy(
+                update={"live_object_digests": sorted(objects)}
+            ),
+        )
+        if frontier_mode == "ambiguous":
+            preparation = c.spec.action_catalogue[0]
+            alternate = preparation.successors[0].model_copy(
+                update={"successor_id": "prepare:alternate"}
+            )
+            c = modify(
+                c,
+                action_catalogue=[
+                    preparation.model_copy(
+                        update={"successors": [*preparation.successors, alternate]}
+                    ),
+                    *c.spec.action_catalogue[1:],
+                ],
+            )
+        if frontier_mode == "unfunded":
+            c = modify(
+                c,
+                initial_state=c.spec.initial_state.model_copy(
+                    update={"resources": {"credits": "5"}}
+                ),
+            )
+        if frontier_mode == "no-superiority":
+            c = modify(c, comparison_margin="10")
     states = [initial_state(c)]
     for name in ("prepare", "reuse"):
         states.append(step(c, objects, states[-1], name))
@@ -241,6 +278,106 @@ def admitted_case(
         [("protocol_author", "root"), ("registration", "auditor"), ("timestamp", "time")],
         -30,
     )
+    frontier = None
+    if frontier_mode is not None:
+        bindings = []
+        for recipe in c.spec.action_catalogue:
+            action = cast(ActionDocument, objects[recipe.action_digest])
+            cap = cast(CapabilityDocument, objects[action.spec.capability_digest])
+            bindings.append(
+                GrowthFrontierBinding(
+                    action_id=action.spec.action_id,
+                    action_digest=document_digest(action),
+                    capability_digest=document_digest(cap),
+                    execution_policy_digest=document_digest(execution),
+                    output_schema_digest=cap.spec.output_schema_digest,
+                    lifecycle=Lifecycle(valid_from=VALID_FROM, valid_until=VALID_UNTIL),
+                )
+            )
+        by_id = {b.action_id: b for b in bindings}
+        frontier = GrowthCapabilityFrontier(
+            metadata=metadata("synthetic-admitted-frontier"),
+            spec=GrowthCapabilityFrontierSpec(
+                contract_digest=document_digest(c),
+                initial_enabled_action_ids=sorted(set(by_id) - {"reuse", "continue"}),
+                latent_action_ids=["continue", "reuse"],
+                bindings=bindings,
+                maximum_activation_depth=3,
+                activation_rules=[
+                    GrowthActivationRule(
+                        rule_id=f"{producer}-enables-{target}",
+                        producer_action_id=producer,
+                        producer_successor_id=f"{producer}:success",
+                        activated_action_ids=[target],
+                        required_capability_digests=[
+                            by_id[producer].capability_digest,
+                            by_id[target].capability_digest,
+                        ],
+                        required_model_ids=["nominal"],
+                        valid_from="0",
+                        expires="6",
+                    )
+                    for producer, target in [("prepare", "reuse"), ("reuse", "continue")]
+                ],
+            ),
+        )
+        if frontier_mode == "ambiguous":
+            rule = frontier.spec.activation_rules[0].model_copy(
+                update={
+                    "rule_id": "alternate-activation",
+                    "producer_successor_id": "prepare:alternate",
+                    "activated_action_ids": ["continue"],
+                }
+            )
+            frontier = frontier.model_copy(
+                update={
+                    "spec": frontier.spec.model_copy(
+                        update={"activation_rules": [*frontier.spec.activation_rules, rule]}
+                    )
+                }
+            )
+        if frontier_mode == "no-rule":
+            frontier = frontier.model_copy(
+                update={"spec": frontier.spec.model_copy(update={"activation_rules": []})}
+            )
+        if frontier_mode == "carried-missing-capability":
+            rule = frontier.spec.activation_rules[0].model_copy(
+                update={"rule_id": "prior-continue", "activated_action_ids": ["continue"]}
+            )
+            prior = GrowthActivation(
+                action_id="continue",
+                rule_id=rule.rule_id,
+                producer_action_id="prepare",
+                producer_successor_id="prepare:success",
+                depth=1,
+                model_time="0",
+                parent_state_digest="sha256:" + "a" * 64,
+            )
+            frontier = frontier.model_copy(
+                update={
+                    "spec": frontier.spec.model_copy(
+                        update={
+                            "initial_enabled_action_ids": sorted(
+                                [*frontier.spec.initial_enabled_action_ids, "continue"]
+                            ),
+                            "latent_action_ids": ["reuse"],
+                            "initial_activation_lineage": [prior],
+                            "activation_rules": [*frontier.spec.activation_rules, rule],
+                        }
+                    )
+                }
+            )
+        if frontier_mode == "missing-frontier-quorum":
+            statement(frontier, "protocol_author", "root")
+        else:
+            quorum(
+                frontier,
+                "protocol_registration",
+                [("protocol_author", "root"), ("registration", "auditor"), ("timestamp", "time")],
+                -30,
+            )
+        if frontier_mode in {"missing-capability", "carried-missing-capability"}:
+            signed.remove(caps["continue"][1])
     result = TrialResult(
         metadata=metadata("growth-result"),
         spec=TrialResultSpec(
@@ -408,7 +545,8 @@ def admitted_case(
             canonical_bytes(root.spec.envelope.model_dump(mode="json"))
         ),
     }
-    return c, objects, observation, kwargs, jobs
+    result = (c, objects, observation, kwargs, jobs)
+    return (*result, frontier) if frontier_mode is not None else result
 
 
 def test_independently_admitted_receipts_reassess_and_replan_without_capacity_authority(

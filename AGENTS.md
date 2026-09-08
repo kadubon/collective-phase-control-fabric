@@ -47,6 +47,10 @@ deployment integration tests, never for offline core inspection.
 - `v6/planning.py`: branch-safe Pareto and strong AND–OR planning.
 - `v6/growth.py`, `v6/growth_evidence.py`: separate finite growth game, independent policy
   checks, and read-only external evidence reassessment. Model clocks and ledgers are not attestations.
+- `v6/growth_frontier.py`, `v6/growth_frontier_evidence.py`: additive finite super-catalogue
+  activation, digest-bound lineage and fresh receipt-backed modelling proposals. Preserve the
+  original 52 native schema identities. Never treat model enablement as capability admission or
+  execution authority; carry depth and prerequisite expiry across replanning.
 - `v6/runner.py`, `v6/projection.py`: external runner receipts and independent projection.
 - `v6/trials.py`: registration and external evidence compatibility.
 - `v6/storage.py`: immutable ledger and copy-on-write legacy boundary.

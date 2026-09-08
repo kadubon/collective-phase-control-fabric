@@ -18,6 +18,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from collective_phase_control_fabric import __version__
 from collective_phase_control_fabric.v6.canonical import canonical_bytes, loads_bounded
 from collective_phase_control_fabric.v6.catalog import RUNNER_GATEWAY_ERROR_CODES
 from collective_phase_control_fabric.v6.models import (
@@ -597,7 +598,7 @@ def create_runner_app(
     current_time = clock or (lambda: datetime.now(UTC))
     app = FastAPI(
         title="CPCF Outbound Runner API",
-        version="0.6.0",
+        version=__version__,
         openapi_version="3.1.0",
         docs_url=None,
         redoc_url=None,

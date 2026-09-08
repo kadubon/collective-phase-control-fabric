@@ -38,6 +38,10 @@ GROUPS: dict[str, tuple[str, ...]] = {
         "src/collective_phase_control_fabric/v6/growth.py",
         "src/collective_phase_control_fabric/v6/growth_evidence.py",
     ),
+    "endogenous-frontier": (
+        "src/collective_phase_control_fabric/v6/growth_frontier.py",
+        "src/collective_phase_control_fabric/v6/growth_frontier_evidence.py",
+    ),
     "trials": ("src/collective_phase_control_fabric/v6/trials.py",),
     "coordination": ("src/collective_phase_control_fabric/v6/coordination.py",),
     "repairs": ("src/collective_phase_control_fabric/v6/repairs.py",),

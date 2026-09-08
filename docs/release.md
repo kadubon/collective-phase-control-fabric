@@ -12,7 +12,7 @@ non-prerelease GitHub Release whose `vX.Y.Z` tag exactly matches package metadat
 also requires the repository variable `PYPI_PUBLISH_ENABLED=true` and approval in the protected
 `pypi` environment.
 
-The 0.6 series is published with the package classifier `Development Status :: 4 - Beta`.
+The 0.6 and 0.7 series are published with the package classifier `Development Status :: 4 - Beta`.
 The release workflow uses the explicit `beta` publication class, which permits OSS package
 distribution without treating absent external evidence as satisfied. A Beta package release is not
 an operational-assurance decision.

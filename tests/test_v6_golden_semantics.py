@@ -59,6 +59,9 @@ GROWTH_EXTENSION_KINDS = {
     "growth-plan",
     "growth-observation",
     "growth-assessment",
+    "growth-capability-frontier",
+    "growth-frontier-plan",
+    "growth-frontier-assessment",
 }
 
 

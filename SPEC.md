@@ -80,6 +80,14 @@ amendment DSSE quorums; strongest-tier promotion remains blocked on that path.
 
 ## Offline growth documents and commands
 
+Package 0.7.0 adds three closed companion kinds: `growth-capability-frontier`,
+`growth-frontier-plan`, and `growth-frontier-assessment`. The original schema digests and
+`cpcf.io/v0.6` identity remain unchanged. A frontier binds the immutable contract, complete
+super-catalogue objects, lifecycle envelopes and exact producer/successor activation rules.
+`--frontier` is explicit on every growth workflow; omission preserves fixed-catalogue behavior.
+The [frontier specification](docs/endogenous-capability-frontier.md) defines active state,
+deterministic rule precedence, depth, prerequisite retention and the admission boundary.
+
 Four closed native kinds, `growth-contract`, `growth-plan`, `growth-observation` and
 `growth-assessment`, support explicit `cpcf growth` planning, independent checking,
 comparison, read-only replay, proposal export and freshly admitted evidence reassessment.

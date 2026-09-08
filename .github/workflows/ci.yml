@@ -70,6 +70,7 @@ jobs:
           tests/test_v6_authority.py
           tests/test_v6_db_worker_assurance.py tests/test_v6_golden_semantics.py
           tests/test_v6_growth.py tests/test_v6_growth_evidence.py tests/test_v6_growth_cli.py
+          tests/test_v6_growth_frontier.py tests/test_v6_frontier_evidence_cli.py
           tests/test_v6_intervention.py
           tests/test_v6_cli_auth.py tests/test_v6_coordination_trial_assurance.py
           tests/test_v6_model_assurance.py tests/test_v6_models_trust.py
@@ -92,6 +93,7 @@ jobs:
           --vulnerability-service osv --timeout 60
       - run: uv build
       - run: uv run --frozen python scripts/run_growth_examples.py --check
+      - run: uv run --frozen python scripts/run_frontier_examples.py --check
       - run: uv run --frozen python scripts/check_release_artifacts.py --dist dist --metadata-out release-metadata
       - run: uv run --frozen twine check dist/*
       - run: uv run --frozen python scripts/generate_sbom.py uv.lock release-metadata/cpcf-sbom.cdx.json

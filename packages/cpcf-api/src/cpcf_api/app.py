@@ -16,6 +16,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict, Field
 
+from collective_phase_control_fabric import __version__
 from collective_phase_control_fabric.v6.canonical import canonical_bytes, digest_bytes
 from collective_phase_control_fabric.v6.models import DOCUMENT_MODELS
 from collective_phase_control_fabric.v6.onboarding import OnboardingState, aggregate_onboarding
@@ -231,7 +232,7 @@ def create_app(
 
     app = FastAPI(
         title="CPCF Evidence-Control API",
-        version="0.6.0",
+        version=__version__,
         openapi_version="3.1.0",
         docs_url="/docs",
         redoc_url=None,

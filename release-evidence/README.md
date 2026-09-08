@@ -14,3 +14,7 @@ any external gate passed and cannot support an operational-assurance claim.
 The manifest records evidence digests and non-secret summaries. It must not contain reports,
 credentials, customer data, private endpoints, or evidence payloads. A passing manifest is a
 release input, not proof that undiscovered defects are impossible.
+
+The 0.7.0 frontier extension uses the same Beta publication class. Synthetic activation
+policies and signed test fixtures do not supply external operational or empirical evidence.
+No 0.7.0 operational-assurance manifest is created in the absence of the actual activities.

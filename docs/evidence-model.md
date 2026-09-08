@@ -1,5 +1,14 @@
 # Evidence Model
 
+The 0.7 frontier adds closed companion kinds without changing the existing signed schemas.
+Offline model activation creates no observation or admission. Frontier evidence reassessment
+reuses the existing `protocol_registration` quorum, validates original growth observations and
+runner receipts, and requires admitted action/capability/execution-policy subjects before an
+activation can be carried into a new unsigned modelling proposal. Ambiguous receipt outcomes
+cannot select a favorable frontier. Replanning preserves signed history, depth and prerequisite
+expiry, and requires fresh original materials rather than a cached assessment. See the
+[frontier evidence path](endogenous-capability-frontier.md#receipt-backed-advancement-and-admission).
+
 Every native v0.6 document uses `api_version`, a closed `kind`, metadata, a typed `spec`, and
 non-authoritative reverse-DNS extensions. One runtime model maps to one generated schema digest.
 

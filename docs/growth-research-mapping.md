@@ -21,6 +21,21 @@ preprint; this repository's implementation and original documentation remain Apa
 | Section 6, synthetic verification/communication/evidence tradeoffs | Separate deterministic CPCF examples and negative controls under one budget | CPCF's small catalogue is not a reproduction of the paper's 40 stochastic recipes or evidence of a deployed system |
 | Queue appendix | Offered service differs from completion; burst, work deadline and typed repair backlog constraints remain explicit | No mean-load, queue-stability, causal or indefinite-growth claim |
 
+## P0.7: endogenous finite frontier
+
+The Section 5 finite state can additionally contain the active subset of a predeclared finite
+super-catalogue. CPCF 0.7.0 implements this bounded model extension with exact successor-bound
+activation, lineage, independent checking and frontier-aware comparator reoptimization. It keeps
+the original objective and all resource/evidence obligations. The
+[frontier guide](endogenous-capability-frontier.md) maps eight synthetic examples and counterexamples.
+This models finite endogenous capability reproduction; it does not demonstrate real-world
+capability creation or experimentally validate the paper. No external empirical acceleration
+experiment was performed.
+
+The next formal extension is fixed-parameter, set-valued model uncertainty with observation-driven
+model-set contraction and prior-free value-of-information planning. It is not implemented in 0.7.0;
+the current adversary remains rectangular and can choose another applicable model at each step.
+
 The paper's mathematical sufficient conditions require coverage and executable refinement.
 CPCF's signatures establish bounded record provenance and role separation; they cannot supply
 those scientific premises. The operational profile, external-runner boundary and existing audit
