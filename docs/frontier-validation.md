@@ -75,6 +75,13 @@ Required remote CI and release workflow runs must bind their own exact commit. T
 results do not assert a successful merge, publication, external service experiment or public
 PyPI installation. The release procedure requires those later outcomes to be verified separately.
 
+CLI reference generation also checks portable empty-remainder parsing. Python 3.12.3 marks
+this optional positional argument as internally required, unlike newer interpreters; the
+generator now documents the actual accepted argument semantics. The seven release-surface
+regressions and generated-reference check pass on Linux Python 3.12.3 and Windows Python 3.14.6.
+The generated documents, CLI behavior, mutation-target modules and selected mutation tests
+are unchanged by this generator correction.
+
 No external empirical acceleration experiment was performed. The next formal extension is
 fixed-parameter, set-valued uncertainty with observation-driven model-set contraction and
 prior-free value-of-information planning; no part of it is implemented in this release.

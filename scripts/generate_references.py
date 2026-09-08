@@ -52,7 +52,9 @@ def _commands(
                     "arguments": [
                         {
                             "flags": item.option_strings or [item.dest],
-                            "required": item.required,
+                            # Older argparse marks REMAINDER as required despite accepting
+                            # no values. Document its runtime semantics across Python versions.
+                            "required": item.required and item.nargs != argparse.REMAINDER,
                             "help": item.help or "",
                             "choices": list(item.choices) if item.choices is not None else None,
                         }
