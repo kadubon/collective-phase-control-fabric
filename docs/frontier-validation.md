@@ -34,22 +34,22 @@ Exact-boundary regressions also cover inclusive minimums, subsecond/scaled physi
 ancestor prerequisites, distinct rule admission requirements, strict comparator equality and
 the exact proposal pair bound to a returned continuation witness. See audit finding V6-038.
 
-## Previous candidate measurements (superseded)
+## Local candidate measurements
 
 The following local results bind implementation commit
-`aa69458943447225706fc60d53f4227da340a9f9` (tree
-`37e1f1f55818a0062695d240411b9f49deeedfb7`). All 517 allowlisted mutation inputs were
-hash-compared with that committed working tree. These results precede the V6-038 correction
-and additional mutation-driven regressions, so they do not validate the final release tree.
+`3ce607a250317337c65252d3e791e4088f56f231` (tree
+`55859c815f06a8635878235b78cc72439a74a671`). All 517 allowlisted mutation inputs were
+hash-compared with that committed working tree before the final documentation-only update.
+These results include the V6-038 correction and additional mutation-driven regressions.
 Windows checks use Python 3.14.6 and the frozen lock; mutation
 uses a fresh native Linux checkout of the same inputs and Python 3.14.6.
 
 | Check | Local result |
 | --- | --- |
-| Full suite with branch measurement | 810 passed, 3 skipped; 91.12% combined statement/branch coverage |
-| Focused critical suite | 520 passed; 95.59% combined statement/branch coverage |
+| Full suite with branch measurement | 828 passed, 3 skipped; 91.13% combined statement/branch coverage |
+| Focused critical suite | 538 passed; 95.60% combined statement/branch coverage |
 | Critical subsystem gates | All 14 pass the unchanged 95% floor |
-| Endogenous-frontier critical group | 97.79% combined; activation kernel 100% statements and branches |
+| Endogenous-frontier critical group | 97.83% combined; activation kernel 100% statements and branches |
 | Growth-planning critical group | 97.86% combined |
 | Ruff formatting/lint and strict mypy | Passed; 179 formatted files checked, 116 typed files |
 | Bandit / OSV pip-audit | No issues / no known vulnerabilities reported |
@@ -58,7 +58,8 @@ uses a fresh native Linux checkout of the same inputs and Python 3.14.6.
 | Source / staged / history / content hygiene | Passed, including Gitleaks with no detected secrets |
 | Distributions | One 0.7.0 wheel and sdist; metadata/tag, Twine and archive hygiene passed |
 | Fresh installed base wheel | Five imports report 0.7.0; pip check, self-check, preparation and depth-two frontier pass |
-| Mutation | Superseded before completion after finding V6-038; no passing result claimed |
+| Mutation | 87.50% (10,749/12,284); no incomplete mutants; 1,530 survived, 4 timeout, 0 segfault, 1 untested; unchanged 85% gate passed |
+| New frontier mutation scope | Activation kernel 733/764 (95.94%); fresh evidence advancement 426/461 (92.41%); combined 1,159/1,225 (94.61%) |
 
 The three local skips are the existing PostgreSQL tests whose disposable database URLs were
 not configured. The required remote PostgreSQL job supplies that service; local skips do not
@@ -66,18 +67,13 @@ satisfy that job.
 
 The repository's coverage gates use coverage.py's combined statement/branch percentage with
 branch measurement enabled: full 90%, critical aggregate and each subsystem 95%. For clarity,
-branch-only fractions are 5,931/6,906 (85.88%) in the full suite and 2,351/2,538 (92.63%) in the
+branch-only fractions are 5,934/6,908 (85.90%) in the full suite and 2,354/2,540 (92.68%) in the
 focused suite; those are not the gate percentages. The mutation floor remains 85%, counting
 timeouts and untested mutants as failures. No threshold or failure accounting is weakened.
 
 Required remote CI and release workflow runs must bind their own exact commit. These local
 results do not assert a successful merge, publication, external service experiment or public
 PyPI installation. The release procedure requires those later outcomes to be verified separately.
-
-## Final release measurements
-
-A fresh full-suite, critical-coverage and mutation run is required for the corrected candidate.
-Its results will replace the preceding candidate measurements before publication.
 
 No external empirical acceleration experiment was performed. The next formal extension is
 fixed-parameter, set-valued uncertainty with observation-driven model-set contraction and
