@@ -30,6 +30,10 @@ def _hashes(package: dict[str, Any]) -> list[dict[str, str]]:
 def generate(lock_path: Path) -> dict[str, Any]:
     raw = lock_path.read_bytes()
     lock = tomllib.loads(raw.decode("utf-8"))
+    project = next(
+        p for p in lock.get("package", []) if p["name"] == "collective-phase-control-fabric"
+    )
+    project_version = str(project["version"])
     components: list[dict[str, Any]] = []
     for package in sorted(
         lock.get("package", []), key=lambda item: (item["name"], item["version"])
@@ -56,9 +60,9 @@ def generate(lock_path: Path) -> dict[str, Any]:
         "metadata": {
             "component": {
                 "type": "application",
-                "bom-ref": "pkg:pypi/cpcf-core@0.6.0",
-                "name": "CPCF uv workspace",
-                "version": "0.6.0",
+                "bom-ref": f"pkg:pypi/collective-phase-control-fabric@{project_version}",
+                "name": "collective-phase-control-fabric",
+                "version": project_version,
             },
             "properties": [{"name": "cpcf:uv-lock-sha256", "value": lock_digest}],
         },

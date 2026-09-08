@@ -77,6 +77,21 @@ and evidence dimensions separately.
 
 ## Finite growth control
 
+With the optional 0.7 frontier, the finite action domain is a predeclared `A_super` and the
+state carries its active subset `A_t`, bounded depth and immutable activation lineage.
+For a declared successor `s`, let `U(s,x)` be the targets whose bound rule prerequisites
+hold in the post-ledger state. The only frontier update is `A_(t+1) = A_t union U(s,x)`;
+it has no direct reward. New targets have producer depth plus one; duplicate targets
+retain their first canonical lineage. Costs, debt, queues and physical time follow the
+unchanged transition ledger. Future use still requires all lineage premises and lifecycles.
+
+The existing finite AND–OR recursion, scalar comparator and lexicographic growth objective
+apply to this enlarged finite state. All frontier facets are hashed and independently
+reconstructed. Comparator restriction changes reachability through the same transition
+function, never freezes the initial frontier. An activation witness establishes a use-after-
+activation relation in the selected model policy; it is not marginal causal attribution.
+See [complete semantics and counterexamples](docs/endogenous-capability-frontier.md).
+
 The separate opt-in growth mode models a finite game with exact rational time, nonempty
 applicable successors, and rectangular adversarial uncertainty. Each decision preserves
 joint task/research service, verification, shared resources, queues, deadlines and evidence

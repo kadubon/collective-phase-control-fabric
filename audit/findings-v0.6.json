@@ -308,6 +308,51 @@
       "correction": "Arithmetic, external evidence compatibility and model conditions are separate; attribution stays undetermined. Real refinements, statistical construct/coverage validity and intended-deployment evidence remain external obligations outside P0.",
       "regression_test": "tests/test_v6_growth_evidence.py::test_evidence_weakening_never_strengthens_empirical_verdict and docs/growth-research-mapping.md",
       "status": "partial"
+    },
+    {
+      "id": "V6-035",
+      "severity": "high",
+      "exploit": "Latent actions or fake activation counts could be treated as productive growth or used before a declared successful producer outcome.",
+      "affected_claim": "Bounded endogenous frontier planning",
+      "correction": "A predeclared closed super-catalogue, digest-bound active state, exact successor rules, bounded lineage, unchanged growth objective and independent all-prefix checking preserve finite semantics.",
+      "regression_test": "tests/test_v6_growth_frontier.py",
+      "status": "closed"
+    },
+    {
+      "id": "V6-036",
+      "severity": "high",
+      "exploit": "A comparator frozen at the initial frontier can understate legally reachable alternatives and manufacture superiority.",
+      "affected_claim": "Fair finite comparator reoptimization",
+      "correction": "Restricted scalar search receives identical frontier semantics and resources and reoptimizes every remaining reachable activation path; incomplete comparison remains inconclusive.",
+      "regression_test": "tests/test_v6_growth_frontier.py::test_comparator_reoptimizes_alternative_activation_route and tests/test_v6_frontier_evidence_cli.py::test_admitted_frontier_comparison_reoptimizes_only_reachable_actions",
+      "status": "closed"
+    },
+    {
+      "id": "V6-037",
+      "severity": "high",
+      "exploit": "Model enablement, a cached assessment or an ambiguous receipt could be laundered into admitted capability or reset activation debt and expiry during replanning.",
+      "affected_claim": "Frontier evidence and authority separation",
+      "correction": "Fresh original admission materials, the existing protocol-registration quorum and independently admitted capability subjects are required. Every compatible receipt outcome must agree on the frontier. New unsigned proposals retain lineage, depth and prerequisite expiry; execution authority remains external.",
+      "regression_test": "tests/test_v6_frontier_evidence_cli.py",
+      "status": "closed"
+    },
+    {
+      "id": "V6-038",
+      "severity": "high",
+      "exploit": "Rebuilding an unsigned modelling proposal after adding its continuation witness changes the assessment-basis digest, so the returned frontier no longer matches the checked witness.",
+      "affected_claim": "Independent checking of receipt-backed frontier continuation",
+      "correction": "The closed frontier assessment embeds the exact unsigned contract/frontier pair created before continuation search. Replan freshly reassesses original materials and returns that same pair. The returned state and policy are independently checked against it, and altered proposal digests are rejected.",
+      "regression_test": "tests/test_v6_frontier_evidence_cli.py::test_fresh_admission_advances_only_unsigned_modelling_proposal",
+      "status": "closed"
+    },
+    {
+      "id": "V6-039",
+      "severity": "high",
+      "exploit": "A full mutation run exceeds the hosted job limit, or incomplete and overlapping parallel results are mistaken for a complete passing score.",
+      "affected_claim": "Complete mutation assurance before merge and publication",
+      "correction": "Five disjoint Mutmut selectors retain the complete generated catalogue and original test selection. The required aggregate job fails on any unsuccessful shard, verifies every full report against the reviewed 12,284-name catalogue fingerprint, rejects missing, changed, duplicated, overlapping and incomplete results, and applies the unchanged 85 percent score to the complete union. Partial diagnostics are retained after a step failure.",
+      "regression_test": "tests/test_mutation_shards.py and tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
+      "status": "closed"
     }
   ]
 }

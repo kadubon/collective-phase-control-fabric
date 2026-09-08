@@ -1,5 +1,13 @@
 # Scientific Boundaries
 
+The 0.7.0 endogenous capability frontier is a finite model and software-control mechanism.
+Model enablement, receipt-backed candidacy, admitted capability and execution authority are
+distinct. Activation lineage and selected-policy use are model-conditional witnesses; no exact
+causal marginal effect is computed. Frontier size is not an intelligence objective or score.
+No external empirical acceleration experiment was performed. This release does not establish
+real-world capability reproduction, collective intelligence, AGI, ASI, causal acceleration or
+indefinite growth. See [the frontier limits](endogenous-capability-frontier.md).
+
 CPCF borrows executable distinctions from chemical organization theory, RAF systems, open reaction
 networks, Petri nets, network calculus, nondeterministic planning, and target-trial design. These are
 formal accounting tools, not evidence that software collectives are chemical or physical phases.

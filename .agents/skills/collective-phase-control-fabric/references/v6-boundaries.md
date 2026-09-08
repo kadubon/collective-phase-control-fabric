@@ -65,6 +65,13 @@ The mathematical tools are bounded formal accounting methods. Preserve these lim
   Hypothetical planner outputs do not become evidence until receipt-backed promotion.
 - Trial binding checks compatibility of registered records; it does not certify causal
   identification or statistical analysis.
+- Endogenous frontier expansion activates only actions from a finite immutable super-catalogue.
+  Model enablement, receipt-backed candidates, admission and execution authority remain distinct.
+  Activation lineage is an explanation of selected model-policy use, not empirical reproduction
+  or a universal intelligence score. Replanning retains depth and prerequisite expiry.
+  A frontier assessment carries the exact unsigned proposal pair used for its continuation
+  proof. Check the returned state and policy against that pair; it is not registration or
+  execution authority, and replan must still revalidate the original evidence.
 
 ## Review sequence
 

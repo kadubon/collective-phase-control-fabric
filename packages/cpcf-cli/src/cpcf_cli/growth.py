@@ -9,6 +9,11 @@ from pathlib import Path
 from typing import Any, cast
 
 from collective_phase_control_fabric.v6.canonical import canonical_bytes, digest_bytes
+from collective_phase_control_fabric.v6.frontier_examples import (
+    SCENARIOS,
+    frontier_report,
+    write_frontier_example,
+)
 from collective_phase_control_fabric.v6.growth import (
     check_plan,
     compare,
@@ -25,10 +30,17 @@ from collective_phase_control_fabric.v6.growth_evidence import (
     replay,
 )
 from collective_phase_control_fabric.v6.growth_examples import comparison_example, write_example
+from collective_phase_control_fabric.v6.growth_frontier import validate_frontier
+from collective_phase_control_fabric.v6.growth_frontier_evidence import (
+    reassess_frontier,
+    replan_frontier,
+)
 from collective_phase_control_fabric.v6.models import (
     AnalysisSnapshot,
     Document,
+    GrowthCapabilityFrontier,
     GrowthContract,
+    GrowthFrontierPlan,
     GrowthObservation,
     GrowthPlan,
     RunnerJob,
@@ -70,10 +82,14 @@ def add_parser(commands: Any) -> None:
                     "no-advantage",
                     "verification",
                     "communication",
+                    *SCENARIOS,
                 ],
             )
             continue
         leaf.add_argument("contract", type=Path)
+        leaf.add_argument(
+            "--frontier", type=Path, help="Optional closed model-only capability frontier."
+        )
         leaf.add_argument(
             "--objects", type=Path, required=True, help="Directory of immutable model documents."
         )
@@ -119,7 +135,10 @@ def _objects(path: Path) -> dict[str, Document]:
 
 
 def _external(
-    args: argparse.Namespace, contract: GrowthContract, objects: dict[str, Document]
+    args: argparse.Namespace,
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    frontier: GrowthCapabilityFrontier | None = None,
 ) -> Any:
     generation = _read(args.generation, WorkspaceGeneration)
     store = MemoryObjectStore()
@@ -134,10 +153,7 @@ def _external(
         raw = path.read_bytes()
         require(digest_bytes(raw) == entry.object_digest, "growth_cli_cas_digest")
         store.put(generation.metadata.tenant_id, raw)
-    return reassess(
-        contract,
-        objects,
-        _read(args.observation, GrowthObservation),
+    admission = dict(
         generation=generation,
         store=store,
         policy=_read(args.trust_policy, TrustPolicyDocument),
@@ -145,6 +161,11 @@ def _external(
         expected_root_spki_fingerprint=args.root_spki_fingerprint,
         expected_genesis_envelope_fingerprint=args.genesis_envelope_fingerprint,
     )
+    observation = _read(args.observation, GrowthObservation)
+    if frontier is not None:
+        function = replan_frontier if args.subcommand == "replan" else reassess_frontier
+        return function(contract, objects, observation, frontier, **admission)
+    return reassess(contract, objects, observation, **admission)
 
 
 def run(args: argparse.Namespace) -> int:
@@ -167,6 +188,10 @@ def run(args: argparse.Namespace) -> int:
 def _run(args: argparse.Namespace) -> dict[str, Any]:
     name = args.subcommand
     if name == "example":
+        if args.scenario in SCENARIOS:
+            if args.directory:
+                write_frontier_example(args.directory, args.scenario)
+            return frontier_report(args.scenario)
         if args.directory:
             write_example(args.directory, args.scenario)
         # Convert the nested typed example ledgers without floats or custom encoders.
@@ -178,13 +203,17 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
     contract = _read(args.contract, GrowthContract)
     objects = _objects(args.objects)
     validate_contract(contract, objects)
+    frontier = _read(args.frontier, GrowthCapabilityFrontier) if args.frontier else None
+    if frontier is not None:
+        validate_frontier(contract, objects, frontier)
     if name == "inspect":
         snapshot = cast(AnalysisSnapshot, objects[contract.spec.analysis_snapshot_digest])
         return {
             "code": "growth_contract_inspected",
             "contract_digest": document_digest(contract),
-            "model_state": initial_state(contract).model_dump(mode="json"),
-            "state_digest": state_digest(initial_state(contract)),
+            "model_state": initial_state(contract, frontier).model_dump(mode="json"),
+            "state_digest": state_digest(initial_state(contract, frontier)),
+            **({"frontier": frontier.model_dump(mode="json")} if frontier is not None else {}),
             "operational_organization_profile": audit_snapshot(snapshot, objects).model_dump(
                 mode="json"
             ),
@@ -201,35 +230,54 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
             "executed": False,
         }
     if name == "plan":
-        return plan_growth(contract, objects).model_dump(mode="json", exclude_none=True)
+        return plan_growth(contract, objects, frontier).model_dump(mode="json", exclude_none=True)
     if name == "compare":
         return {
             "code": "growth_comparison_completed",
-            "comparisons": [x.model_dump(mode="json") for x in compare(contract, objects)],
+            "comparisons": [
+                x.model_dump(mode="json") for x in compare(contract, objects, frontier)
+            ],
+            **({"frontier": frontier.model_dump(mode="json")} if frontier is not None else {}),
             "executed": False,
         }
     if name in {"check-plan", "export", "replay"}:
-        plan = _read(args.plan, GrowthPlan)
+        doc = _read(args.plan, Document)
+        require(isinstance(doc, (GrowthPlan, GrowthFrontierPlan)), "growth_cli_document_kind")
+        plan = cast(GrowthPlan | GrowthFrontierPlan, doc)
         if name == "check-plan":
             return {
                 "code": "growth_plan_checked",
-                "checker_digest": check_plan(contract, objects, plan),
+                "checker_digest": check_plan(contract, objects, plan, frontier),
+                **(
+                    {"frontier_diagnostics": plan.spec.frontier_diagnostics.model_dump(mode="json")}
+                    if isinstance(plan, GrowthFrontierPlan)
+                    else {}
+                ),
                 "claim": (
                     "all-prefix feasibility and objective checked; "
                     "optimality requires complete search"
                 ),
             }
         if name == "export":
-            return export_proposal(contract, objects, plan, _read(args.job, RunnerJob))
-        return replay(contract, objects, plan, args.branch)
-    assessment = _external(args, contract, objects)
+            return export_proposal(contract, objects, plan, _read(args.job, RunnerJob), frontier)
+        return replay(contract, objects, plan, args.branch, frontier)
+    assessment = _external(args, contract, objects, frontier)
     if name == "replan":
-        derived = replan_contract(contract, assessment)
-        planned = plan_growth(derived, objects)
+        proposed_frontier = None
+        if frontier is not None:
+            derived, proposed_frontier, assessment = assessment
+        else:
+            derived = replan_contract(contract, assessment)
+        planned = plan_growth(derived, objects, proposed_frontier)
         return {
             "code": "growth_replanned_proposal",
             "assessment": assessment.model_dump(mode="json"),
             "unsigned_contract_proposal": derived.model_dump(mode="json"),
+            **(
+                {"unsigned_frontier_proposal": proposed_frontier.model_dump(mode="json")}
+                if proposed_frontier is not None
+                else {}
+            ),
             "plan": planned.model_dump(mode="json"),
             "registration": "required-before-external-use",
         }
@@ -249,6 +297,18 @@ def _text(result: dict[str, Any]) -> None:
         print("Required evidence: " + ", ".join(spec["next_evidence"]))
         print("Required authority: " + ", ".join(spec["required_authority"]))
         print("Input digest: " + spec["input_digest"])
+        if "frontier_diagnostics" in spec:
+            declared = spec["declared_frontier"]["spec"]
+            print("Initially model-enabled: " + ", ".join(declared["initial_enabled_action_ids"]))
+            print("Latent: " + ", ".join(declared["latent_action_ids"]))
+            print(
+                "Declared activation rules: "
+                + json.dumps(declared["activation_rules"], sort_keys=True)
+            )
+            print(
+                "Model activation witness: "
+                + json.dumps(spec["frontier_diagnostics"], sort_keys=True)
+            )
     else:
         print(json.dumps(result, indent=2, sort_keys=True))
     print("Offline model output; no adapter executed and no capacity admitted.")

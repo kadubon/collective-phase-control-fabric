@@ -49,6 +49,18 @@ def _commands(
                     "argv": list(command),
                     "description": child.description or choice_help.get(name) or "",
                     "help": choice_help.get(name),
+                    "arguments": [
+                        {
+                            "flags": item.option_strings or [item.dest],
+                            # Older argparse marks REMAINDER as required despite accepting
+                            # no values. Document its runtime semantics across Python versions.
+                            "required": item.required and item.nargs != argparse.REMAINDER,
+                            "help": item.help or "",
+                            "choices": list(item.choices) if item.choices is not None else None,
+                        }
+                        for item in child._actions
+                        if not isinstance(item, argparse._SubParsersAction) and item.dest != "help"
+                    ],
                 }
             )
             result.extend(_commands(child, command))

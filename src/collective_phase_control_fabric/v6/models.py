@@ -1796,6 +1796,122 @@ class GrowthAssessment(Document):
     spec: GrowthAssessmentSpec
 
 
+class GrowthFrontierBinding(StrictModel):
+    action_id: Identifier
+    action_digest: Digest
+    capability_digest: Digest
+    output_schema_digest: Digest
+    execution_policy_digest: Digest
+    # A declared model validity envelope, never an authoritative clock or admission.
+    lifecycle: Lifecycle
+
+
+class GrowthActivationRule(StrictModel):
+    rule_id: Identifier
+    producer_action_id: Identifier
+    producer_successor_id: Identifier
+    activated_action_ids: list[Identifier] = Field(min_length=1, max_length=16)
+    required_capability_digests: list[Digest] = Field(min_length=1, max_length=16)
+    required_evidence: list[Identifier] = Field(default_factory=list, max_length=128)
+    required_model_ids: list[Identifier] = Field(min_length=1, max_length=32)
+    minimum_capacities: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    minimum_resources: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    valid_from: Rational
+    expires: Rational
+
+
+class GrowthActivation(StrictModel):
+    action_id: Identifier
+    rule_id: Identifier
+    producer_action_id: Identifier
+    producer_successor_id: Identifier
+    depth: int = Field(ge=1, le=16)
+    model_time: Rational
+    parent_state_digest: Digest
+
+
+class GrowthCapabilityFrontierSpec(StrictModel):
+    contract_digest: Digest
+    initial_enabled_action_ids: list[Identifier] = Field(min_length=1, max_length=16)
+    latent_action_ids: list[Identifier] = Field(default_factory=list, max_length=16)
+    bindings: list[GrowthFrontierBinding] = Field(min_length=1, max_length=16)
+    activation_rules: list[GrowthActivationRule] = Field(default_factory=list, max_length=128)
+    maximum_activation_depth: int = Field(ge=0, le=16)
+    initial_activation_lineage: list[GrowthActivation] = Field(default_factory=list, max_length=16)
+    parent_frontier_digest: Digest | None = None
+    advancement_evidence_digests: list[Digest] = Field(default_factory=list, max_length=256)
+    meaning: Literal["model-enablement-only"] = "model-enablement-only"
+
+
+class GrowthCapabilityFrontier(Document):
+    kind: Literal["growth-capability-frontier"] = "growth-capability-frontier"
+    spec: GrowthCapabilityFrontierSpec
+
+
+class GrowthFrontierState(GrowthState):
+    frontier_digest: Digest
+    enabled_action_ids: list[Identifier] = Field(min_length=1, max_length=16)
+    activation_depth: int = Field(ge=0, le=16)
+    activation_lineage: list[GrowthActivation] = Field(default_factory=list, max_length=16)
+
+
+class GrowthActivationWitness(StrictModel):
+    activation: GrowthActivation
+    carried_from_initial_frontier: bool = False
+    first_policy_node_using_activation: Digest | None = None
+    policy_path: list[Identifier] = Field(default_factory=list, max_length=16)
+    continuation_use: bool = False
+    verification_capacity_effect: bool = False
+    downstream_objective_effect: Literal["not-marginally-attributed"] = "not-marginally-attributed"
+
+
+class GrowthFrontierDiagnostics(StrictModel):
+    newly_enabled_action_ids: list[Identifier] = Field(default_factory=list, max_length=16)
+    actions_used_after_activation: list[Identifier] = Field(default_factory=list, max_length=16)
+    maximum_activation_depth: int = Field(ge=0, le=16)
+    endogenous_frontier_used: bool
+    continuation_depends_on_frontier: bool
+    recursive_activation_used: bool
+    verification_capacity_contribution: bool
+    witnesses: list[GrowthActivationWitness] = Field(default_factory=list, max_length=65536)
+    scope: Literal["selected-policy-model-conditional"] = "selected-policy-model-conditional"
+    capability_admitted: Literal[False] = False
+    execution_authorized: Literal[False] = False
+    empirical_attribution: Literal["undetermined"] = "undetermined"
+
+
+class GrowthFrontierPlanSpec(GrowthPlanSpec):
+    frontier_digest: Digest
+    declared_frontier: GrowthCapabilityFrontier
+    initial_frontier_state: GrowthFrontierState
+    terminal_frontier_states: list[GrowthFrontierState] = Field(
+        default_factory=list, max_length=4096
+    )
+    frontier_diagnostics: GrowthFrontierDiagnostics
+
+
+class GrowthFrontierPlan(Document):
+    kind: Literal["growth-frontier-plan"] = "growth-frontier-plan"
+    spec: GrowthFrontierPlanSpec
+
+
+class GrowthFrontierAssessmentSpec(GrowthAssessmentSpec):
+    frontier_digest: Digest
+    reconstructed_frontier_state: GrowthFrontierState | None = None
+    admitted_activation_action_ids: list[Identifier] = Field(default_factory=list, max_length=16)
+    advancement_evidence_digests: list[Digest] = Field(default_factory=list, max_length=256)
+    proposed_contract: GrowthContract | None = None
+    proposed_frontier: GrowthCapabilityFrontier | None = None
+    frontier_continuation_state: GrowthFrontierState | None = None
+    execution_authorized: Literal[False] = False
+    registration_required: Literal[True] = True
+
+
+class GrowthFrontierAssessment(Document):
+    kind: Literal["growth-frontier-assessment"] = "growth-frontier-assessment"
+    spec: GrowthFrontierAssessmentSpec
+
+
 type DocumentType = (
     UnitRegistryDocument
     | PhaseContract
@@ -1849,6 +1965,9 @@ type DocumentType = (
     | GrowthObservation
     | GrowthPlan
     | GrowthAssessment
+    | GrowthCapabilityFrontier
+    | GrowthFrontierPlan
+    | GrowthFrontierAssessment
 )
 
 DOCUMENT_MODELS: dict[str, type[Document]] = {
@@ -1906,6 +2025,9 @@ DOCUMENT_MODELS: dict[str, type[Document]] = {
         GrowthObservation,
         GrowthPlan,
         GrowthAssessment,
+        GrowthCapabilityFrontier,
+        GrowthFrontierPlan,
+        GrowthFrontierAssessment,
     )
 }
 

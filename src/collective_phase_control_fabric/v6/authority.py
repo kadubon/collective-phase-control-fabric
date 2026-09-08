@@ -21,6 +21,7 @@ from collective_phase_control_fabric.v6.models import (
     Document,
     DsseEnvelope,
     EvidenceAttestation,
+    GrowthCapabilityFrontier,
     GrowthObservation,
     Lifecycle,
     MeasurementProtocol,
@@ -118,7 +119,7 @@ def _claimed_signer(document: Document) -> tuple[str, str] | None:
 
 
 def _required_quorum(document: Document) -> str | None:
-    if isinstance(document, MeasurementProtocol):
+    if isinstance(document, (MeasurementProtocol, GrowthCapabilityFrontier)):
         return "protocol_registration"
     if isinstance(document, ProtocolAmendment):
         return "protocol_amendment"

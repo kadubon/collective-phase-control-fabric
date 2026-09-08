@@ -13,8 +13,9 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from fractions import Fraction
 from itertools import product
-from typing import Any, cast
+from typing import Any, cast, overload
 
+from collective_phase_control_fabric.v6 import growth_frontier as frontier_model
 from collective_phase_control_fabric.v6.canonical import canonical_bytes, digest_bytes
 from collective_phase_control_fabric.v6.models import (
     ActionDocument,
@@ -22,9 +23,13 @@ from collective_phase_control_fabric.v6.models import (
     CapabilityDocument,
     Document,
     GrowthAction,
+    GrowthCapabilityFrontier,
     GrowthCheckpoint,
     GrowthComparison,
     GrowthContract,
+    GrowthFrontierPlan,
+    GrowthFrontierPlanSpec,
+    GrowthFrontierState,
     GrowthInterval,
     GrowthObjective,
     GrowthPlan,
@@ -101,19 +106,29 @@ def normalize(state: GrowthState) -> GrowthState:
         data["reservations"], key=lambda x: (x["resource"], x["owner"], F(x["until"]))
     )
     data["checkpoints"] = sorted(data["checkpoints"], key=lambda x: F(x["time"]))
-    return GrowthState.model_validate(data)
+    if isinstance(state, GrowthFrontierState):
+        data["enabled_action_ids"] = sorted(data["enabled_action_ids"])
+        data["activation_lineage"] = sorted(
+            data["activation_lineage"], key=lambda x: x["action_id"]
+        )
+    return type(state).model_validate(data)
 
 
 def state_digest(state: GrowthState) -> str:
     return content_digest(normalize(state))
 
 
-def input_digest(contract: GrowthContract, objects: dict[str, Document]) -> str:
+def input_digest(
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    frontier: GrowthCapabilityFrontier | None = None,
+) -> str:
     return digest_bytes(
         canonical_bytes(
             {
                 "contract": document_digest(contract),
                 "objects": sorted(document_digest(item) for item in objects.values()),
+                **({"frontier": document_digest(frontier)} if frontier is not None else {}),
             }
         )
     )
@@ -367,7 +382,9 @@ def check_state(contract: GrowthContract, state: GrowthState) -> None:
     require(len(times) == len(set(times)), "growth_checkpoint_invalid")
 
 
-def initial_state(contract: GrowthContract) -> GrowthState:
+def initial_state(
+    contract: GrowthContract, frontier: GrowthCapabilityFrontier | None = None
+) -> GrowthState:
     c = contract.spec
     s = c.initial_state
     resources = dict(s.resources)
@@ -402,15 +419,25 @@ def initial_state(contract: GrowthContract) -> GrowthState:
         )
     )
     check_state(contract, state)
-    return state
+    return frontier_model.seed(state, frontier) if frontier is not None else state
 
 
 def applicable(
-    contract: GrowthContract, state: GrowthState, recipe: GrowthAction, objects: dict[str, Document]
+    contract: GrowthContract,
+    state: GrowthState,
+    recipe: GrowthAction,
+    objects: dict[str, Document],
+    frontier: GrowthCapabilityFrontier | None = None,
 ) -> tuple[ActionDocument, CapabilityDocument]:
     require(bool(state.model_ids), "growth_inconsistent_models")
     action = cast(ActionDocument, objects[recipe.action_digest])
     cap = cast(CapabilityDocument, objects[action.spec.capability_digest])
+    if frontier is not None:
+        frontier_model.check_use(
+            contract, objects, frontier, state, action.spec.action_id, F(state.elapsed)
+        )
+    else:
+        require(not isinstance(state, GrowthFrontierState), "growth_frontier_document_required")
     require(
         cap.spec.repeatable or action.spec.action_id not in state.used_actions,
         "growth_nonrepeatable_reuse",
@@ -449,9 +476,10 @@ def transition(
     recipe: GrowthAction,
     effect: GrowthSuccessor,
     objects: dict[str, Document],
+    frontier: GrowthCapabilityFrontier | None = None,
 ) -> GrowthState:
     """Recheck every prefix, transient reservation, queue and expiry after a model step."""
-    action, cap = applicable(contract, state, recipe, objects)
+    action, cap = applicable(contract, state, recipe, objects, frontier)
     require(effect in successors(state, recipe), "growth_undeclared_successor")
     c = contract.spec
     end = F(state.elapsed) + F(effect.duration)
@@ -607,7 +635,11 @@ def transition(
     )
     require(not set(result.hazards) & set(action.spec.prohibited_hazards), "growth_hazard")
     check_state(contract, result)
-    return result
+    return (
+        frontier_model.activate(contract, objects, frontier, state, result, recipe, effect)
+        if frontier is not None
+        else result
+    )
 
 
 def attainment(contract: GrowthContract, state: GrowthState, bound: str = "lower") -> Fraction:
@@ -704,6 +736,7 @@ class Search:
     counterexamples: set[str] = field(default_factory=set)
     memo: dict[tuple[str, int, str | None], list[Candidate]] = field(default_factory=dict)
     scalar_memo: dict[tuple[str, int], ScalarSolution | None] = field(default_factory=dict)
+    frontier: GrowthCapabilityFrontier | None = None
 
     def scalar(self, state: GrowthState, depth: int = 0) -> ScalarSolution | None:
         """Backward induction for ONE terminal scalar, with no vector composition.
@@ -740,7 +773,7 @@ class Search:
             if self.excluded & set(recipe.interactions):
                 continue
             try:
-                action, _ = applicable(self.contract, state, recipe, self.objects)
+                action, _ = applicable(self.contract, state, recipe, self.objects, self.frontier)
                 effects = successors(state, recipe)
                 require(bool(effects), "growth_successor_incomplete")
                 children: list[ScalarSolution] = []
@@ -748,7 +781,10 @@ class Search:
                     if not self.budget.take("expansions", self.budget.limits.max_expansions):
                         break
                     child = self.scalar(
-                        transition(self.contract, state, recipe, effect, self.objects), depth + 1
+                        transition(
+                            self.contract, state, recipe, effect, self.objects, self.frontier
+                        ),
+                        depth + 1,
                     )
                     if child is None:
                         break
@@ -880,14 +916,18 @@ class Search:
                 if self.excluded & set(recipe.interactions):
                     continue
                 try:
-                    action, _ = applicable(self.contract, state, recipe, self.objects)
+                    action, _ = applicable(
+                        self.contract, state, recipe, self.objects, self.frontier
+                    )
                     effects = successors(state, recipe)
                     require(bool(effects), "growth_successor_incomplete")
                     child_options: list[list[Candidate]] = []
                     for effect in effects:
                         if not self.budget.take("expansions", self.budget.limits.max_expansions):
                             return options
-                        next_state = transition(self.contract, state, recipe, effect, self.objects)
+                        next_state = transition(
+                            self.contract, state, recipe, effect, self.objects, self.frontier
+                        )
                         next_stop = (
                             F(selected_entry.time) + F(self.contract.spec.continuation_horizon)
                             if selected_entry
@@ -969,10 +1009,16 @@ def objective_key(contract: GrowthContract, candidate: Candidate) -> tuple[Any, 
     )
 
 
-def compare(contract: GrowthContract, objects: dict[str, Document]) -> list[GrowthComparison]:
+def compare(
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    frontier: GrowthCapabilityFrontier | None = None,
+) -> list[GrowthComparison]:
     """Reoptimize each restricted class from exactly the same charged checkpoint."""
     validate_contract(contract, objects)
-    start = initial_state(contract)
+    if frontier is not None:
+        frontier_model.validate_frontier(contract, objects, frontier)
+    start = initial_state(contract, frontier)
     results: list[GrowthComparison] = []
     for comparator in sorted(contract.spec.comparators, key=lambda x: x.comparator_id):
         for endpoint in sorted({F(w.end) for w in contract.spec.windows}):
@@ -982,6 +1028,7 @@ def compare(contract: GrowthContract, objects: dict[str, Document]) -> list[Grow
                 Budget(contract.spec.search_limits),
                 excluded=frozenset(comparator.excluded_interactions),
                 endpoint=endpoint,
+                frontier=frontier,
             )
             solution = search.scalar(start) if start.model_ids else None
             lower: Fraction | None = None
@@ -1002,25 +1049,51 @@ def compare(contract: GrowthContract, objects: dict[str, Document]) -> list[Grow
                     lower_bound=str(lower) if lower is not None else None,
                     upper_bound=str(upper) if upper is not None else None,
                     search=search.budget.report(),
-                    matched_basis_digest=input_digest(contract, objects),
+                    matched_basis_digest=input_digest(contract, objects, frontier),
                     policy_digest=content_digest(best.node) if best else None,
                 )
             )
     return results
 
 
-def plan_growth(contract: GrowthContract, objects: dict[str, Document]) -> GrowthPlan:
+@overload
+def plan_growth(
+    contract: GrowthContract, objects: dict[str, Document], frontier: None = None
+) -> GrowthPlan: ...
+
+
+@overload
+def plan_growth(
+    contract: GrowthContract, objects: dict[str, Document], frontier: GrowthCapabilityFrontier
+) -> GrowthFrontierPlan: ...
+
+
+def plan_growth(
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    frontier: GrowthCapabilityFrontier | None = None,
+) -> GrowthPlan | GrowthFrontierPlan:
     validate_contract(contract, objects)
-    start = initial_state(contract)
-    comparisons = compare(contract, objects)
-    search = Search(contract, objects, Budget(contract.spec.search_limits), comparisons=comparisons)
+    start = initial_state(contract, frontier)
+    comparisons = compare(contract, objects, frontier)
+    search = Search(
+        contract,
+        objects,
+        Budget(contract.spec.search_limits),
+        comparisons=comparisons,
+        frontier=frontier,
+    )
     candidates = search.enumerate(start) if start.model_ids else []
     candidates.sort(key=lambda candidate: objective_key(contract, candidate))
     best = candidates[0] if candidates else None
     complete = search.budget.complete and all(x.search.complete for x in comparisons)
     # A fallback only certifies a complete safe policy to the declared deadline.
     fallback_search = Search(
-        contract, objects, Budget(contract.spec.search_limits), endpoint=F(contract.spec.deadline)
+        contract,
+        objects,
+        Budget(contract.spec.search_limits),
+        endpoint=F(contract.spec.deadline),
+        frontier=frontier,
     )
     safe = fallback_search.scalar(start) if not best and start.model_ids else None
     fallback = safe.candidate.node if safe else None
@@ -1032,11 +1105,11 @@ def plan_growth(contract: GrowthContract, objects: dict[str, Document]) -> Growt
         code = "growth_model_policy_found"
     else:
         code = "growth_no_guaranteed_entry"
-    plan = GrowthPlan(
+    plan: GrowthPlan | GrowthFrontierPlan = GrowthPlan(
         metadata=contract.metadata,
         spec=GrowthPlanSpec(
             contract_digest=document_digest(contract),
-            input_digest=input_digest(contract, objects),
+            input_digest=input_digest(contract, objects, frontier),
             initial_state_digest=state_digest(start),
             code=code,
             solution_class="exact" if complete else "incomplete",
@@ -1059,7 +1132,9 @@ def plan_growth(contract: GrowthContract, objects: dict[str, Document]) -> Growt
                 }
             ),
             counterexamples=sorted(search.counterexamples),
-            model_predicted_terminal=best.terminals if best else [],
+            model_predicted_terminal=[frontier_model.base_state(s) for s in best.terminals]
+            if best
+            else [],
             required_authority=[
                 "operator-external-runner-authorization",
                 "admitted-capability",
@@ -1070,14 +1145,37 @@ def plan_growth(contract: GrowthContract, objects: dict[str, Document]) -> Growt
             invalidate_on=INVALIDATE_ON,
         ),
     )
+    if frontier is not None:
+        plan = GrowthFrontierPlan(
+            metadata=plan.metadata,
+            spec=GrowthFrontierPlanSpec(
+                **plan.spec.model_dump(),
+                frontier_digest=document_digest(frontier),
+                declared_frontier=frontier,
+                initial_frontier_state=cast(GrowthFrontierState, start),
+                terminal_frontier_states=[cast(GrowthFrontierState, s) for s in best.terminals]
+                if best
+                else [],
+                frontier_diagnostics=frontier_model.diagnostics(
+                    contract, objects, frontier, best.node if best else None
+                ),
+            ),
+        )
     # Checker walks the submitted tree, without trusting the search or cached effects.
     if best:
-        checked = check_plan(contract, objects, plan)
+        checked = check_plan(contract, objects, plan, frontier)
         plan = plan.model_copy(
             update={"spec": plan.spec.model_copy(update={"checker_digest": checked})}
         )
     elif fallback is not None:
-        check_tree(contract, objects, fallback, start, endpoint=F(contract.spec.deadline))
+        check_tree(
+            contract,
+            objects,
+            fallback,
+            start,
+            endpoint=F(contract.spec.deadline),
+            frontier=frontier,
+        )
     if not best and start.model_ids:
         plan = plan.model_copy(
             update={
@@ -1089,25 +1187,58 @@ def plan_growth(contract: GrowthContract, objects: dict[str, Document]) -> Growt
     return plan
 
 
-def check_plan(contract: GrowthContract, objects: dict[str, Document], plan: GrowthPlan) -> str:
+def check_plan(
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    plan: GrowthPlan | GrowthFrontierPlan,
+    frontier: GrowthCapabilityFrontier | None = None,
+) -> str:
     validate_contract(contract, objects)
     require(
+        isinstance(plan, GrowthFrontierPlan) == (frontier is not None),
+        "growth_frontier_document_required",
+    )
+    if frontier is not None:
+        frontier_model.validate_frontier(contract, objects, frontier)
+        require(
+            cast(GrowthFrontierPlan, plan).spec.frontier_digest == document_digest(frontier)
+            and cast(GrowthFrontierPlan, plan).spec.declared_frontier == frontier,
+            "growth_frontier_digest_mismatch",
+        )
+    require(
         plan.spec.contract_digest == document_digest(contract)
-        and plan.spec.input_digest == input_digest(contract, objects),
+        and plan.spec.input_digest == input_digest(contract, objects, frontier),
         "growth_plan_input_mismatch",
     )
-    start = initial_state(contract)
+    start = initial_state(contract, frontier)
     require(plan.spec.initial_state_digest == state_digest(start), "growth_plan_state_mismatch")
     require(plan.spec.policy is not None, "growth_plan_policy_missing")
     root = cast(GrowthPolicyNode, plan.spec.policy)
     require(plan.spec.policy_digest == content_digest(root), "growth_plan_digest_mismatch")
-    comparisons = compare(contract, objects)
+    comparisons = compare(contract, objects, frontier)
     require(comparisons == plan.spec.comparisons, "growth_plan_comparison_mismatch")
-    candidate = check_tree(contract, objects, root, start, comparisons=comparisons)
+    candidate = check_tree(
+        contract, objects, root, start, comparisons=comparisons, frontier=frontier
+    )
     require(plan.spec.objective == objective(contract, candidate), "growth_plan_objective_mismatch")
     require(
-        plan.spec.model_predicted_terminal == candidate.terminals, "growth_plan_terminal_mismatch"
+        plan.spec.model_predicted_terminal
+        == [frontier_model.base_state(s) for s in candidate.terminals],
+        "growth_plan_terminal_mismatch",
     )
+    if isinstance(plan, GrowthFrontierPlan):
+        require(
+            plan.spec.initial_frontier_state == start
+            and plan.spec.terminal_frontier_states == candidate.terminals,
+            "growth_frontier_state_mismatch",
+        )
+        require(
+            plan.spec.frontier_diagnostics
+            == frontier_model.diagnostics(
+                contract, objects, cast(GrowthCapabilityFrontier, frontier), root
+            ),
+            "growth_frontier_witness_mismatch",
+        )
     return digest_bytes(
         canonical_bytes(
             {
@@ -1129,6 +1260,7 @@ def check_tree(
     entry: GrowthCheckpoint | None = None,
     comparisons: list[GrowthComparison] | None = None,
     endpoint: Fraction | None = None,
+    frontier: GrowthCapabilityFrontier | None = None,
 ) -> Candidate:
     """Independent all-prefix traversal, also used to revalidate a stored fallback."""
     checker = Search(
@@ -1137,6 +1269,7 @@ def check_tree(
         Budget(contract.spec.search_limits),
         comparisons=comparisons or [],
         endpoint=endpoint,
+        frontier=frontier,
     )
     terminals: list[GrowthState] = []
     entries: list[Fraction] = []
@@ -1186,7 +1319,7 @@ def check_tree(
                 node.effect_digests[effect.successor_id] == content_digest(effect),
                 "growth_plan_effect_mismatch",
             )
-            next_state = transition(contract, state, recipe, effect, objects)
+            next_state = transition(contract, state, recipe, effect, objects, frontier)
             walk(node.branches[effect.successor_id], next_state, depth + 1, entry)
 
     walk(root, start, 0, entry)

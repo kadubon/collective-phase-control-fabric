@@ -44,6 +44,7 @@ jobs:
           tests/test_v6_authority.py
           tests/test_v6_db_worker_assurance.py tests/test_v6_golden_semantics.py
           tests/test_v6_growth.py tests/test_v6_growth_evidence.py tests/test_v6_growth_cli.py
+          tests/test_v6_growth_frontier.py tests/test_v6_frontier_evidence_cli.py
           tests/test_v6_intervention.py
           tests/test_v6_cli_auth.py tests/test_v6_coordination_trial_assurance.py
           tests/test_v6_model_assurance.py tests/test_v6_models_trust.py
@@ -71,6 +72,7 @@ jobs:
           --vulnerability-service osv --timeout 60
       - run: uv build
       - run: uv run --frozen python scripts/run_growth_examples.py --check
+      - run: uv run --frozen python scripts/run_frontier_examples.py --check
       - name: Validate artifact count, names, tag, and checksums
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name || '' }}
@@ -91,6 +93,8 @@ jobs:
           /tmp/linux-amd64/helm template test deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >/dev/null
       - name: Clean installed-wheel smoke test
         run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf self-check --json
+      - name: Clean installed-wheel frontier path
+        run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf growth example --scenario frontier-chain --json
       - name: Clean installed-wheel growth path
         run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf growth example --scenario preparation --json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -138,12 +142,20 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  mutation:
-    name: Mutation assurance
+  mutation-shards:
     needs: build
-    runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {shard: 0, selector: "*__mutmut_*[05]"}
+          - {shard: 1, selector: "*__mutmut_*[16]"}
+          - {shard: 2, selector: "*__mutmut_*[27]"}
+          - {shard: 3, selector: "*__mutmut_*[38]"}
+          - {shard: 4, selector: "*__mutmut_*[49]"}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
         with:
@@ -154,12 +166,52 @@ jobs:
           python-version: "3.14.6"
           enable-cache: true
       - run: uv sync --frozen --all-extras --group dev --group security
-      - run: uv run --frozen mutmut run
+      - name: Run assigned mutants
+        timeout-minutes: 300
+        env:
+          MUTATION_SELECTOR: ${{ matrix.selector }}
+        run: uv run --frozen mutmut run "$MUTATION_SELECTOR"
       - run: uv run --frozen mutmut results --all true > mutation-results.txt
+        if: ${{ always() }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: ${{ always() }}
+        with:
+          name: mutation-shard-${{ matrix.shard }}
+          path: mutation-results.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  mutation:
+    name: Mutation assurance
+    needs: mutation-shards
+    permissions:
+      contents: read
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every shard job to succeed
+        if: ${{ needs.mutation-shards.result != 'success' }}
+        run: exit 1
+      - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6a191366842ac1502ba6c07e9b5acd5c2d9d8db3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14.6"
+      - run: uv sync --frozen --all-extras --group dev --group security
+      - uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
+        with:
+          pattern: mutation-shard-*
+          path: mutation-shards
+      - run: >-
+          uv run --frozen python -m scripts.merge_mutation_results
+          mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v0.7.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: mutation-results
           path: mutation-results.txt
+          if-no-files-found: error
           retention-days: 14
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 

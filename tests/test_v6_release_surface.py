@@ -32,6 +32,26 @@ def test_root_distribution_is_single_and_complete() -> None:
     assert not list((ROOT / "packages").glob("*/pyproject.toml"))
 
 
+def test_sbom_and_generated_cli_expose_current_distribution_and_frontier_option() -> None:
+    from cpcf_cli.main import build_parser
+
+    from scripts.generate_references import documents
+    from scripts.generate_sbom import generate
+
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    component = generate(ROOT / "uv.lock")["metadata"]["component"]
+    assert component["name"] == project["name"] and component["version"] == project["version"]
+    assert component["bom-ref"] == f"pkg:pypi/{project['name']}@{project['version']}"
+    commands = documents()["cli.json"]["commands"]
+    plan = next(c for c in commands if c["argv"] == ["growth", "plan"])
+    assert any("--frontier" in a["flags"] for a in plan["arguments"])
+    # Empty remainder parsing is portable even where argparse's internal required flag is not.
+    assert build_parser().parse_args(["legacy", "inspect"]).arguments == []
+    legacy = next(c for c in commands if c["argv"] == ["legacy", "inspect"])
+    remainder = next(a for a in legacy["arguments"] if a["flags"] == ["arguments"])
+    assert remainder["required"] is False
+
+
 def test_offline_cli_orientation_and_schema_registry(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

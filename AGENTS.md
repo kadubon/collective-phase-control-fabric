@@ -34,6 +34,11 @@ uv build
 
 Use the checked-in `uv.lock`. Do not regenerate it as a side effect of an unrelated command.
 
+CI and release partition mutation execution into five disjoint shards. Preserve the full
+catalogue fingerprint, all shard-success dependencies, missing/overlap/incomplete rejection,
+and the unchanged aggregate 85% floor. Never treat an interrupted or skipped shard as a pass.
+See `docs/release.md` before changing the mutation catalogue or scheduling.
+
 Core and CLI checks must work in PowerShell, cmd-compatible Python execution, and POSIX shells on
 Windows and Linux. PostgreSQL, S3, OIDC, KMS, OCI, and Kubernetes are required only for server and
 deployment integration tests, never for offline core inspection.
@@ -47,6 +52,10 @@ deployment integration tests, never for offline core inspection.
 - `v6/planning.py`: branch-safe Pareto and strong AND–OR planning.
 - `v6/growth.py`, `v6/growth_evidence.py`: separate finite growth game, independent policy
   checks, and read-only external evidence reassessment. Model clocks and ledgers are not attestations.
+- `v6/growth_frontier.py`, `v6/growth_frontier_evidence.py`: additive finite super-catalogue
+  activation, digest-bound lineage and fresh receipt-backed modelling proposals. Preserve the
+  original 52 native schema identities. Never treat model enablement as capability admission or
+  execution authority; carry depth and prerequisite expiry across replanning.
 - `v6/runner.py`, `v6/projection.py`: external runner receipts and independent projection.
 - `v6/trials.py`: registration and external evidence compatibility.
 - `v6/storage.py`: immutable ledger and copy-on-write legacy boundary.

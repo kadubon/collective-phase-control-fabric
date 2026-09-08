@@ -1,0 +1,1382 @@
+{
+  "frontier-chain": {
+    "code": "growth_model_policy_found",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:16e4ea80b644b470fb62a1863f2638490398072ee3c4b2ac99628f015e48f00d",
+        "policy_digest": "sha256:5d5c75e6086223eff84e801fe8f82c37cfdf9553c89477d7b5a52341801c73dc",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 14,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 11,
+          "states": 15
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:16e4ea80b644b470fb62a1863f2638490398072ee3c4b2ac99628f015e48f00d",
+        "policy_digest": "sha256:2c86b88f8a12e93414078481ee337334f2207772b8dd81ab65a0b8060fd85efd",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 35,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 28,
+          "states": 35
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:16e4ea80b644b470fb62a1863f2638490398072ee3c4b2ac99628f015e48f00d",
+        "policy_digest": "sha256:ac392d2ebfc9199930811990af540cbe6321bdf7292a84af23f5bec1601b6e89",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 84,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 67,
+          "states": 84
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [
+        "continue",
+        "reuse"
+      ],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": true,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": true,
+      "execution_authorized": false,
+      "maximum_activation_depth": 2,
+      "newly_enabled_action_ids": [
+        "continue",
+        "reuse"
+      ],
+      "recursive_activation_used": true,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": false,
+      "witnesses": [
+        {
+          "activation": {
+            "action_id": "reuse",
+            "depth": 1,
+            "model_time": "1",
+            "parent_state_digest": "sha256:33b523b3453f70f41c56a099c1c35ec6b37d75e235e05421c6f50fc3a0179ffe",
+            "producer_action_id": "prepare",
+            "producer_successor_id": "prepare:success",
+            "rule_id": "prepare-enables-reuse"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": false,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:e0edc12981ed45b71446cddbe1aa1bcb1077bad13a90221607eb9e1aeba1deb9",
+          "policy_path": [
+            "prepare:success"
+          ],
+          "verification_capacity_effect": false
+        },
+        {
+          "activation": {
+            "action_id": "continue",
+            "depth": 2,
+            "model_time": "2",
+            "parent_state_digest": "sha256:01b3ec0f659844350588b0927a40a0f9954dc6831f5e7d0c927bc5efb11e2bfc",
+            "producer_action_id": "reuse",
+            "producer_successor_id": "reuse:success",
+            "rule_id": "reuse-enables-continue"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": true,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:5ac8589eed2ebda4236498809e62a71d4963a83e5437018e6c30eed8cdae4fa3",
+          "policy_path": [
+            "prepare:success",
+            "reuse:success"
+          ],
+          "verification_capacity_effect": false
+        }
+      ]
+    },
+    "empirical_attribution": "undetermined",
+    "objective": {
+      "terminal_min_attainment": "4/3",
+      "worst_cost": {
+        "credits": "5"
+      },
+      "worst_debt": {
+        "research": "0",
+        "task": "0",
+        "verification": "0"
+      },
+      "worst_duration": "3",
+      "worst_entry_time": "2"
+    },
+    "safe_fallback_paths": [
+      []
+    ],
+    "selected_policy_paths": [
+      [
+        "prepare",
+        "prepare:success",
+        "reuse",
+        "reuse:success",
+        "continue",
+        "continue:success"
+      ]
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  },
+  "frontier-comparator": {
+    "code": "growth_model_policy_found",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:5baf260e951d0ae0e6981fd77abb5f54ad9ef8eb32af6b20ec5225f54c3a25ad",
+        "policy_digest": "sha256:e4edc2b69cff865f39b77f0962071a5beb5eaf683f69d6a36d9f0855681ac6ff",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 8,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 6,
+          "states": 9
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "4/3",
+        "matched_basis_digest": "sha256:5baf260e951d0ae0e6981fd77abb5f54ad9ef8eb32af6b20ec5225f54c3a25ad",
+        "policy_digest": "sha256:f06e1e17da481776f0049f767466e0807bd0d0a330361c7bb5b6621959e5787b",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 17,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 14,
+          "states": 17
+        },
+        "status": "supported",
+        "upper_bound": "4/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "5/3",
+        "matched_basis_digest": "sha256:5baf260e951d0ae0e6981fd77abb5f54ad9ef8eb32af6b20ec5225f54c3a25ad",
+        "policy_digest": "sha256:07217f40920844015c4f488eab7b99b699ce3c94b25926477d2e950ae874c25a",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 42,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 34,
+          "states": 42
+        },
+        "status": "supported",
+        "upper_bound": "5/3"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [
+        "continue",
+        "reuse"
+      ],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": true,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": true,
+      "execution_authorized": false,
+      "maximum_activation_depth": 2,
+      "newly_enabled_action_ids": [
+        "continue",
+        "reuse"
+      ],
+      "recursive_activation_used": true,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": false,
+      "witnesses": [
+        {
+          "activation": {
+            "action_id": "reuse",
+            "depth": 1,
+            "model_time": "1",
+            "parent_state_digest": "sha256:cc397f632a70005cc195a6c2ea1b5a1ca6962cb238386d20dd6173a6f2ae66ef",
+            "producer_action_id": "prepare",
+            "producer_successor_id": "prepare:success",
+            "rule_id": "prepare-enables-reuse"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": false,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:8c6f6b2454efff8fdf261370e823d7b528925737960fd9f6938bb3937dccd901",
+          "policy_path": [
+            "prepare:success"
+          ],
+          "verification_capacity_effect": false
+        },
+        {
+          "activation": {
+            "action_id": "continue",
+            "depth": 2,
+            "model_time": "2",
+            "parent_state_digest": "sha256:3e98cbb21da7fbff5b774314cbaa03076b88b5c65ed41d7c644ac87ff4c75c59",
+            "producer_action_id": "reuse",
+            "producer_successor_id": "reuse:success",
+            "rule_id": "reuse-enables-continue"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": true,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:cf4b226db39a85adfbad1c090319309fb0c71aad00583ee5371c005bdc8beeec",
+          "policy_path": [
+            "prepare:success",
+            "reuse:success"
+          ],
+          "verification_capacity_effect": false
+        }
+      ]
+    },
+    "empirical_attribution": "undetermined",
+    "objective": {
+      "terminal_min_attainment": "4/3",
+      "worst_cost": {
+        "credits": "5"
+      },
+      "worst_debt": {
+        "research": "0",
+        "task": "0",
+        "verification": "0"
+      },
+      "worst_duration": "3",
+      "worst_entry_time": "2"
+    },
+    "safe_fallback_paths": [
+      []
+    ],
+    "selected_policy_paths": [
+      [
+        "prepare",
+        "prepare:success",
+        "reuse",
+        "reuse:success",
+        "continue",
+        "continue:success"
+      ]
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  },
+  "frontier-cycle": {
+    "code": "growth_model_policy_found",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:5d2796d5d6b9e47f74239e0fddb96133265377b391f3c257f602a414cc135e31",
+        "policy_digest": "sha256:ab81e4eea9f2689cfb48cade81eb3af989facbc74cc86c1191b168df35b1d90d",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 9,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 7,
+          "states": 10
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:5d2796d5d6b9e47f74239e0fddb96133265377b391f3c257f602a414cc135e31",
+        "policy_digest": "sha256:f0bd1220e75355155fec165c98c2e6b1684f94cc246f6f6fd523fc9a29f02dec",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 25,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 20,
+          "states": 26
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:5d2796d5d6b9e47f74239e0fddb96133265377b391f3c257f602a414cc135e31",
+        "policy_digest": "sha256:16cdaacf0d411ea9d89cfe080a4b684b750ab2fe58a997944661a1a4fd474def",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 54,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 44,
+          "states": 52
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse",
+      "growth_premise_missing_or_expired"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": false,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": false,
+      "execution_authorized": false,
+      "maximum_activation_depth": 0,
+      "newly_enabled_action_ids": [],
+      "recursive_activation_used": false,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": false,
+      "witnesses": []
+    },
+    "empirical_attribution": "undetermined",
+    "objective": {
+      "terminal_min_attainment": "4/3",
+      "worst_cost": {
+        "credits": "5"
+      },
+      "worst_debt": {
+        "research": "0",
+        "task": "0",
+        "verification": "0"
+      },
+      "worst_duration": "3",
+      "worst_entry_time": "2"
+    },
+    "safe_fallback_paths": [
+      []
+    ],
+    "selected_policy_paths": [
+      [
+        "prepare",
+        "prepare:success",
+        "reuse",
+        "reuse:success",
+        "continue",
+        "continue:success"
+      ]
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  },
+  "frontier-failure": {
+    "code": "growth_no_guaranteed_entry",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:adb9ed13b9dfb8cb08e0cdcffa053dbcffa7dbcedf9bc7957b4093db0580756e",
+        "policy_digest": "sha256:455061bd697c51101161768b70fc8505bfd868697ec12512252592295941ca28",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 50,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 15,
+          "states": 47
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:adb9ed13b9dfb8cb08e0cdcffa053dbcffa7dbcedf9bc7957b4093db0580756e",
+        "policy_digest": "sha256:f3a79b6db6b0313597b24fbbdeda0ea4ea7d965e4aa56314dc8a0c57721899d1",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 149,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 45,
+          "states": 124
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:adb9ed13b9dfb8cb08e0cdcffa053dbcffa7dbcedf9bc7957b4093db0580756e",
+        "policy_digest": "sha256:28be06d6075e9294ce58078cdabf26c13b21655802af4af344ca0c1765e7041c",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 267,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 77,
+          "states": 226
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": false,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": false,
+      "execution_authorized": false,
+      "maximum_activation_depth": 0,
+      "newly_enabled_action_ids": [],
+      "recursive_activation_used": false,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": false,
+      "witnesses": []
+    },
+    "empirical_attribution": "undetermined",
+    "objective": null,
+    "safe_fallback_paths": [
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:failure",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:success",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:failure",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:success",
+        "serial",
+        "serial:timeout"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:failure"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:success"
+      ],
+      [
+        "greedy",
+        "greedy:timeout",
+        "serial",
+        "serial:timeout",
+        "serial",
+        "serial:timeout"
+      ]
+    ],
+    "selected_policy_paths": [
+      []
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  },
+  "frontier-no-entry": {
+    "code": "growth_no_guaranteed_entry",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:b0840b201f3fbd90696920928f7cf2aa0f96faf3d13925064971a960dacdedf9",
+        "policy_digest": "sha256:0b7302f9b5d3e55b27aa9805a81b72b0acc21c4832db85d2e49f2c76499240d5",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 14,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 11,
+          "states": 15
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:b0840b201f3fbd90696920928f7cf2aa0f96faf3d13925064971a960dacdedf9",
+        "policy_digest": "sha256:1978253778a7411f60742d37642c87f41848755360efaca0f65a5d2147cfa056",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 30,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 25,
+          "states": 28
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1/3",
+        "matched_basis_digest": "sha256:b0840b201f3fbd90696920928f7cf2aa0f96faf3d13925064971a960dacdedf9",
+        "policy_digest": "sha256:1c6b3ee68e91f39e3f8f819e125ef35adb3c525f306ffa03d04158c7c01a4b01",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 52,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 45,
+          "states": 43
+        },
+        "status": "supported",
+        "upper_bound": "1/3"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": false,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": false,
+      "execution_authorized": false,
+      "maximum_activation_depth": 0,
+      "newly_enabled_action_ids": [],
+      "recursive_activation_used": false,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": false,
+      "witnesses": []
+    },
+    "empirical_attribution": "undetermined",
+    "objective": null,
+    "safe_fallback_paths": [
+      [
+        "greedy",
+        "greedy:failure",
+        "idle",
+        "idle:failure",
+        "idle",
+        "idle:failure",
+        "idle",
+        "idle:failure",
+        "idle",
+        "idle:failure"
+      ]
+    ],
+    "selected_policy_paths": [
+      []
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  },
+  "frontier-research": {
+    "code": "growth_model_policy_found",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:ca565989539d3290031d60be21b8dfd261a881dccf08f943797c0a92ef9e45c6",
+        "policy_digest": "sha256:1df77262b3457ce13923093cb5f66e7299c3c39e88180a4634b0850fa114ed30",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 14,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 11,
+          "states": 15
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:ca565989539d3290031d60be21b8dfd261a881dccf08f943797c0a92ef9e45c6",
+        "policy_digest": "sha256:b828501cb3390f683f9e820c8a36af767716d7af06e6cd0eba037b464d6f5420",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 35,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 28,
+          "states": 35
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:ca565989539d3290031d60be21b8dfd261a881dccf08f943797c0a92ef9e45c6",
+        "policy_digest": "sha256:9c462cfe1a0fbc95dacd270845e410d5a5fcba26701ee283847cb40f11f174ae",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 84,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 67,
+          "states": 84
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse",
+      "growth_premise_missing_or_expired"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [
+        "reuse"
+      ],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": false,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": true,
+      "execution_authorized": false,
+      "maximum_activation_depth": 1,
+      "newly_enabled_action_ids": [
+        "reuse"
+      ],
+      "recursive_activation_used": false,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": false,
+      "witnesses": [
+        {
+          "activation": {
+            "action_id": "reuse",
+            "depth": 1,
+            "model_time": "1",
+            "parent_state_digest": "sha256:ffbddba01ae9c9256531766fea468f467f82ad01d662de798db7f45f607f78dd",
+            "producer_action_id": "prepare",
+            "producer_successor_id": "prepare:success",
+            "rule_id": "prepare-enables-reuse"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": false,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:0165ba6a0b4c347781ef090879e917786bf58cac63a02ee2859515b47f2e958a",
+          "policy_path": [
+            "prepare:success"
+          ],
+          "verification_capacity_effect": false
+        }
+      ]
+    },
+    "empirical_attribution": "undetermined",
+    "objective": {
+      "terminal_min_attainment": "4/3",
+      "worst_cost": {
+        "credits": "5"
+      },
+      "worst_debt": {
+        "research": "0",
+        "task": "0",
+        "verification": "0"
+      },
+      "worst_duration": "3",
+      "worst_entry_time": "2"
+    },
+    "safe_fallback_paths": [
+      []
+    ],
+    "selected_policy_paths": [
+      [
+        "prepare",
+        "prepare:success",
+        "reuse",
+        "reuse:success",
+        "continue",
+        "continue:success"
+      ]
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  },
+  "frontier-useless": {
+    "code": "growth_model_policy_found",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:2fde522c7da8c8312c4e23ff17c97621302a8bc1c524e80c61a95903a121c54b",
+        "policy_digest": "sha256:5248f2d9225aee545f78945c12ee465fd13979bf6eea5d3853f3bcb868a295ec",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 11,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 9,
+          "states": 12
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:2fde522c7da8c8312c4e23ff17c97621302a8bc1c524e80c61a95903a121c54b",
+        "policy_digest": "sha256:5d052191bc0e9919f3daea4c33385331bb6a6648efbd0455b98443e84904127e",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 45,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 38,
+          "states": 46
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:2fde522c7da8c8312c4e23ff17c97621302a8bc1c524e80c61a95903a121c54b",
+        "policy_digest": "sha256:48be1f802fa10660fa66ee507c4ebda2321168b22100c3ca8663c1089b951153",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 128,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 109,
+          "states": 119
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse",
+      "growth_premise_missing_or_expired",
+      "growth_resource_floor"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": false,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": false,
+      "execution_authorized": false,
+      "maximum_activation_depth": 0,
+      "newly_enabled_action_ids": [],
+      "recursive_activation_used": false,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": false,
+      "witnesses": []
+    },
+    "empirical_attribution": "undetermined",
+    "objective": {
+      "terminal_min_attainment": "4/3",
+      "worst_cost": {
+        "credits": "5"
+      },
+      "worst_debt": {
+        "research": "0",
+        "task": "0",
+        "verification": "0"
+      },
+      "worst_duration": "3",
+      "worst_entry_time": "2"
+    },
+    "safe_fallback_paths": [
+      []
+    ],
+    "selected_policy_paths": [
+      [
+        "prepare",
+        "prepare:success",
+        "reuse",
+        "reuse:success",
+        "continue",
+        "continue:success"
+      ]
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  },
+  "frontier-verifier": {
+    "code": "growth_model_policy_found",
+    "comparisons": [
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "2",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:e0d1b6e253363b4444c2f828410b32cc04b9ef9476b2869b655c744c7799c33e",
+        "policy_digest": "sha256:ad69ac136b6930695f5154fa7cfb380aec8ab9e4f66385929163f1bfbd88be35",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 15,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 2,
+          "policies": 12,
+          "states": 15
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "3",
+        "lower_bound": "2/3",
+        "matched_basis_digest": "sha256:e0d1b6e253363b4444c2f828410b32cc04b9ef9476b2869b655c744c7799c33e",
+        "policy_digest": "sha256:f0477d0846a5b135a5d3d732a0dc52d18e59497b461ff95a42086c9c88dd3e60",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 43,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 3,
+          "policies": 13,
+          "states": 22
+        },
+        "status": "supported",
+        "upper_bound": "2/3"
+      },
+      {
+        "comparator_id": "reoptimized-reuse-restricted",
+        "endpoint": "4",
+        "lower_bound": "1",
+        "matched_basis_digest": "sha256:e0d1b6e253363b4444c2f828410b32cc04b9ef9476b2869b655c744c7799c33e",
+        "policy_digest": "sha256:278a12e430d281a06fb1ca33ab8558afe97d20d88f1575cbac893a1ba4750be7",
+        "scope": "finite-worst-case-scalar-catalogue",
+        "search": {
+          "complete": true,
+          "expansions": 67,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 4,
+          "policies": 26,
+          "states": 39
+        },
+        "status": "supported",
+        "upper_bound": "1"
+      }
+    ],
+    "counterexamples": [
+      "growth_deadline",
+      "growth_frontier_action_latent",
+      "growth_nonrepeatable_reuse",
+      "growth_work_deadline"
+    ],
+    "diagnostics": {
+      "actions_used_after_activation": [
+        "continue",
+        "reuse",
+        "verifier"
+      ],
+      "capability_admitted": false,
+      "continuation_depends_on_frontier": true,
+      "empirical_attribution": "undetermined",
+      "endogenous_frontier_used": true,
+      "execution_authorized": false,
+      "maximum_activation_depth": 3,
+      "newly_enabled_action_ids": [
+        "continue",
+        "reuse",
+        "verifier"
+      ],
+      "recursive_activation_used": true,
+      "scope": "selected-policy-model-conditional",
+      "verification_capacity_contribution": true,
+      "witnesses": [
+        {
+          "activation": {
+            "action_id": "verifier",
+            "depth": 1,
+            "model_time": "1",
+            "parent_state_digest": "sha256:c8dc29072f8599d542a0066900160f2fe963b168181b797a0976a08875c3b395",
+            "producer_action_id": "prepare",
+            "producer_successor_id": "prepare:success",
+            "rule_id": "prepare-enables-verifier"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": false,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:85e6ad968691552acd7d0c07665e03e88ebeb8c5208a0e235438e1607a2353b7",
+          "policy_path": [
+            "prepare:success"
+          ],
+          "verification_capacity_effect": true
+        },
+        {
+          "activation": {
+            "action_id": "reuse",
+            "depth": 2,
+            "model_time": "2",
+            "parent_state_digest": "sha256:4ef79179462efba899193a2dea58a6581f33f93170f58af92b109c39f7019b27",
+            "producer_action_id": "verifier",
+            "producer_successor_id": "verifier:success",
+            "rule_id": "verifier-enables-reuse"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": false,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:bf3b8e30052442b9ad64324748b3439dfacf3f1cc9599794e7778c8cda4d1759",
+          "policy_path": [
+            "prepare:success",
+            "verifier:success"
+          ],
+          "verification_capacity_effect": false
+        },
+        {
+          "activation": {
+            "action_id": "continue",
+            "depth": 3,
+            "model_time": "3",
+            "parent_state_digest": "sha256:1c59fdce4398bed6aeedf7008cbcab027cdcfa152f336861159ddb652fd935d5",
+            "producer_action_id": "reuse",
+            "producer_successor_id": "reuse:success",
+            "rule_id": "reuse-enables-continue"
+          },
+          "carried_from_initial_frontier": false,
+          "continuation_use": true,
+          "downstream_objective_effect": "not-marginally-attributed",
+          "first_policy_node_using_activation": "sha256:1c11efdc73f5080bb660d79d589f31b07af472ce6a15777c38e64856ffca41d3",
+          "policy_path": [
+            "prepare:success",
+            "verifier:success",
+            "reuse:success"
+          ],
+          "verification_capacity_effect": false
+        }
+      ]
+    },
+    "empirical_attribution": "undetermined",
+    "objective": {
+      "terminal_min_attainment": "4/3",
+      "worst_cost": {
+        "credits": "6"
+      },
+      "worst_debt": {
+        "research": "0",
+        "task": "0",
+        "verification": "0"
+      },
+      "worst_duration": "4",
+      "worst_entry_time": "3"
+    },
+    "safe_fallback_paths": [
+      []
+    ],
+    "selected_policy_paths": [
+      [
+        "prepare",
+        "prepare:success",
+        "verifier",
+        "verifier:success",
+        "reuse",
+        "reuse:success",
+        "continue",
+        "continue:success"
+      ]
+    ],
+    "solution_class": "exact",
+    "synthetic": true
+  }
+}

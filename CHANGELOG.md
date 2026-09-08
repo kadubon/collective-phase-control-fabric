@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.7.0
+
+- Add bounded endogenous capability frontier expansion over an immutable finite
+  super-catalogue: exact successor-bound model activation, deterministic lineage and bounded
+  depth, without executable generation or admission authority.
+- Preserve the original growth objective, exact ledger, AND–OR semantics, old document schema
+  identities and no-frontier behavior. Reoptimize restricted comparators over reachable frontiers.
+- Add independent frontier plan checking, model activation witnesses, read-only replay and fresh
+  receipt-backed frontier reassessment/replanning that preserves depth and prerequisites.
+- Add eight deterministic synthetic scenarios, negative/property/oracle tests, critical coverage
+  and mutation selection, CLI options, schema/CLI/error references, documentation and Wiki guide.
+- Correct SBOM and OpenAPI package-version metadata while retaining protocol `cpcf.io/v0.6`.
+- Remain a Beta research package. No external empirical acceleration experiment was performed;
+  the feature does not establish real-world capability reproduction, collective intelligence,
+  AGI, ASI, causal acceleration or indefinite growth.
+
 ## 0.6.1 (2026-09-08)
 
 - Added the explicit offline `growth` mode with four closed document kinds, exact rational

@@ -1,6 +1,7 @@
 {
   "commands": [
     {
+      "arguments": [],
       "argv": [
         "action"
       ],
@@ -8,6 +9,40 @@
       "help": "Dispatch one signed action to a runner queue."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "action",
         "dispatch"
@@ -16,6 +51,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "agent"
       ],
@@ -23,6 +59,16 @@
       "help": "Obtain evidence-driven onboarding instructions."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "agent",
         "explain"
@@ -31,6 +77,24 @@
       "help": "Explain CPCF claims, nonclaims, and the first safe offline commands."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "agent",
         "onboard"
@@ -39,6 +103,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "attestation"
       ],
@@ -46,6 +111,40 @@
       "help": "Admit typed signed statements."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "attestation",
         "admit"
@@ -54,6 +153,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "audit"
       ],
@@ -61,6 +161,32 @@
       "help": "Queue or inspect immutable snapshot audits."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "audit",
         "start"
@@ -69,6 +195,24 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "job_id"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "audit",
         "status"
@@ -77,6 +221,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "auth"
       ],
@@ -84,6 +229,16 @@
       "help": "Inspect OIDC client configuration."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "auth",
         "login"
@@ -92,6 +247,7 @@
       "help": "Use OIDC device authorization and an OS-backed credential store."
     },
     {
+      "arguments": [],
       "argv": [
         "bundle"
       ],
@@ -99,6 +255,32 @@
       "help": "Verify a portable bundle without network access."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "bundle"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--trust-policy"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "bundle",
         "verify"
@@ -107,6 +289,7 @@
       "help": "Verify bundle content and optional trust."
     },
     {
+      "arguments": [],
       "argv": [
         "coordination"
       ],
@@ -114,6 +297,48 @@
       "help": "Advance signed coordination sessions."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--session"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "coordination",
         "commit"
@@ -122,6 +347,48 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--session"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "coordination",
         "init"
@@ -130,6 +397,48 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--session"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "coordination",
         "reveal"
@@ -138,6 +447,48 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--session"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "coordination",
         "route"
@@ -146,6 +497,24 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "coordination",
         "status"
@@ -154,6 +523,48 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--session"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "coordination",
         "terminate"
@@ -162,6 +573,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "growth"
       ],
@@ -169,6 +581,56 @@
       "help": "Plan and check finite model growth offline."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--plan"
+          ],
+          "help": "",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "check-plan"
@@ -177,6 +639,48 @@
       "help": "Independently replay every submitted policy branch."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "compare"
@@ -185,6 +689,54 @@
       "help": "Reoptimize the interaction-restricted comparator catalogue."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "directory"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": [
+            "preparation",
+            "all-failure",
+            "no-advantage",
+            "verification",
+            "communication",
+            "frontier-research",
+            "frontier-verifier",
+            "frontier-failure",
+            "frontier-useless",
+            "frontier-chain",
+            "frontier-cycle",
+            "frontier-comparator",
+            "frontier-no-entry"
+          ],
+          "flags": [
+            "--scenario"
+          ],
+          "help": "",
+          "required": false
+        }
+      ],
       "argv": [
         "growth",
         "example"
@@ -193,6 +745,64 @@
       "help": "Run a deterministic synthetic comparison; optionally write its inputs."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--plan"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--job"
+          ],
+          "help": "Unsigned operator-prepared runner-job draft.",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "export"
@@ -201,6 +811,104 @@
       "help": "Export an operator-supplied proposed runner job; never execute."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--observation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--cas"
+          ],
+          "help": "Read-only CAS files named HEX.bin.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--trust-policy"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--trusted-time"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--root-spki-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--genesis-envelope-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "ingest"
@@ -209,6 +917,48 @@
       "help": "Recompute independent receipt admission and observation compatibility."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "inspect"
@@ -217,6 +967,48 @@
       "help": "Inspect the finite contract and separate operational profile."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "plan"
@@ -225,6 +1017,104 @@
       "help": "Enumerate a bounded exact contingent growth policy."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--observation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--cas"
+          ],
+          "help": "Read-only CAS files named HEX.bin.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--trust-policy"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--trusted-time"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--root-spki-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--genesis-envelope-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "reassess"
@@ -233,6 +1123,104 @@
       "help": "Recheck external observation, arithmetic and model scope."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--observation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--cas"
+          ],
+          "help": "Read-only CAS files named HEX.bin.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--trust-policy"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--trusted-time"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--root-spki-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--genesis-envelope-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        }
+      ],
       "argv": [
         "growth",
         "replan"
@@ -241,6 +1229,64 @@
       "help": "Reassess first, then propose a new unsigned model contract and plan."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--plan"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--branch"
+          ],
+          "help": "",
+          "required": false
+        }
+      ],
       "argv": [
         "growth",
         "replay"
@@ -249,6 +1295,7 @@
       "help": "Read-only hypothetical replay; never admit an observation."
     },
     {
+      "arguments": [],
       "argv": [
         "intervention"
       ],
@@ -256,6 +1303,40 @@
       "help": "Queue bounded intervention analysis."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "intervention",
         "analyze"
@@ -264,6 +1345,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "legacy"
       ],
@@ -271,6 +1353,16 @@
       "help": "Read-only v0.1-v0.5 inspection."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "arguments"
+          ],
+          "help": "",
+          "required": false
+        }
+      ],
       "argv": [
         "legacy",
         "inspect"
@@ -279,6 +1371,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "object"
       ],
@@ -286,6 +1379,40 @@
       "help": "Upload immutable CAS material."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "object",
         "admit"
@@ -294,6 +1421,40 @@
       "help": "Queue signed object admission."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "path"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "object",
         "upload"
@@ -302,6 +1463,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "perturbation"
       ],
@@ -309,6 +1471,48 @@
       "help": "Replay a reduced immutable snapshot."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--scenario"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "perturbation",
         "replay"
@@ -317,6 +1521,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "projection"
       ],
@@ -324,6 +1529,40 @@
       "help": "Inspect and approve pending projections."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "projection",
         "approve"
@@ -332,6 +1571,24 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "projection",
         "pending"
@@ -340,6 +1597,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "quarantine"
       ],
@@ -347,6 +1605,24 @@
       "help": "Inspect or queue quarantine changes."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "quarantine",
         "list"
@@ -355,6 +1631,40 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "quarantine",
         "resolve"
@@ -363,6 +1673,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "repair"
       ],
@@ -370,6 +1681,24 @@
       "help": "Inspect typed repairs or run a bound action."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "repair",
         "list"
@@ -378,6 +1707,48 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "repair_id"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "repair",
         "run"
@@ -386,6 +1757,32 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "repair_id"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "repair",
         "show"
@@ -394,6 +1791,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "runner"
       ],
@@ -401,6 +1799,72 @@
       "help": "Validate signed runner protocol records."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "job"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "receipt"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "capability"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "execution_policy"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--runner-principal"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--received-at"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--artifact"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "runner",
         "conformance"
@@ -409,6 +1873,7 @@
       "help": "Validate one local job/receipt contract without execution."
     },
     {
+      "arguments": [],
       "argv": [
         "schema"
       ],
@@ -416,6 +1881,16 @@
       "help": "Inspect the closed v0.6 schema registry."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "schema",
         "list"
@@ -424,6 +1899,24 @@
       "help": "List locally installed v0.6 schemas."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "kind"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "schema",
         "show"
@@ -432,6 +1925,16 @@
       "help": "Show one locally generated v0.6 schema."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "self-check"
       ],
@@ -439,6 +1942,7 @@
       "help": "Validate the installed offline core without contacting an API."
     },
     {
+      "arguments": [],
       "argv": [
         "time"
       ],
@@ -446,6 +1950,24 @@
       "help": "Inspect or admit trusted-time receipts."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "time",
         "status"
@@ -454,6 +1976,40 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "time",
         "update"
@@ -462,6 +2018,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "trial"
       ],
@@ -469,6 +2026,40 @@
       "help": "Admit and inspect preregistered external evidence."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "trial",
         "amendment-import"
@@ -477,6 +2068,40 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "trial",
         "protocol-import"
@@ -485,6 +2110,40 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "trial",
         "result-import"
@@ -493,6 +2152,24 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "trial",
         "status"
@@ -501,6 +2178,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "trust"
       ],
@@ -508,6 +2186,24 @@
       "help": "Inspect or queue role-separated trust updates."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "trust",
         "status"
@@ -516,6 +2212,40 @@
       "help": null
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "trust",
         "update"
@@ -524,6 +2254,7 @@
       "help": null
     },
     {
+      "arguments": [],
       "argv": [
         "workspace"
       ],
@@ -531,6 +2262,40 @@
       "help": "Create and inspect tenant workspaces."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--root-spki-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--genesis-envelope-fingerprint"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "workspace",
         "create"
@@ -539,6 +2304,40 @@
       "help": "Create a workspace with two out-of-band genesis fingerprints."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--generation"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--digest"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "workspace",
         "import-legacy"
@@ -547,6 +2346,24 @@
       "help": "Queue copy-on-write import of uploaded legacy material."
     },
     {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "workspace"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "==SUPPRESS==",
+          "required": false
+        }
+      ],
       "argv": [
         "workspace",
         "status"
