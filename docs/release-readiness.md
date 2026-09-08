@@ -12,6 +12,13 @@ critical group covers model activation and fresh evidence advancement. The exist
 group retains search, transition accounting, independent checking and observation reassessment.
 CI/release test selections and mutation sources include the new code and tests.
 
+Mutation runs use five disjoint shards to fit hosted job time limits. Each produces the
+entire generated status catalogue, leaving other shards' entries unchecked. The mandatory
+aggregate job requires all shard jobs to succeed, checks their catalogue identities against
+`audit/mutation-catalogue-v0.7.json`, rejects omitted, duplicated or incomplete assignments,
+and applies the same 85% score to every unique mutant. A failed or skipped shard cannot turn
+the aggregate gate into a successful skipped job. See [release procedures](release.md).
+
 Required gates include formatting, lint, strict types across core/packages/scripts, full and
 focused tests, schema/fixture/reference checks, old and new executable examples, Bandit,
 OSV pip-audit, source/staged/history/content/archive publication hygiene, package metadata,

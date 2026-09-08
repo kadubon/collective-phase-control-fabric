@@ -344,6 +344,15 @@
       "correction": "The closed frontier assessment embeds the exact unsigned contract/frontier pair created before continuation search. Replan freshly reassesses original materials and returns that same pair. The returned state and policy are independently checked against it, and altered proposal digests are rejected.",
       "regression_test": "tests/test_v6_frontier_evidence_cli.py::test_fresh_admission_advances_only_unsigned_modelling_proposal",
       "status": "closed"
+    },
+    {
+      "id": "V6-039",
+      "severity": "high",
+      "exploit": "A full mutation run exceeds the hosted job limit, or incomplete and overlapping parallel results are mistaken for a complete passing score.",
+      "affected_claim": "Complete mutation assurance before merge and publication",
+      "correction": "Five disjoint Mutmut selectors retain the complete generated catalogue and original test selection. The required aggregate job fails on any unsuccessful shard, verifies every full report against the reviewed 12,284-name catalogue fingerprint, rejects missing, changed, duplicated, overlapping and incomplete results, and applies the unchanged 85 percent score to the complete union. Partial diagnostics are retained after a step failure.",
+      "regression_test": "tests/test_mutation_shards.py and tests/test_v6_release_surface.py::test_release_workflow_is_fail_closed",
+      "status": "closed"
     }
   ]
 }

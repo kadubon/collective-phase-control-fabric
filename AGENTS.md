@@ -34,6 +34,11 @@ uv build
 
 Use the checked-in `uv.lock`. Do not regenerate it as a side effect of an unrelated command.
 
+CI and release partition mutation execution into five disjoint shards. Preserve the full
+catalogue fingerprint, all shard-success dependencies, missing/overlap/incomplete rejection,
+and the unchanged aggregate 85% floor. Never treat an interrupted or skipped shard as a pass.
+See `docs/release.md` before changing the mutation catalogue or scheduling.
+
 Core and CLI checks must work in PowerShell, cmd-compatible Python execution, and POSIX shells on
 Windows and Linux. PostgreSQL, S3, OIDC, KMS, OCI, and Kubernetes are required only for server and
 deployment integration tests, never for offline core inspection.

@@ -82,6 +82,21 @@ regressions and generated-reference check pass on Linux Python 3.12.3 and Window
 The generated documents, CLI behavior, mutation-target modules and selected mutation tests
 are unchanged by this generator correction.
 
+The first complete-scope hosted mutation attempt reached 10,627/12,284 evaluated mutants
+before the six-hour job limit cancelled it; this is an incomplete run, not a passing result.
+CI and release therefore use five disjoint shards with complete catalogue reconstruction
+and the same 85% gate. The reviewed catalogue fingerprint binds all 12,284 names from the
+complete local run above. Portable negative regressions reject missing, changed, overlapping,
+unknown and unfinished results; a native Mutmut 3.6.0 oracle confirms that a 12-mutant
+synthetic catalogue has exactly the same complete status map before and after five-way
+partitioning. This changes execution scheduling, not CPCF mutation targets or test selection.
+
+After the scheduling correction, the full local suite passes 853 tests with the same three
+optional PostgreSQL skips and 91.13% combined coverage. The 25 new shard regressions pass;
+the shard/release-surface subset also passes on Linux Python 3.12.3. Ruff checks 182 files and
+strict mypy checks 118 files. Core/frontier source and the selected mutation tests still match
+the complete local mutation run above; remote runs must verify the final workflow and commit.
+
 No external empirical acceleration experiment was performed. The next formal extension is
 fixed-parameter, set-valued uncertainty with observation-driven model-set contraction and
 prior-free value-of-information planning; no part of it is implemented in this release.
