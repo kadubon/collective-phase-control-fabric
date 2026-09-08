@@ -247,7 +247,20 @@ def reassess_frontier(
             advancement_evidence_digests=sorted(evidence),
         ),
     )
-    if reconstructed is not None and result.spec.model_condition == "supported":
+    if reconstructed is None:
+        return result
+    # Bind the proof and returned proposal to one pre-continuation evidence basis.
+    # Rebuilding after adding the proof would change the contract's basis digest,
+    # then the frontier digest, invalidating that same proof's state bindings.
+    proposed, proposed_frontier = _proposal(contract, frontier, result)
+    result = result.model_copy(
+        update={
+            "spec": result.spec.model_copy(
+                update={"proposed_contract": proposed, "proposed_frontier": proposed_frontier}
+            )
+        }
+    )
+    if result.spec.model_condition == "supported":
         try:
             units = cast(UnitRegistryDocument, objects[contract.spec.unit_registry_digest])
             require(
@@ -256,7 +269,6 @@ def reassess_frontier(
                 * F(units.spec.units[units.spec.time_unit].scale),
                 "growth_continuation_state_stale",
             )
-            proposed, proposed_frontier = _proposal(contract, frontier, result)
             continuation_state = cast(
                 GrowthFrontierState, initial_state(proposed, proposed_frontier)
             )
@@ -304,5 +316,13 @@ def replan_frontier(
     **admission: Any,
 ) -> tuple[GrowthContract, GrowthCapabilityFrontier, GrowthFrontierAssessment]:
     assessment = reassess_frontier(contract, objects, observation, frontier, **admission)
-    proposed, proposed_frontier = _proposal(contract, frontier, assessment)
-    return proposed, proposed_frontier, assessment
+    require(
+        assessment.spec.proposed_contract is not None
+        and assessment.spec.proposed_frontier is not None,
+        "growth_frontier_advancement_unavailable",
+    )
+    return (
+        cast(GrowthContract, assessment.spec.proposed_contract),
+        cast(GrowthCapabilityFrontier, assessment.spec.proposed_frontier),
+        assessment,
+    )

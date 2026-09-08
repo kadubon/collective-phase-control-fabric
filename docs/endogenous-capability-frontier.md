@@ -157,6 +157,13 @@ bound or extend an expired premise. The proposed pair requires registration/admi
 external use. A receipt-compatible activation can exist without supported growth entry or an
 affordable continuation. Attribution remains undetermined in every case.
 
+The assessment includes the exact unsigned `proposed_contract` and `proposed_frontier` used
+to check prospective continuation. `replan` returns that same pair after fresh reassessment.
+Adding the finished witness does not regenerate its own input digests. The returned continuation
+state must equal the proposal's reconstructed initial state, and its policy can be independently
+checked against those exact documents. A funded continuation of the observed episode does not
+guarantee another full growth window after replanning.
+
 ## Research relationship and next step
 
 See [the mapping](growth-research-mapping.md) to Takahashi, K. (2026), *Observing and

@@ -1900,6 +1900,8 @@ class GrowthFrontierAssessmentSpec(GrowthAssessmentSpec):
     reconstructed_frontier_state: GrowthFrontierState | None = None
     admitted_activation_action_ids: list[Identifier] = Field(default_factory=list, max_length=16)
     advancement_evidence_digests: list[Digest] = Field(default_factory=list, max_length=256)
+    proposed_contract: GrowthContract | None = None
+    proposed_frontier: GrowthCapabilityFrontier | None = None
     frontier_continuation_state: GrowthFrontierState | None = None
     execution_authorized: Literal[False] = False
     registration_required: Literal[True] = True

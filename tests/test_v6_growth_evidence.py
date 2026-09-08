@@ -194,8 +194,19 @@ def admitted_case(
                     update={"resources": {"credits": "5"}}
                 ),
             )
-        if frontier_mode == "no-superiority":
-            c = modify(c, comparison_margin="10")
+        if frontier_mode == "frontier-sensitive-comparator":
+            continuation = recipe_for(c, objects, "continue")
+            c = modify(
+                c,
+                action_catalogue=[
+                    r.model_copy(update={"required_evidence": [], "interactions": []})
+                    if r == continuation
+                    else r
+                    for r in c.spec.action_catalogue
+                ],
+            )
+        if frontier_mode in {"no-superiority", "comparison-tie"}:
+            c = modify(c, comparison_margin="10" if frontier_mode == "no-superiority" else "1/3")
     states = [initial_state(c)]
     for name in ("prepare", "reuse"):
         states.append(step(c, objects, states[-1], name))
@@ -367,6 +378,41 @@ def admitted_case(
                     )
                 }
             )
+        if frontier_mode == "missing-rule-capability":
+            producer_rule = frontier.spec.activation_rules[0]
+            producer_rule = producer_rule.model_copy(
+                update={
+                    "required_capability_digests": [
+                        *producer_rule.required_capability_digests,
+                        by_id["greedy"].capability_digest,
+                    ]
+                }
+            )
+            # An unused rule must not substitute its different admitted prerequisites.
+            decoy = GrowthActivationRule(
+                rule_id="unused-self-activation",
+                producer_action_id="idle",
+                producer_successor_id="idle:success",
+                activated_action_ids=["idle"],
+                required_capability_digests=[by_id["idle"].capability_digest],
+                required_model_ids=["nominal"],
+                valid_from="0",
+                expires="6",
+            )
+            frontier = frontier.model_copy(
+                update={
+                    "spec": frontier.spec.model_copy(
+                        update={
+                            "activation_rules": [
+                                decoy,
+                                producer_rule,
+                                frontier.spec.activation_rules[1],
+                            ]
+                        }
+                    )
+                }
+            )
+            signed.remove(caps["greedy"][1])
         if frontier_mode == "missing-frontier-quorum":
             statement(frontier, "protocol_author", "root")
         else:

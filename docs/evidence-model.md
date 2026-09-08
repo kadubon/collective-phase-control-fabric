@@ -39,3 +39,8 @@ registered trial compatibility; a cached assessment Boolean has no admission rol
 Raw CAS artifacts remain opaque even when their bytes parse as a native document. Only
 explicitly typed, admitted ledger records participate in authority evaluation.
 See [the complete external evidence path](growth-planning.md#independently-admitted-external-evidence).
+
+Frontier assessments additionally retain the exact unsigned contract/frontier proposal pair
+used to check prospective continuation. Replanning freshly validates the original admission
+materials and returns that same pair, keeping the policy and state digests consistent. A cached
+assessment or an embedded modelling proposal does not supply admission or execution authority.

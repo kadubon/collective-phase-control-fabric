@@ -29,6 +29,7 @@ from collective_phase_control_fabric.v6.growth import (
     validate_contract,
 )
 from collective_phase_control_fabric.v6.growth_frontier import (
+    _lifecycle,
     base_state,
     check_frontier_state,
     validate_frontier,
@@ -44,6 +45,7 @@ from collective_phase_control_fabric.v6.models import (
     Lifecycle,
     ResourceObservationAttestation,
     ResourceObservationSpec,
+    UnitRegistryDocument,
 )
 from collective_phase_control_fabric.v6.registry import (
     document_digest,
@@ -104,6 +106,8 @@ def test_eight_scenarios_preserve_growth_objective_and_audited_continuation(name
         if name in {"frontier-chain", "frontier-comparator"}:
             assert d.maximum_activation_depth == 2 and d.continuation_depends_on_frontier
             assert d.recursive_activation_used
+        if name == "frontier-research":
+            assert not d.recursive_activation_used
 
 
 def test_success_unlocks_only_predeclared_action_and_latent_use_is_rejected(planned: Any) -> None:
@@ -462,6 +466,192 @@ def test_unsatisfied_rule_never_expands_the_frontier(planned: Any, field: str, v
     validate_frontier(c, o, f)
     s = step((c, o, f), initial_state(c, f), "prepare")
     assert s.activation_lineage == [] and "reuse" not in s.enabled_action_ids
+
+
+@pytest.mark.parametrize(
+    "boundary",
+    ["valid-from", "capacities", "resources", "zero-minima", "evidence-expiry", "all-targets"],
+)
+def test_exact_activation_prerequisite_boundaries_are_inclusive(
+    planned: Any, boundary: str
+) -> None:
+    c, o, f, _ = planned
+    recipe = recipe_for(c, o, "prepare")
+    effect = next(e for e in recipe.successors if e.outcome == "success")
+    if boundary == "evidence-expiry":
+        effect = effect.model_copy(update={"evidence_added": {"calibrated": effect.duration}})
+        replacement = recipe.model_copy(update={"successors": [effect, *recipe.successors[1:]]})
+        c = modify(
+            c, action_catalogue=[replacement if r == recipe else r for r in c.spec.action_catalogue]
+        )
+        recipe = replacement
+    f = changed(f, contract_digest=document_digest(c))
+    # The pre-existing ledger supplies a fixed post-action boundary; activation adds no balance.
+    after = transition(c, initial_state(c), recipe, effect, o)
+    updates: dict[str, Any]
+    if boundary == "valid-from":
+        updates = {"valid_from": after.elapsed}
+    elif boundary == "capacities":
+        updates = {"minimum_capacities": {k: v.lower for k, v in after.capacities.items()}}
+    elif boundary == "resources":
+        updates = {"minimum_resources": after.resources}
+    elif boundary == "zero-minima":
+        updates = {
+            "minimum_capacities": {k: "0" for k in c.spec.domains},
+            "minimum_resources": {k: "0" for k in c.spec.resource_units},
+        }
+    elif boundary == "evidence-expiry":
+        assert after.evidence["calibrated"] == after.elapsed
+        updates = {"required_evidence": ["calibrated"]}
+    else:
+        updates = {"activated_action_ids": [b.action_id for b in f.spec.bindings]}
+    rule = f.spec.activation_rules[0].model_copy(update=updates)
+    f = changed(f, activation_rules=[rule])
+    validate_frontier(c, o, f)
+    result = step((c, o, f), initial_state(c, f), "prepare")
+    assert "reuse" in result.enabled_action_ids
+    assert base_state(result) == after
+    if boundary == "all-targets":
+        assert set(result.enabled_action_ids) == {b.action_id for b in f.spec.bindings}
+
+
+@pytest.mark.parametrize(
+    "boundary,code",
+    [
+        ("empty-interval", "growth_frontier_condition_invalid"),
+        ("depth-limit", "growth_frontier_depth_overflow"),
+    ],
+)
+def test_invalid_frontier_contract_bounds_have_stable_failure_codes(
+    planned: Any, boundary: str, code: str
+) -> None:
+    c, o, f, _ = planned
+    if boundary == "empty-interval":
+        rule = f.spec.activation_rules[0].model_copy(update={"valid_from": "1", "expires": "1"})
+        f = changed(f, activation_rules=[rule])
+    else:
+        f = changed(f, maximum_activation_depth=c.spec.max_decisions + 1)
+    with pytest.raises(GrowthError, match="^" + code + "$"):
+        validate_frontier(c, o, f)
+
+
+@pytest.mark.parametrize("mode", ["missing-state", "wrong-digest"])
+def test_frontier_state_binding_errors_are_stable(planned: Any, mode: str) -> None:
+    c, _, f, _ = planned
+    if mode == "missing-state":
+        state = initial_state(c)
+        code = "growth_frontier_state_missing"
+    else:
+        state = initial_state(c, f).model_copy(update={"frontier_digest": "sha256:" + "0" * 64})
+        code = "growth_frontier_digest_mismatch"
+    with pytest.raises(GrowthError, match="^" + code + "$"):
+        check_frontier_state(state, f)
+
+
+def test_unrelated_expired_binding_cannot_replace_the_action_binding(planned: Any) -> None:
+    c, o, f, _ = planned
+    unrelated = next(b for b in f.spec.bindings if b.action_id == "greedy")
+    unrelated = unrelated.model_copy(
+        update={
+            "lifecycle": unrelated.lifecycle.model_copy(
+                update={"valid_until": c.spec.model_time_origin + timedelta(microseconds=500_000)}
+            )
+        }
+    )
+    f = changed(f, bindings=[unrelated, *[b for b in f.spec.bindings if b.action_id != "greedy"]])
+    validate_frontier(c, o, f)
+    result = step((c, o, f), initial_state(c, f), "prepare")
+    assert "reuse" in result.enabled_action_ids
+
+
+@pytest.mark.parametrize("action_id", ["prepare", "reuse"])
+def test_producer_end_and_target_activation_expiry_are_distinct(
+    planned: Any, action_id: str
+) -> None:
+    c, o, f, _ = planned
+    recipe = recipe_for(c, o, action_id)
+    c = modify(
+        c,
+        action_catalogue=[
+            r.model_copy(update={"expires": "1"}) if r == recipe else r
+            for r in c.spec.action_catalogue
+        ],
+    )
+    f = changed(f, contract_digest=document_digest(c))
+    validate_frontier(c, o, f)
+    if action_id == "prepare":
+        result = step((c, o, f), initial_state(c, f), "prepare")
+        assert "reuse" in result.enabled_action_ids
+    else:
+        with pytest.raises(GrowthError, match=r"^growth_frontier_object_expired$"):
+            step((c, o, f), initial_state(c, f), "prepare")
+
+
+def test_every_ancestor_prerequisite_survives_in_the_future_use_check(planned: Any) -> None:
+    c, o, f, _ = planned
+    reuse = recipe_for(c, o, "reuse")
+    c = modify(
+        c,
+        initial_state=c.spec.initial_state.model_copy(update={"evidence": {"ancestor-proof": "6"}}),
+        action_catalogue=[
+            r.model_copy(
+                update={
+                    "successors": [
+                        e.model_copy(update={"evidence_removed": ["ancestor-proof"]})
+                        for e in r.successors
+                    ]
+                }
+            )
+            if r == reuse
+            else r
+            for r in c.spec.action_catalogue
+        ],
+    )
+    f = changed(
+        f,
+        contract_digest=document_digest(c),
+        activation_rules=[
+            f.spec.activation_rules[0].model_copy(update={"required_evidence": ["ancestor-proof"]}),
+            *f.spec.activation_rules[1:],
+        ],
+    )
+    validate_frontier(c, o, f)
+    first = step((c, o, f), initial_state(c, f), "prepare")
+    second = step((c, o, f), first, "reuse")
+    assert second.activation_depth == 2 and "continue" in second.enabled_action_ids
+    assert "ancestor-proof" not in second.evidence
+    with pytest.raises(GrowthError, match=r"^growth_frontier_premise_unavailable$"):
+        step((c, o, f), second, "continue")
+
+
+def test_lifecycle_uses_exact_subsecond_and_scaled_physical_time() -> None:
+    c, o, _ = frontier_example()
+    units = cast(UnitRegistryDocument, o[c.spec.unit_registry_digest])
+    unit_id = units.spec.time_unit
+    units = units.model_copy(
+        update={
+            "spec": units.spec.model_copy(
+                update={
+                    "units": {
+                        **units.spec.units,
+                        unit_id: units.spec.units[unit_id].model_copy(update={"scale": "1/2"}),
+                    }
+                }
+            )
+        }
+    )
+    o = {**o, document_digest(units): units}
+    c = modify(c, unit_registry_digest=document_digest(units))
+    day = c.spec.model_time_origin + timedelta(days=1)
+    lifecycle = Lifecycle(
+        valid_from=day + timedelta(microseconds=1),
+        valid_until=day + timedelta(microseconds=2),
+        withdrawn_at=day + timedelta(microseconds=3),
+    )
+    start, end = F(172800) + F(1, 500_000), F(172800) + F(1, 250_000)
+    _lifecycle(c, o, lifecycle, start, end)
+    with pytest.raises(GrowthError, match=r"^growth_frontier_object_expired$"):
+        _lifecycle(c, o, lifecycle, F(172800), end)
 
 
 def test_unreachable_latent_actions_do_not_change_exact_optimum() -> None:
