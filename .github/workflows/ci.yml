@@ -211,6 +211,7 @@ jobs:
           path: mutation-results.txt
           if-no-files-found: error
           retention-days: 14
+      - run: uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 
   reference-operations:

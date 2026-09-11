@@ -20,8 +20,10 @@ an operational-assurance decision.
 The 1.0 target defines a maintained public API, not production maturity. Its
 qualification matrix is [tracked separately](roadmap-to-1.0.md). Complete the new
 epistemic/composition coverage and expanded mutation catalogue before release;
-the historical 0.7 catalogue below is not sufficient for changed source. Normal
-required review/checks and the actual Wiki update are release prerequisites.
+the historical 0.7 catalogue below is not sufficient for changed source. Required
+checks, merge authorization and the actual Wiki update are release prerequisites.
+The specific owner-authorized 1.0 review exception is recorded in the requirement
+matrix; it does not waive any verification or publication environment gate.
 
 Operational assurance separately requires `release-evidence/vX.Y.Z.json`. The strict default mode
 checks exact version and commit bindings and requires passed availability-soak,
@@ -43,7 +45,7 @@ the external operational evidence listed above.
 
 CI and release run the same five selectors: `*__mutmut_*[05]`, `*__mutmut_*[16]`,
 `*__mutmut_*[27]`, `*__mutmut_*[38]`, and `*__mutmut_*[49]`. They partition positive
-Mutmut indices modulo five. Every shard keeps the original frozen configuration, mutation
+Mutmut indices modulo five. Every shard uses the same frozen configuration, mutation
 targets, coverage-based generation, test selection, baseline checks and per-mutant timeouts.
 Each shard's execution step is bounded to 300 minutes so a step timeout can still retain its
 complete diagnostic status list before the hosted job limit.
@@ -67,6 +69,15 @@ incomplete owner results and execution assigned to the wrong shard all fail clos
 the assigned shard supplies each mutant's terminal status. The full union retains surviving,
 untested, timeout, suspicious and segfault results as failures under the unchanged 85% gate.
 Raw shard artifacts and the combined report remain available for 14 days.
+
+The pinned Mutmut excludes decorated classes. Epistemic control and policy search
+therefore use ordinary classes so their actual methods are mutated. Its default
+import setup covers top-level `src` only; the mutation pytest configuration also
+adds the copied API/CLI package roots. The baseline checks every target's actual
+import origin. `scripts.check_mutation_scope` rejects a catalogue missing any
+configured module or a required epistemic control method, independently of the
+membership fingerprint and the full execution/score gates. Scope membership
+alone is not a passing mutation result.
 
 If reviewed source, test selection or a pinned Mutmut update changes the generated catalogue,
 produce and inspect a complete native result before regenerating its version/count/fingerprint.

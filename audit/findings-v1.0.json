@@ -43,6 +43,14 @@
       "correction": "Reconstruct a bounded joint receipt/ledger/kernel trace; reject contradiction while preserving the full visible-only controller support.",
       "regression_test": "tests/test_v6_epistemic_evidence.py::test_evidence_weakening_cannot_enable_replanning; tests/test_v6_epistemic_evidence.py::test_receipt_joint_validation_does_not_leak_hidden_ledger_to_controller",
       "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-006",
+      "severity": "high",
+      "exploit": "A mutation score can omit decorated control classes or import original nested packages instead of their mutated copies.",
+      "correction": "Use undecorated control classes, configure copied package roots, assert baseline import origins and reject incomplete module/method scope separately from execution and score gates.",
+      "regression_test": "tests/test_mutation_scope.py; tests/test_mutation_import_origins.py; tests/test_mutation_shards.py",
+      "status": "validation-in-progress"
     }
   ]
 }

@@ -8,7 +8,6 @@ All compatible full ledger/entry pairs are retained, rather than marginal bounds
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from fractions import Fraction as F
 from typing import cast
 
@@ -43,21 +42,33 @@ def support_digest(support: Support) -> str:
     return digest_bytes(canonical_bytes({"support": [h.model_dump(mode="json") for h in support]}))
 
 
-@dataclass
 class Domain:
-    contract: GrowthContract
-    objects: dict[str, Document]
-    epistemic: EpistemicContract
-    frontier: GrowthCapabilityFrontier | None = None
-    observation_map: dict[str, str] | None = None
-    excluded_actions: frozenset[str] = frozenset()
-    excluded_interactions: frozenset[str] = frozenset()
-    recipes: dict[str, GrowthAction] = field(init=False)
-    kernel: dict[tuple[str, str, str], tuple[str, ...]] = field(init=False)
-    peak_support: int = field(default=0, init=False)
-    primitive_transitions: int = field(default=0, init=False)
+    """Mutable planning indices and counters; kept undecorated for mutation checking."""
 
-    def __post_init__(self) -> None:
+    def __init__(
+        self,
+        contract: GrowthContract,
+        objects: dict[str, Document],
+        epistemic: EpistemicContract,
+        frontier: GrowthCapabilityFrontier | None = None,
+        observation_map: dict[str, str] | None = None,
+        excluded_actions: frozenset[str] = frozenset(),
+        excluded_interactions: frozenset[str] = frozenset(),
+    ) -> None:
+        self.contract = contract
+        self.objects = objects
+        self.epistemic = epistemic
+        self.frontier = frontier
+        self.observation_map = observation_map
+        self.excluded_actions = excluded_actions
+        self.excluded_interactions = excluded_interactions
+        self.recipes: dict[str, GrowthAction]
+        self.kernel: dict[tuple[str, str, str], tuple[str, ...]]
+        self.peak_support = 0
+        self.primitive_transitions = 0
+        self._validate()
+
+    def _validate(self) -> None:
         g.validate_contract(self.contract, self.objects)
         if self.frontier is not None:
             frontier_model.validate_frontier(self.contract, self.objects, self.frontier)

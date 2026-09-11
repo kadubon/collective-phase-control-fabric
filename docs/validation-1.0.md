@@ -17,12 +17,15 @@ Historical 0.7.0 measurements are not reused as 1.0.0 evidence.
 | Coverage | Local full, CI-selected and release-selected critical suites passed the unchanged aggregate and all 17 per-subsystem gates; metrics below; hosted matrix pending |
 | Mutation | New critical modules and tests selected; complete expanded catalogue, all five shards and 85% aggregate gate pending |
 | Security and publication hygiene | Local Ruff, strict mypy (131 sources), Bandit, OSV audit, generated references, 225 schemas, 9 fixtures, source/history/archive hygiene, Gitleaks, build and Twine passed; final staged/push and hosted security checks pending |
-| GitHub, Wiki and PyPI | Source PR, normal required review/checks, Wiki push and publication verification pending |
+| GitHub, Wiki and PyPI | Feature branch and candidate Wiki pushed; PR, required checks, owner-authorized merge and publication verification pending; the specific review exception is recorded in the requirement matrix |
 
 ## Local source qualification
 
 Core source commit: `13383d1` on the feature branch. Windows Python 3.14.6,
 frozen dependencies, branch-enabled coverage and all five import packages:
+
+These results precede the mutation-scope correction described below. The changed
+source requires fresh full and critical regression runs before final qualification.
 
 | Suite | Tests | Statements | Branch destinations | Combined |
 | --- | --- | --- | --- | --- |
@@ -45,6 +48,18 @@ This is not installation of 1.0.0 from the public index and is not publication e
 An earlier pair of local coverage runs was interrupted after an environment setup
 failure. Those runs were discarded; the values above come from fresh runs after
 restoring the frozen environment, with separate coverage databases.
+
+The actual Wiki's nine candidate pages were pushed and verified at commit
+`30733f9019bb22b2139a76ecd84fee7c5763609c`. Source links, page links, content,
+secret scanning and archive hygiene were checked. The pages explicitly retain
+candidate status; released labels remain pending actual publication verification.
+
+The first mutation attempt was interrupted and not counted. Inspection of the
+resumed catalogue found that decorated control classes and nested CLI imports
+were silently excluded by the pinned tool. That catalogue was rejected. The
+control classes now expose their methods to mutation, copied package import
+origins are checked, and a separate catalogue-scope gate prevents this omission
+from passing. A complete regenerated execution and score are still required.
 
 Coverage reports must distinguish statement coverage (covered executable lines /
 all executable lines), branch coverage (covered branch destinations / all branch

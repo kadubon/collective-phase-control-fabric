@@ -9,7 +9,7 @@ and all their observation branches have been constructed.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from fractions import Fraction as F
 from itertools import product
 from typing import Any, cast
@@ -62,16 +62,18 @@ def policy_key(domain: Domain, policy: Policy) -> tuple[Any, ...]:
     )
 
 
-@dataclass
 class PolicySearch:
-    domain: Domain
-    comparisons: list[GrowthComparison] = field(default_factory=list)
-    endpoint: F | None = None
-    memo: dict[tuple[str, int], list[Policy]] = field(default_factory=dict)
-    budget: g.Budget = field(init=False)
-    stored_nodes: int = 0
-
-    def __post_init__(self) -> None:
+    def __init__(
+        self,
+        domain: Domain,
+        comparisons: list[GrowthComparison] | None = None,
+        endpoint: F | None = None,
+    ) -> None:
+        self.domain = domain
+        self.comparisons = comparisons if comparisons is not None else []
+        self.endpoint = endpoint
+        self.memo: dict[tuple[str, int], list[Policy]] = {}
+        self.stored_nodes = 0
         self.budget = g.Budget(self.domain.contract.spec.search_limits)
 
     def enumerate(self, support: Support, depth: int = 0) -> list[Policy]:

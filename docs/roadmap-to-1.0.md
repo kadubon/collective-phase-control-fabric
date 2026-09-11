@@ -13,8 +13,8 @@ This is an implementation tracking record, not a claim that pending work passed.
 | Maintained 1.0 public API | Explicit facade and JSON/CLI contract; compatibility and installed-wheel tests | Implemented; qualification in progress |
 | Released compatibility | Preserve all 55 existing native schema identities and 0.6.1/0.7.0 golden encodings | Released 55-schema and original golden regressions passed; final rerun pending |
 | Assurance gates | Full supported matrix, per-subsystem coverage, expanded complete mutation catalogue, security and publication hygiene | Tests and exploratory coverage run; final qualification and mutation pending |
-| Docs and actual Wiki | Canonical guides, generated references, skill and separate Wiki commit | Guides and skill updated; Wiki candidate prepared locally, not pushed |
-| Release and public-index installation | Normal reviewed merge, exact tag/run/artifacts, existing OIDC publisher, external clean installation | Pending |
+| Docs and actual Wiki | Canonical guides, generated references, skill and separate Wiki commit | Guides and skill updated; nine Wiki candidate pages pushed and remote commit verified |
+| Release and public-index installation | Required checks, owner-authorized merge, exact tag/run/artifacts, existing OIDC publisher, external clean installation | Pending |
 
 No external empirical acceleration experiment is available or required. Synthetic model
 checking does not establish empirical validity, admission, authority or operational assurance.
@@ -22,6 +22,9 @@ The package remains Beta; 1.0.0 concerns its documented maintained public softwa
 
 Current repository policy requires one approval of the latest push and 13 checks. The
 authenticated repository owner cannot provide an independent approval of their own PR.
-No historical administrator exception is applicable to this release.
+The owner subsequently authorized an administrator review exception specifically for
+the 1.0.0 PR, conditional on every required check passing. This is not independent
+review and does not authorize bypassing checks or publication environment approval.
+The merge and its exact check results remain pending.
 
 Detailed qualification status and metric definitions: [1.0 validation](validation-1.0.md).

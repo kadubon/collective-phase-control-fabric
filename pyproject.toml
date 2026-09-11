@@ -259,8 +259,13 @@ only_mutate = [
   "packages/cpcf-cli/src/cpcf_cli/growth.py",
   "packages/cpcf-cli/src/cpcf_cli/epistemic.py",
 ]
-pytest_add_cli_args = ["-q"]
+pytest_add_cli_args = [
+  "-q",
+  "-o",
+  "pythonpath=src packages/cpcf-api/src packages/cpcf-cli/src",
+]
 pytest_add_cli_args_test_selection = [
+  "tests/test_mutation_import_origins.py",
   "tests/test_v6_api_assurance.py",
   "tests/test_v6_assurance_branches.py",
   "tests/test_v6_authority.py",

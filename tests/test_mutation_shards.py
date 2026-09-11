@@ -223,6 +223,10 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
         assert not any(step.get("continue-on-error") for step in gate["steps"] + shard_job["steps"])
         commands = [step.get("run", "") for step in gate["steps"]]
         assert (
+            "uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt"
+            in commands
+        )
+        assert (
             "uv run --frozen python -m scripts.merge_mutation_results "
             "mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v0.7.json"
             in commands
