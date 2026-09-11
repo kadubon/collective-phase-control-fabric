@@ -26,6 +26,12 @@ from collective_phase_control_fabric.v6.models import (
     CapabilityDocument,
     Document,
     EffectInterval,
+    EpistemicContract,
+    EpistemicContractSpec,
+    EpistemicKernelRow,
+    EpistemicObservation,
+    EpistemicObservationSpec,
+    EpistemicStep,
     ExecutionPolicy,
     ExecutionPolicySpec,
     GrowthActivation,
@@ -76,6 +82,7 @@ def admitted_case(
     job_updates: dict[str, Any] | None = None,
     receipt_updates: dict[str, Any] | None = None,
     frontier_mode: str | None = None,
+    epistemic_mode: str | None = None,
 ) -> tuple[Any, ...]:
     monkeypatch.setattr(growth_examples, "metadata", metadata)
     c, objects = growth_examples.example()
@@ -424,6 +431,33 @@ def admitted_case(
             )
         if frontier_mode in {"missing-capability", "carried-missing-capability"}:
             signed.remove(caps["continue"][1])
+    epistemic = None
+    if epistemic_mode is not None:
+        epistemic = EpistemicContract(
+            metadata=metadata("synthetic-epistemic-contract"),
+            spec=EpistemicContractSpec(
+                growth_contract_digest=document_digest(c),
+                frontier_digest=document_digest(frontier) if frontier else None,
+                observation_alphabet=["recorded"],
+                kernel=[
+                    EpistemicKernelRow(
+                        model_id=theta,
+                        action_digest=r.action_digest,
+                        successor_id=s.successor_id,
+                        observations=["recorded"],
+                    )
+                    for r in c.spec.action_catalogue
+                    for s in r.successors
+                    for theta in s.applicable_model_ids
+                ],
+            ),
+        )
+        quorum(
+            epistemic,
+            "protocol_registration",
+            [("protocol_author", "root"), ("registration", "auditor"), ("timestamp", "time")],
+            -30,
+        )
     result = TrialResult(
         metadata=metadata("growth-result"),
         spec=TrialResultSpec(
@@ -487,6 +521,35 @@ def admitted_case(
             ),
         )
         statement(source, "state_source", "root")
+        stdout = raw
+        if epistemic is not None:
+            stdout = canonical_bytes(
+                {
+                    "epistemic_contract_digest": document_digest(epistemic),
+                    "sample": index,
+                    "observation": "wrong" if epistemic_mode == "wrong-symbol" else "recorded",
+                }
+            )
+            if epistemic_mode == "invalid-json-object":
+                stdout = b"[" + str(index).encode("ascii") + b"]"
+            raw_objects.append(stdout)
+            source_digests.append(digest_bytes(stdout))
+            signal_source = source.model_copy(
+                update={
+                    "metadata": metadata("epistemic-source-" + name),
+                    "spec": source.spec.model_copy(
+                        update={
+                            "raw_digest": digest_bytes(stdout),
+                            "byte_length": len(stdout),
+                            "expected_schema_name": "epistemic-stdout-symbol-v1",
+                            "expected_schema_digest": digest_bytes(
+                                canonical_bytes({"mapping": "receipt-stdout-symbol-v1"})
+                            ),
+                        }
+                    ),
+                }
+            )
+            statement(signal_source, "state_source", "root")
         job = RunnerJob(
             metadata=metadata("growth-job-" + name, NOW - timedelta(seconds=5)),
             spec=RunnerJobSpec(
@@ -525,9 +588,9 @@ def admitted_case(
                     document_digest(cap_statement),
                     document_digest(execution_statement),
                 ],
-                stdout_digest=digest_bytes(raw),
+                stdout_digest=digest_bytes(stdout),
                 stderr_digest=digest_bytes(b""),
-                stdout_captured_bytes=len(raw),
+                stdout_captured_bytes=len(stdout),
                 stderr_captured_bytes=0,
                 stdout_discarded_bytes=0,
                 stderr_discarded_bytes=0,
@@ -579,6 +642,30 @@ def admitted_case(
             "acceleration_compatibility",
             [("evaluator", "root"), ("quality_safety_verifier", "auditor"), ("timestamp", "time")],
         )
+    epistemic_observation = None
+    if epistemic is not None:
+        epistemic_observation = EpistemicObservation(
+            metadata=metadata("synthetic-epistemic-observation"),
+            spec=EpistemicObservationSpec(
+                epistemic_contract_digest=document_digest(epistemic),
+                growth_observation_digest=document_digest(observation),
+                evaluator_principal_id="root-principal",
+                history=[
+                    EpistemicStep(action_id=n, observation="recorded") for n in ("prepare", "reuse")
+                ],
+                lifecycle=Lifecycle(valid_from=VALID_FROM, valid_until=VALID_UNTIL),
+            ),
+        )
+        if epistemic_mode != "missing-quorum":
+            quorum(
+                epistemic_observation,
+                "acceleration_compatibility",
+                [
+                    ("evaluator", "root"),
+                    ("quality_safety_verifier", "auditor"),
+                    ("timestamp", "time"),
+                ],
+            )
     store = MemoryObjectStore()
     generation = _generation(store, signed, raw_objects=(*raw_objects, b""))
     kwargs = {
@@ -592,6 +679,8 @@ def admitted_case(
         ),
     }
     result = (c, objects, observation, kwargs, jobs)
+    if epistemic is not None:
+        return (*result, frontier, epistemic, epistemic_observation)
     return (*result, frontier) if frontier_mode is not None else result
 
 

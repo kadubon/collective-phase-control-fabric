@@ -95,3 +95,16 @@ They use the existing canonical registry, action/capability, trust, runner and t
 protocols. A growth proposal cannot authorize a runner or project an admitted capability.
 The [growth contract guide](docs/growth-planning.md) specifies the finite model, exactness
 limits, command arguments and separate model/arithmetic/evidence/attribution outcomes.
+
+## Opt-in epistemic and composition documents
+
+The 1.0 development surface adds `epistemic-contract`, `epistemic-plan`,
+`epistemic-observation`, `epistemic-assessment`, `information-value`,
+`workflow-request`, `workflow-candidate`, `workflow-certificate`,
+`workflow-synthesis`, and `catalogue-revision`. All are closed `cpcf.io/v0.6`
+documents; the 55 released identities remain unchanged. The explicit sidecar
+selects fixed-model observation semantics without reinterpreting old contracts.
+See [epistemic semantics](docs/epistemic-growth-control.md),
+[composition](docs/checked-capability-composition.md), and
+[public API](docs/public-api.md). Publication status is tracked separately in the
+[verification matrix](docs/roadmap-to-1.0.md).

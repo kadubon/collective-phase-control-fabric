@@ -40,3 +40,16 @@ The paper's mathematical sufficient conditions require coverage and executable r
 CPCF's signatures establish bounded record provenance and role separation; they cannot supply
 those scientific premises. The operational profile, external-runner boundary and existing audit
 findings retain their independent status. See [the implementation guide](growth-planning.md).
+
+## 1.0 development: M8, M9 and M10
+
+The fixed-parameter extension described above as future work for 0.7.0 is now the
+subject of the opt-in [epistemic implementation](epistemic-growth-control.md).
+It retains correlated finite model/ledger supports and visible-history policies.
+[Information value](information-value.md) separates matched paid-channel
+coarsening from removal of optional sensing. [Composition](checked-capability-composition.md)
+checks bounded typed primitive workflows and charged catalogue proposals.
+These are finite software refinements with their own explicit assumptions, not a
+proof of the paper's broader sufficient conditions, empirical validation, or
+an implementation of probabilistic calibration or causal identification.
+The [verification matrix](roadmap-to-1.0.md) records actual release qualification.

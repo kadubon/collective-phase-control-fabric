@@ -67,6 +67,12 @@ def add_parser(commands: Any) -> None:
         ("reassess", "Recheck external observation, arithmetic and model scope."),
         ("replan", "Reassess first, then propose a new unsigned model contract and plan."),
         ("example", "Run a deterministic synthetic comparison; optionally write its inputs."),
+        ("support", "Inspect correlated fixed-model support from visible history."),
+        ("information-value", "Reoptimize information-blind and no-sensing policy classes."),
+        ("synthesize", "Compile bounded typed primitive observation workflows."),
+        ("check-composition", "Independently unfold a finite workflow candidate."),
+        ("catalogue-propose", "Propose a checked unsigned next model catalogue."),
+        ("catalogue-replan", "Replan with an explicitly model-only checked catalogue."),
     ):
         leaf = subs.add_parser(name, help=help_text)
         leaf.add_argument("--json", action="store_true")
@@ -83,10 +89,26 @@ def add_parser(commands: Any) -> None:
                     "verification",
                     "communication",
                     *SCENARIOS,
+                    "epistemic-probe",
+                    "epistemic-ambiguous",
+                    "epistemic-verifier",
+                    "epistemic-information",
+                    "epistemic-composition",
+                    "epistemic-integrated",
+                    "epistemic-budget",
+                    "epistemic-uninformative",
+                    "epistemic-no-composition",
+                    "epistemic-rejected-composition",
                 ],
             )
             continue
         leaf.add_argument("contract", type=Path)
+        leaf.add_argument(
+            "--epistemic", type=Path, help="Opt-in closed fixed-model observation sidecar."
+        )
+        leaf.add_argument(
+            "--history", type=Path, help="JSON array of visible action/observation steps."
+        )
         leaf.add_argument(
             "--frontier", type=Path, help="Optional closed model-only capability frontier."
         )
@@ -104,7 +126,23 @@ def add_parser(commands: Any) -> None:
             )
         if name == "replay":
             leaf.add_argument("--branch", action="append", default=[])
+            leaf.add_argument("--observation-symbol", action="append", default=[])
+        if name == "information-value":
+            leaf.add_argument("--masked-channel", type=Path, required=True)
+            leaf.add_argument("--sensing-action", action="append", required=True)
+        if name in {"synthesize", "check-composition", "catalogue-propose", "catalogue-replan"}:
+            leaf.add_argument("--request", type=Path, required=True)
+        if name in {"check-composition", "catalogue-propose", "catalogue-replan"}:
+            leaf.add_argument("--candidate", type=Path, required=True)
+        if name == "catalogue-propose":
+            leaf.add_argument("--synthesis", type=Path, required=True)
+            leaf.add_argument("--parent", type=Path)
+        if name == "catalogue-replan":
+            leaf.add_argument("--revision", type=Path, required=True)
+            leaf.add_argument("--certificate", type=Path, required=True)
+            leaf.add_argument("--model-only", action="store_true")
         if name in {"ingest", "reassess", "replan"}:
+            leaf.add_argument("--epistemic-observation", type=Path)
             leaf.add_argument("--observation", type=Path, required=True)
             leaf.add_argument("--generation", type=Path, required=True)
             leaf.add_argument(
@@ -134,12 +172,7 @@ def _objects(path: Path) -> dict[str, Document]:
     return result
 
 
-def _external(
-    args: argparse.Namespace,
-    contract: GrowthContract,
-    objects: dict[str, Document],
-    frontier: GrowthCapabilityFrontier | None = None,
-) -> Any:
+def _admission(args: argparse.Namespace) -> dict[str, Any]:
     generation = _read(args.generation, WorkspaceGeneration)
     store = MemoryObjectStore()
     total = 0
@@ -153,7 +186,7 @@ def _external(
         raw = path.read_bytes()
         require(digest_bytes(raw) == entry.object_digest, "growth_cli_cas_digest")
         store.put(generation.metadata.tenant_id, raw)
-    admission = dict(
+    return dict(
         generation=generation,
         store=store,
         policy=_read(args.trust_policy, TrustPolicyDocument),
@@ -161,6 +194,15 @@ def _external(
         expected_root_spki_fingerprint=args.root_spki_fingerprint,
         expected_genesis_envelope_fingerprint=args.genesis_envelope_fingerprint,
     )
+
+
+def _external(
+    args: argparse.Namespace,
+    contract: GrowthContract,
+    objects: dict[str, Document],
+    frontier: GrowthCapabilityFrontier | None = None,
+) -> Any:
+    admission = _admission(args)
     observation = _read(args.observation, GrowthObservation)
     if frontier is not None:
         function = replan_frontier if args.subcommand == "replan" else reassess_frontier
@@ -188,6 +230,10 @@ def run(args: argparse.Namespace) -> int:
 def _run(args: argparse.Namespace) -> dict[str, Any]:
     name = args.subcommand
     if name == "example":
+        if args.scenario.startswith("epistemic-"):
+            from cpcf_cli.epistemic import example_report
+
+            return example_report(args.scenario, args.directory)
         if args.scenario in SCENARIOS:
             if args.directory:
                 write_frontier_example(args.directory, args.scenario)
@@ -206,6 +252,22 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
     frontier = _read(args.frontier, GrowthCapabilityFrontier) if args.frontier else None
     if frontier is not None:
         validate_frontier(contract, objects, frontier)
+    if args.epistemic is not None:
+        from cpcf_cli.epistemic import run_epistemic
+
+        return run_epistemic(args, contract, objects, frontier)
+    require(
+        name
+        not in {
+            "support",
+            "information-value",
+            "synthesize",
+            "check-composition",
+            "catalogue-propose",
+            "catalogue-replan",
+        },
+        "epistemic_sidecar_required",
+    )
     if name == "inspect":
         snapshot = cast(AnalysisSnapshot, objects[contract.spec.analysis_snapshot_digest])
         return {

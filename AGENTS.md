@@ -57,6 +57,14 @@ deployment integration tests, never for offline core inspection.
   original 52 native schema identities. Never treat model enablement as capability admission or
   execution authority; carry depth and prerequisite expiry across replanning.
 - `v6/runner.py`, `v6/projection.py`: external runner receipts and independent projection.
+- `growth_control.py`: maintained finite-growth public facade; do not freeze all internals.
+- `v6/epistemic.py`, `v6/epistemic_planning.py`, `v6/epistemic_checking.py`: fixed-parameter
+  correlated supports and observation policies. Retain all compatible ledgers; never branch on
+  hidden model IDs or take the union of enabled actions. Checker feasibility is not optimality.
+- `v6/information_value.py`: reoptimized paid-but-masked and no-sensing comparators are distinct.
+- `v6/composition.py`, `v6/synthesis.py`, `v6/catalogue_revision.py`: finite typed primitive
+  workflows, fresh unfolding certificates and charged model-only proposals. Never compress
+  primitive time/steps, reset debt/depth, or infer composite authority from primitive policies.
 - `v6/trials.py`: registration and external evidence compatibility.
 - `v6/storage.py`: immutable ledger and copy-on-write legacy boundary.
 - `packages/cpcf-api`: optional OIDC/RLS/S3 control plane; no adapter execution.

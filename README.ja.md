@@ -5,6 +5,11 @@ the project's English-only documentation requirement.
 
 Use [README.md](README.md) for installation, scope, commands, and safety boundaries.
 
+The 1.0 development target adds [fixed-model observation control](docs/epistemic-growth-control.md)
+and [checked finite workflows](docs/checked-capability-composition.md). It defines
+a [maintained public API](docs/public-api.md) while retaining Beta classification.
+See the [qualification matrix](docs/roadmap-to-1.0.md) for actual release status.
+
 Offline growth planning is documented in the English
 [growth guide](docs/growth-planning.md) and [reproducible comparisons](docs/examples/growth-comparison.json).
 

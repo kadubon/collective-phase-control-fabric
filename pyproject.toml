@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "collective-phase-control-fabric"
-version = "0.7.0"
+version = "1.0.0"
 description = "Evidence-bound analysis and finite intervention control for collective workflows."
 readme = "README.md"
 requires-python = ">=3.12,<3.15,!=3.14.0,!=3.14.1"
@@ -242,6 +242,14 @@ only_mutate = [
   "src/collective_phase_control_fabric/v6/growth_evidence.py",
   "src/collective_phase_control_fabric/v6/growth_frontier.py",
   "src/collective_phase_control_fabric/v6/growth_frontier_evidence.py",
+  "src/collective_phase_control_fabric/v6/epistemic.py",
+  "src/collective_phase_control_fabric/v6/epistemic_planning.py",
+  "src/collective_phase_control_fabric/v6/epistemic_checking.py",
+  "src/collective_phase_control_fabric/v6/epistemic_evidence.py",
+  "src/collective_phase_control_fabric/v6/information_value.py",
+  "src/collective_phase_control_fabric/v6/composition.py",
+  "src/collective_phase_control_fabric/v6/synthesis.py",
+  "src/collective_phase_control_fabric/v6/catalogue_revision.py",
   "src/collective_phase_control_fabric/v6/trials.py",
   "src/collective_phase_control_fabric/v6/coordination.py",
   "src/collective_phase_control_fabric/v6/onboarding.py",
@@ -260,6 +268,13 @@ pytest_add_cli_args_test_selection = [
   "tests/test_v6_growth_evidence.py",
   "tests/test_v6_growth_cli.py",
   "tests/test_v6_growth_frontier.py",
+  "tests/test_v6_epistemic.py",
+  "tests/test_v6_epistemic_oracle.py",
+  "tests/test_v6_epistemic_evidence.py",
+  "tests/test_v6_epistemic_cli.py",
+  "tests/test_v6_epistemic_limits.py",
+  "tests/test_v6_information_value.py",
+  "tests/test_v6_composition.py",
   "tests/test_v6_frontier_evidence_cli.py",
   "tests/test_v6_intervention.py",
   "tests/test_v6_cli_auth.py",

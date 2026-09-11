@@ -15,6 +15,14 @@ thermodynamic feasibility, physical phase behavior, or runner isolation.
 
 ## Install
 
+The 1.0.0 development work adds opt-in fixed-model observation planning, separate
+information-use and net sensing comparisons, and independently checked finite
+workflow composition. See the [release verification matrix](docs/roadmap-to-1.0.md)
+for actual completion status, the [epistemic guide](docs/epistemic-growth-control.md),
+[composition guide](docs/checked-capability-composition.md), and
+[maintained public API](docs/public-api.md). Version 1.0 concerns API maintenance;
+the package remains Beta and makes no empirical acceleration claim.
+
 The one public distribution contains the offline core, CLI, schema registry, bundle verifier,
 runner protocol models, and all import packages.
 

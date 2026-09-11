@@ -45,6 +45,10 @@ jobs:
           tests/test_v6_db_worker_assurance.py tests/test_v6_golden_semantics.py
           tests/test_v6_growth.py tests/test_v6_growth_evidence.py tests/test_v6_growth_cli.py
           tests/test_v6_growth_frontier.py tests/test_v6_frontier_evidence_cli.py
+          tests/test_v6_epistemic.py tests/test_v6_epistemic_oracle.py
+          tests/test_v6_epistemic_evidence.py tests/test_v6_composition.py
+          tests/test_v6_epistemic_cli.py
+          tests/test_v6_epistemic_limits.py tests/test_v6_information_value.py
           tests/test_v6_intervention.py
           tests/test_v6_cli_auth.py tests/test_v6_coordination_trial_assurance.py
           tests/test_v6_model_assurance.py tests/test_v6_models_trust.py
@@ -73,6 +77,7 @@ jobs:
       - run: uv build
       - run: uv run --frozen python scripts/run_growth_examples.py --check
       - run: uv run --frozen python scripts/run_frontier_examples.py --check
+      - run: uv run --frozen python scripts/run_epistemic_examples.py --check
       - name: Validate artifact count, names, tag, and checksums
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name || '' }}
@@ -92,11 +97,20 @@ jobs:
           /tmp/linux-amd64/helm lint deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           /tmp/linux-amd64/helm template test deploy/helm/cpcf --kube-version 1.36.0 --set image.api.digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >/dev/null
       - name: Clean installed-wheel smoke test
-        run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf self-check --json
+        working-directory: ${{ runner.temp }}
+        run: uv run --isolated --no-project --with "$(find "$GITHUB_WORKSPACE/dist" -name '*.whl')" cpcf self-check --json
       - name: Clean installed-wheel frontier path
-        run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf growth example --scenario frontier-chain --json
+        working-directory: ${{ runner.temp }}
+        run: uv run --isolated --no-project --with "$(find "$GITHUB_WORKSPACE/dist" -name '*.whl')" cpcf growth example --scenario frontier-chain --json
       - name: Clean installed-wheel growth path
-        run: uv run --isolated --no-project --with "$(find dist -name '*.whl')" cpcf growth example --scenario preparation --json
+        working-directory: ${{ runner.temp }}
+        run: uv run --isolated --no-project --with "$(find "$GITHUB_WORKSPACE/dist" -name '*.whl')" cpcf growth example --scenario preparation --json
+      - name: Installed public API and integrated offline continuation
+        working-directory: ${{ runner.temp }}
+        run: >-
+          uv run --isolated --no-project --with "$(find "$GITHUB_WORKSPACE/dist" -name '*.whl')"
+          python -I "$GITHUB_WORKSPACE/scripts/check_installed_release.py"
+          --source-root "$GITHUB_WORKSPACE" --version 1.0.0
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: python-distributions

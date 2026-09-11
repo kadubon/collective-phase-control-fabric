@@ -41,3 +41,14 @@ empty model sets are inconsistent. Even a fully admitted registered measurement 
 support finite arithmetic/evidence compatibility. Statistical validity, construct validity,
 causality, endogenous attribution and indefinite continuation remain unestablished.
 See [growth planning](growth-planning.md) and [the research mapping](growth-research-mapping.md).
+
+## Epistemic support and procedural reuse
+
+Fixed-model support is a set of logically compatible hypotheses, not a posterior,
+confidence set with established coverage, or causal identification result.
+Information-use value is a model-relative comparison with the same paid probe and
+a restricted observation channel; net sensing benefit is a different comparison.
+A checked workflow certificate proves only its declared finite domain. New names,
+fewer hypotheses and successful compilation are not intelligence measurements.
+The maintained 1.x API remains Beta and does not resolve operational-assurance
+findings. No external empirical acceleration experiment was performed.

@@ -44,3 +44,14 @@ Frontier assessments additionally retain the exact unsigned contract/frontier pr
 used to check prospective continuation. Replanning freshly validates the original admission
 materials and returns that same pair, keeping the policy and state digests consistent. A cached
 assessment or an embedded modelling proposal does not supply admission or execution authority.
+
+## Registered epistemic observations
+
+`epistemic-observation` binds the exact fixed-model kernel sidecar and original
+growth observation. Reassessment freshly loads authoritative materials and reruns
+the existing signed source, receipt, trial, clock and lifecycle checks. The
+registered stdout-symbol mapping selects only declared visible observations;
+ambiguity retains all compatible ledger/frontier states. Debug fields cannot
+select a hidden successor. Model-only catalogue revisions and certificates are
+unsigned proposals, never replacement admission authority. See
+[the observation boundary](epistemic-growth-control.md#evidence-and-replay).

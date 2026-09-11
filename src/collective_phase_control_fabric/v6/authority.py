@@ -16,10 +16,13 @@ from collective_phase_control_fabric.v6.canonical import (
 from collective_phase_control_fabric.v6.models import (
     ArtifactRecord,
     AuditEvent,
+    CatalogueRevision,
     CoordinationEventDocument,
     CoordinationPlan,
     Document,
     DsseEnvelope,
+    EpistemicContract,
+    EpistemicObservation,
     EvidenceAttestation,
     GrowthCapabilityFrontier,
     GrowthObservation,
@@ -113,17 +116,20 @@ def _claimed_signer(document: Document) -> tuple[str, str] | None:
         return document.spec.author_principal_id, "protocol_author"
     if isinstance(document, ProtocolAmendment):
         return document.spec.author_principal_id, "protocol_author"
-    if isinstance(document, (TrialResult, GrowthObservation)):
+    if isinstance(document, (TrialResult, GrowthObservation, EpistemicObservation)):
         return document.spec.evaluator_principal_id, "evaluator"
     return None
 
 
 def _required_quorum(document: Document) -> str | None:
-    if isinstance(document, (MeasurementProtocol, GrowthCapabilityFrontier)):
+    if isinstance(
+        document,
+        (MeasurementProtocol, GrowthCapabilityFrontier, EpistemicContract, CatalogueRevision),
+    ):
         return "protocol_registration"
     if isinstance(document, ProtocolAmendment):
         return "protocol_amendment"
-    if isinstance(document, (TrialResult, GrowthObservation)):
+    if isinstance(document, (TrialResult, GrowthObservation, EpistemicObservation)):
         return "acceleration_compatibility"
     return None
 

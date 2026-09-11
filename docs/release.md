@@ -12,10 +12,16 @@ non-prerelease GitHub Release whose `vX.Y.Z` tag exactly matches package metadat
 also requires the repository variable `PYPI_PUBLISH_ENABLED=true` and approval in the protected
 `pypi` environment.
 
-The 0.6 and 0.7 series are published with the package classifier `Development Status :: 4 - Beta`.
+The 0.6 and 0.7 series and the 1.0 release target use the classifier `Development Status :: 4 - Beta`.
 The release workflow uses the explicit `beta` publication class, which permits OSS package
 distribution without treating absent external evidence as satisfied. A Beta package release is not
 an operational-assurance decision.
+
+The 1.0 target defines a maintained public API, not production maturity. Its
+qualification matrix is [tracked separately](roadmap-to-1.0.md). Complete the new
+epistemic/composition coverage and expanded mutation catalogue before release;
+the historical 0.7 catalogue below is not sufficient for changed source. Normal
+required review/checks and the actual Wiki update are release prerequisites.
 
 Operational assurance separately requires `release-evidence/vX.Y.Z.json`. The strict default mode
 checks exact version and commit bindings and requires passed availability-soak,

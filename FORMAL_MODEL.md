@@ -104,3 +104,19 @@ Computational exhaustion is unknown, not nonexistence. Model-predicted states an
 never become observed attestations. See [the exact domain and equations](docs/growth-planning.md)
 and [the paper-to-code mapping](docs/growth-research-mapping.md). These additions do not close
 the repair planner's existing full-snapshot conformance gap or establish empirical acceleration.
+
+## Fixed-parameter observation support and finite composition
+
+In the opt-in domain, `B_t = {(theta, x)}` retains every compatible fixed parameter
+and full ledger state. The update retains `(theta, x_next)` exactly when
+`x_next` is an applicable same-theta successor and the visible symbol belongs to
+its declared kernel. No model switches, coordinatewise stitching or hidden-state
+policy choices are allowed. Action and entry decisions must work in all members.
+
+Search retains complete terminal supports across observation-tree alternatives;
+it evaluates the original path-dependent lexicographic objective only after
+combining every adverse branch. A certificate checks one finite domain, not global
+optimality or a universal program theorem. Typed compositions unfold to the same
+primitive transition relation, horizon and costs. New names do not add elementary
+reachability. See [the finite reference domain](docs/epistemic-growth-control.md)
+and [typed unfolding](docs/checked-capability-composition.md).

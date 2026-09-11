@@ -18,3 +18,9 @@ release input, not proof that undiscovered defects are impossible.
 The 0.7.0 frontier extension uses the same Beta publication class. Synthetic activation
 policies and signed test fixtures do not supply external operational or empirical evidence.
 No 0.7.0 operational-assurance manifest is created in the absence of the actual activities.
+
+The 1.0.0 target also remains Beta. Fixed-model observation policies and checked
+workflow certificates are finite software results, not operational-assurance
+evidence. API maintenance does not supply an external acceleration experiment,
+deployment validation or independent security review. No 1.0.0 operational
+manifest is created without those actual activities.

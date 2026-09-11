@@ -42,6 +42,18 @@ GROUPS: dict[str, tuple[str, ...]] = {
         "src/collective_phase_control_fabric/v6/growth_frontier.py",
         "src/collective_phase_control_fabric/v6/growth_frontier_evidence.py",
     ),
+    "epistemic-control": (
+        "src/collective_phase_control_fabric/v6/epistemic.py",
+        "src/collective_phase_control_fabric/v6/epistemic_planning.py",
+        "src/collective_phase_control_fabric/v6/epistemic_checking.py",
+        "src/collective_phase_control_fabric/v6/epistemic_evidence.py",
+        "src/collective_phase_control_fabric/v6/information_value.py",
+    ),
+    "checked-composition": (
+        "src/collective_phase_control_fabric/v6/composition.py",
+        "src/collective_phase_control_fabric/v6/synthesis.py",
+        "src/collective_phase_control_fabric/v6/catalogue_revision.py",
+    ),
     "trials": ("src/collective_phase_control_fabric/v6/trials.py",),
     "coordination": ("src/collective_phase_control_fabric/v6/coordination.py",),
     "repairs": ("src/collective_phase_control_fabric/v6/repairs.py",),

@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import json
 from datetime import timedelta
 from fractions import Fraction as F
 from itertools import product
+from pathlib import Path
 from typing import Any, cast
 
 import pytest
@@ -290,13 +292,30 @@ def test_frontier_documents_are_closed_and_old_schema_stays_unchanged(planned: A
 
 def test_all_v061_schema_identities_remain_byte_compatible() -> None:
     manifest = registry_manifest()
+    released = json.loads(
+        (Path(__file__).parent / "data/native-schemas-v0.7.0.json").read_text(encoding="utf-8")
+    )
+    released_kinds = {x["kind"] for x in released["schemas"]}
     additions = {"growth-capability-frontier", "growth-frontier-plan", "growth-frontier-assessment"}
-    manifest["schemas"] = [x for x in manifest["schemas"] if x["kind"] not in additions]
+    manifest["schemas"] = [
+        x for x in manifest["schemas"] if x["kind"] in released_kinds - additions
+    ]
     assert len(manifest["schemas"]) == 52
     assert (
         digest_bytes(canonical_bytes(manifest))
         == "sha256:b2f953f493fd94c80c8617a3a172d54d21965a53c234f89a52b0cc28b1b82cde"
     )
+
+
+def test_all_v070_schema_identities_remain_byte_compatible() -> None:
+    released = json.loads(
+        (Path(__file__).parent / "data/native-schemas-v0.7.0.json").read_text(encoding="utf-8")
+    )
+    current = registry_manifest()
+    released_kinds = {x["kind"] for x in released["schemas"]}
+    assert len(released_kinds) == 55
+    current["schemas"] = [x for x in current["schemas"] if x["kind"] in released_kinds]
+    assert canonical_bytes(current) == canonical_bytes(released)
 
 
 @pytest.mark.parametrize(
