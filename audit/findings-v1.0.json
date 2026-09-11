@@ -48,8 +48,8 @@
       "id": "V1-006",
       "severity": "high",
       "exploit": "A mutation score can omit decorated control classes or import original nested packages instead of their mutated copies.",
-      "correction": "Use undecorated control classes, configure copied package roots, assert baseline import origins and reject incomplete module/method scope separately from execution and score gates.",
-      "regression_test": "tests/test_mutation_scope.py; tests/test_mutation_import_origins.py; tests/test_mutation_shards.py",
+      "correction": "Use undecorated control classes, copy hash-identical sources into one mutation import layout, assert baseline import origins and reject incomplete module/method scope separately from execution and score gates.",
+      "regression_test": "tests/test_mutation_scope.py; tests/test_mutation_import_origins.py; tests/test_mutation_shards.py; tests/test_mutation_workspace.py",
       "status": "validation-in-progress"
     }
   ]

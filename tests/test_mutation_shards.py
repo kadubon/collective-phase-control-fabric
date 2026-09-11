@@ -213,6 +213,16 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
             step for step in shard_job["steps"] if step.get("name") == "Run assigned mutants"
         )
         assert 'mutmut run "$MUTATION_SELECTOR"' in run["run"]
+        assert run["working-directory"] == ".cache/mutation-workspace"
+        assert "uv sync --frozen --all-extras --group dev --group security" in run["run"]
+        preparation = next(
+            step
+            for step in shard_job["steps"]
+            if step.get("name") == "Prepare isolated mutation layout"
+        )
+        assert preparation["run"] == (
+            "uv run --frozen python -m scripts.prepare_mutation_workspace .cache/mutation-workspace"
+        )
         assert run["timeout-minutes"] == 300
         assert run["env"]["MUTATION_SELECTOR"] == "${{ matrix.selector }}"
         gate = jobs["mutation"]

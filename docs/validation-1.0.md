@@ -57,8 +57,9 @@ candidate status; released labels remain pending actual publication verification
 The first mutation attempt was interrupted and not counted. Inspection of the
 resumed catalogue found that decorated control classes and nested CLI imports
 were silently excluded by the pinned tool. That catalogue was rejected. The
-control classes now expose their methods to mutation, copied package import
-origins are checked, and a separate catalogue-scope gate prevents this omission
+control classes now expose their methods to mutation. An isolated, hash-checked
+single-source layout makes nested package mutation names agree with their import
+names; copied package origins are checked. A separate catalogue-scope gate prevents this omission
 from passing. A complete regenerated execution and score are still required.
 
 Coverage reports must distinguish statement coverage (covered executable lines /

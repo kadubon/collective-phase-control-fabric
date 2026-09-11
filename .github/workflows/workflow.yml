@@ -180,18 +180,31 @@ jobs:
           python-version: "3.14.6"
           enable-cache: true
       - run: uv sync --frozen --all-extras --group dev --group security
+      - name: Prepare isolated mutation layout
+        run: uv run --frozen python -m scripts.prepare_mutation_workspace .cache/mutation-workspace
       - name: Run assigned mutants
         timeout-minutes: 300
+        working-directory: .cache/mutation-workspace
         env:
           MUTATION_SELECTOR: ${{ matrix.selector }}
-        run: uv run --frozen mutmut run "$MUTATION_SELECTOR"
+        run: |
+          uv sync --frozen --all-extras --group dev --group security
+          uv run --frozen mutmut run "$MUTATION_SELECTOR"
       - run: uv run --frozen mutmut results --all true > mutation-results.txt
+        working-directory: .cache/mutation-workspace
         if: ${{ always() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: ${{ always() }}
         with:
-          name: mutation-shard-${{ matrix.shard }}
-          path: mutation-results.txt
+            name: mutation-shard-${{ matrix.shard }}
+            path: .cache/mutation-workspace/mutation-results.txt
+            if-no-files-found: error
+            retention-days: 14
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: ${{ always() }}
+        with:
+          name: mutation-source-map-${{ matrix.shard }}
+          path: .cache/mutation-workspace/mutation-source-manifest.json
           if-no-files-found: error
           retention-days: 14
 

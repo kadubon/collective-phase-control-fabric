@@ -71,10 +71,13 @@ untested, timeout, suspicious and segfault results as failures under the unchang
 Raw shard artifacts and the combined report remain available for 14 days.
 
 The pinned Mutmut excludes decorated classes. Epistemic control and policy search
-therefore use ordinary classes so their actual methods are mutated. Its default
-import setup covers top-level `src` only; the mutation pytest configuration also
-adds the copied API/CLI package roots. The baseline checks every target's actual
-import origin. `scripts.check_mutation_scope` rejects a catalogue missing any
+therefore use ordinary classes so their actual methods are mutated. Its import
+and mutation names do not agree for nested source roots. The isolated workspace
+preparer copies source into one `src` root and verifies every file's SHA-256.
+Only mutation source placement/path settings change: the lock, source bytes,
+test selection, operators and timeouts remain fixed. Per-shard source maps are
+retained as separate artifacts. The baseline checks every target's actual import
+origin. `scripts.check_mutation_scope` rejects a catalogue missing any
 configured module or a required epistemic control method, independently of the
 membership fingerprint and the full execution/score gates. Scope membership
 alone is not a passing mutation result.
