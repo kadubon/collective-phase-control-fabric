@@ -14,7 +14,7 @@ Historical 0.7.0 measurements are not reused as 1.0.0 evidence.
 | Evidence | Synthetic independently signed original admission tests, fresh root checks, exact stdout mapping and unsigned replan; no operational evidence |
 | Backward compatibility | Old signed-fixture scope and expected golden hashes preserved; 55 released schema identities retained |
 | Public API and installed base wheel | Local 1.0.0 wheel installed outside checkout; all five import versions/origins, pip check and six network-disabled scenarios passed; public-index publication verification pending |
-| Coverage | Local full and CI-selected critical suites passed the unchanged aggregate and all 17 per-subsystem gates; metrics below; hosted matrix and release-selected rerun pending |
+| Coverage | Local full, CI-selected and release-selected critical suites passed the unchanged aggregate and all 17 per-subsystem gates; metrics below; hosted matrix pending |
 | Mutation | New critical modules and tests selected; complete expanded catalogue, all five shards and 85% aggregate gate pending |
 | Security and publication hygiene | Local Ruff, strict mypy (131 sources), Bandit, OSV audit, generated references, 225 schemas, 9 fixtures, source/history/archive hygiene, Gitleaks, build and Twine passed; final staged/push and hosted security checks pending |
 | GitHub, Wiki and PyPI | Source PR, normal required review/checks, Wiki push and publication verification pending |
@@ -28,6 +28,7 @@ frozen dependencies, branch-enabled coverage and all five import packages:
 | --- | --- | --- | --- | --- |
 | Full suite | 928 passed, 3 skipped | 17,774 / 19,023 (93.43%) | 6,164 / 7,156 (86.14%) | 91.44% |
 | CI critical selection | 613 passed | 8,218 / 8,486 (96.84%) | 2,584 / 2,788 (92.68%) | 95.81% |
+| Release critical selection | 632 passed | 8,246 / 8,486 (97.17%) | 2,593 / 2,788 (93.01%) | 96.14% |
 
 The three local skips are the existing PostgreSQL tests without configured
 application/owner URLs. Required hosted PostgreSQL integration remains pending.
