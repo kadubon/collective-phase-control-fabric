@@ -43,7 +43,14 @@ def main() -> None:
         paths[name] = str(path)
     from cpcf_cli.main import main as cli
 
-    scenarios = ("preparation", "frontier-chain", "epistemic-probe", "epistemic-integrated")
+    scenarios = (
+        "preparation",
+        "frontier-chain",
+        "epistemic-probe",
+        "epistemic-information",
+        "epistemic-composition",
+        "epistemic-integrated",
+    )
     for command in (
         ["self-check", "--json"],
         *(["growth", "example", "--scenario", scenario, "--json"] for scenario in scenarios),
