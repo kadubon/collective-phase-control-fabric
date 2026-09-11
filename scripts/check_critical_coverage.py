@@ -54,6 +54,10 @@ GROUPS: dict[str, tuple[str, ...]] = {
         "src/collective_phase_control_fabric/v6/synthesis.py",
         "src/collective_phase_control_fabric/v6/catalogue_revision.py",
     ),
+    "growth-cli": (
+        "packages/cpcf-cli/src/cpcf_cli/growth.py",
+        "packages/cpcf-cli/src/cpcf_cli/epistemic.py",
+    ),
     "trials": ("src/collective_phase_control_fabric/v6/trials.py",),
     "coordination": ("src/collective_phase_control_fabric/v6/coordination.py",),
     "repairs": ("src/collective_phase_control_fabric/v6/repairs.py",),

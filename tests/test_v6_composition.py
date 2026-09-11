@@ -214,7 +214,7 @@ def test_checker_exhaustion_cannot_accept_an_unchecked_candidate(
 def test_no_funded_primitive_or_composite_policy_is_not_a_reuse_advantage() -> None:
     d = epistemic_example()
     c = d.contract.model_copy(
-        update={"spec": d.contract.spec.model_copy(update={"max_decisions": 1})}
+        update={"spec": d.contract.spec.model_copy(update={"comparison_margin": "100"})}
     )
     d = rebound(d, c)
     result = synthesize(d, workflow_request(d))

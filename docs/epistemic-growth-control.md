@@ -64,6 +64,13 @@ lifecycle admission. The registered `receipt-stdout-symbol-v1` mapping reads
 Other JSON fields are not controller inputs. Support reconstruction retains all
 compatible states rather than selecting a favorable measured branch.
 
+A separate finite check also requires the admitted receipt outcomes, recorded
+ledger and visible symbols to share a single fixed-model history. Separate
+compatibility of each projection is insufficient. This private validation can
+reject a contradictory model, but it does not prune the controller's support by
+unregistered ledger fields. Declared formation costs must also match any claimed
+observed ledger; an unsigned cost proposal does not attest that those costs occurred.
+
 Replanning requires fresh validation; an earlier assessment is not authority.
 Original signed bytes remain unchanged. Proposed plans remain unsigned and need
 registration before external use. A signature authenticates the observation

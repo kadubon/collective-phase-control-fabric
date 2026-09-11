@@ -35,6 +35,14 @@
       "correction": "Bind the entry comparison checkpoint in visible history, replay accumulated cost events and reserve maximum synthesis expansions.",
       "regression_test": "tests/test_v6_epistemic_cli.py; tests/test_v6_epistemic_limits.py; tests/test_v6_composition.py",
       "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-005",
+      "severity": "critical",
+      "exploit": "Individually compatible symbols and recorded ledger projections may have no common fixed-model history.",
+      "correction": "Reconstruct a bounded joint receipt/ledger/kernel trace; reject contradiction while preserving the full visible-only controller support.",
+      "regression_test": "tests/test_v6_epistemic_evidence.py::test_evidence_weakening_cannot_enable_replanning; tests/test_v6_epistemic_evidence.py::test_receipt_joint_validation_does_not_leak_hidden_ledger_to_controller",
+      "status": "validation-in-progress"
     }
   ]
 }

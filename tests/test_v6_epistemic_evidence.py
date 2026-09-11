@@ -3,7 +3,8 @@
 
 import pytest
 
-from collective_phase_control_fabric.v6.epistemic import Domain
+from collective_phase_control_fabric.v6.epistemic import Domain, support_digest
+from collective_phase_control_fabric.v6.epistemic_checking import reference_comparisons
 from collective_phase_control_fabric.v6.epistemic_evidence import (
     export_epistemic,
     reassess_epistemic,
@@ -48,15 +49,33 @@ def test_fresh_signed_observation_replans_without_mutating_history(
         ("wrong-symbol", "epistemic_measurement_mapping"),
         ("missing-quorum", "epistemic_observation_not_admitted"),
         ("invalid-json-object", "epistemic_measurement_mapping"),
+        ("joint-mismatch", "epistemic_receipt_model_mismatch"),
     ],
 )
 def test_evidence_weakening_cannot_enable_replanning(
     monkeypatch: pytest.MonkeyPatch, mode: str, reason: str
 ) -> None:
     c, objects, obs, admission, _, f, e, eo = admitted_case(
-        monkeypatch, epistemic_mode=mode, frontier_mode="valid"
+        monkeypatch,
+        epistemic_mode=mode,
+        frontier_mode="ambiguous" if mode == "joint-mismatch" else "valid",
     )
     result = reassess_epistemic(Domain(c, objects, e, f), eo, obs, **admission)
     assert result.spec.external_evidence_compatibility == "incompatible"
     assert reason in result.spec.reasons
     assert result.spec.compatible_support_digest is None
+
+
+def test_receipt_joint_validation_does_not_leak_hidden_ledger_to_controller(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    c, objects, obs, admission, _, f, e, eo = admitted_case(
+        monkeypatch, epistemic_mode="joint-ambiguous", frontier_mode="ambiguous"
+    )
+    d = Domain(c, objects, e, f)
+    visible = d.replay(eo.spec.history, reference_comparisons(d))
+    assert len(visible) == 2
+    assessment = reassess_epistemic(d, eo, obs, **admission)
+    assert assessment.spec.reasons == []
+    assert assessment.spec.external_evidence_compatibility == "compatible"
+    assert assessment.spec.compatible_support_digest == support_digest(visible)

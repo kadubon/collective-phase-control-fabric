@@ -19,20 +19,82 @@ from collective_phase_control_fabric.v6.epistemic_checking import (
     reference_comparisons,
 )
 from collective_phase_control_fabric.v6.epistemic_planning import plan_epistemic
-from collective_phase_control_fabric.v6.growth_evidence import reassess
+from collective_phase_control_fabric.v6.growth_evidence import _within_prediction, reassess
+from collective_phase_control_fabric.v6.growth_frontier import base_state
 from collective_phase_control_fabric.v6.models import (
     ActionDocument,
     AnalysisSnapshot,
     CapabilityDocument,
     EpistemicAssessment,
     EpistemicAssessmentSpec,
+    EpistemicHypothesis,
     EpistemicObservation,
     EpistemicPlan,
+    EpistemicStep,
+    GrowthCheckpoint,
     GrowthObservation,
+    GrowthState,
     RunnerJob,
     RunnerReceipt,
 )
 from collective_phase_control_fabric.v6.registry import document_digest
+
+
+def _joint_receipt_trace(
+    domain: Domain,
+    history: list[EpistemicStep],
+    observation: GrowthObservation,
+    receipts: list[RunnerReceipt],
+) -> None:
+    """Check joint consistency without exposing or using hidden ledger data as a signal."""
+
+    def fits(actual: GrowthState, h: EpistemicHypothesis) -> bool:
+        predicted = base_state(h.state)
+        # The legacy field lists model alternatives, not a measured true theta.
+        actual = actual.model_copy(update={"model_ids": predicted.model_ids})
+        return _within_prediction(actual, predicted)
+
+    joint = [h for h in domain.initial() if fits(observation.spec.states[0], h)]
+    g.require(bool(joint), "epistemic_receipt_model_mismatch")
+    budget = g.Budget(domain.contract.spec.search_limits)
+    for index, (step, receipt) in enumerate(zip(history, receipts, strict=True)):
+        following = []
+        recipe = domain.recipes[step.action_id]
+        for h in joint:
+            if step.entry:
+                h = h.model_copy(
+                    update={
+                        "entry": GrowthCheckpoint(
+                            time=h.state.elapsed, capacities=h.state.capacities
+                        )
+                    }
+                )
+            for effect in g.successors(h.state, recipe):
+                g.require(
+                    budget.take("expansions", budget.limits.max_expansions),
+                    "epistemic_check_budget",
+                )
+                if (
+                    effect.outcome != receipt.spec.claimed_outcome
+                    or step.observation
+                    not in domain.kernel[(h.model_id, recipe.action_digest, effect.successor_id)]
+                ):
+                    continue
+                after = g.transition(
+                    domain.contract, h.state, recipe, effect, domain.objects, domain.frontier
+                )
+                candidate = domain.pay(
+                    EpistemicHypothesis(
+                        model_id=h.model_id,
+                        state=after,
+                        entry=h.entry,
+                        primitive_steps=h.primitive_steps + 1,
+                    )
+                )
+                if fits(observation.spec.states[index + 1], candidate):
+                    following.append(candidate)
+        g.require(bool(following), "epistemic_receipt_model_mismatch")
+        joint = list(domain.bounded(following))
 
 
 def export_epistemic(domain: Domain, plan: EpistemicPlan, job: RunnerJob) -> dict[str, Any]:
@@ -97,10 +159,16 @@ def reassess_epistemic(
         history = observation.spec.history
         receipts = growth_observation.spec.runner_receipt_digests
         g.require(len(history) == len(receipts), "epistemic_evidence_trace_incomplete")
+        g.require(
+            domain.observation_map == {s: s for s in domain.epistemic.spec.observation_alphabet},
+            "epistemic_evidence_channel_mismatch",
+        )
+        admitted_receipts = []
         for step, digest in zip(history, receipts, strict=True):
             receipt = view.objects.get(digest)
             g.require(isinstance(receipt, RunnerReceipt), "epistemic_receipt_missing")
             receipt = cast(RunnerReceipt, receipt)
+            admitted_receipts.append(receipt)
             job = view.objects.get(receipt.spec.job_digest)
             g.require(
                 isinstance(job, RunnerJob) and step.action_id in domain.recipes,
@@ -125,8 +193,10 @@ def reassess_epistemic(
                 "epistemic_measurement_mapping",
             )
         support = domain.replay(history, reference_comparisons(domain))
+        _joint_receipt_trace(domain, history, growth_observation, admitted_receipts)
     except g.GrowthError as error:
         reasons.append(error.code)
+        support = None
     return EpistemicAssessment(
         metadata=observation.metadata,
         spec=EpistemicAssessmentSpec(

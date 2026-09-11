@@ -299,6 +299,12 @@
       "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
     ]
   },
+  "epistemic_evidence_channel_mismatch": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
   "epistemic_evidence_incompatible": {
     "effect_class": "none",
     "recovery": [
@@ -492,6 +498,12 @@
     ]
   },
   "epistemic_receipt_missing": {
+    "effect_class": "none",
+    "recovery": [
+      "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."
+    ]
+  },
+  "epistemic_receipt_model_mismatch": {
     "effect_class": "none",
     "recovery": [
       "Inspect the immutable growth contract, all-prefix ledger, search limits, and admitted evidence; see docs/growth-planning.md."

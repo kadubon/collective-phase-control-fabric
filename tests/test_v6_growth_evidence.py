@@ -39,6 +39,7 @@ from collective_phase_control_fabric.v6.models import (
     GrowthCapabilityFrontier,
     GrowthCapabilityFrontierSpec,
     GrowthFrontierBinding,
+    GrowthInterval,
     GrowthObservation,
     GrowthObservationSpec,
     Lifecycle,
@@ -185,6 +186,12 @@ def admitted_case(
             alternate = preparation.successors[0].model_copy(
                 update={"successor_id": "prepare:alternate"}
             )
+            if epistemic_mode in {"joint-mismatch", "joint-ambiguous"}:
+                alternate = alternate.model_copy(
+                    update={"capacity_delta": {"task": GrowthInterval(lower="1", upper="1")}}
+                )
+            if epistemic_mode == "joint-ambiguous":
+                alternate = alternate.model_copy(update={"outcome": "partial"})
             c = modify(
                 c,
                 action_catalogue=[
@@ -344,7 +351,9 @@ def admitted_case(
                 update={
                     "rule_id": "alternate-activation",
                     "producer_successor_id": "prepare:alternate",
-                    "activated_action_ids": ["continue"],
+                    "activated_action_ids": ["reuse"]
+                    if epistemic_mode in {"joint-mismatch", "joint-ambiguous"}
+                    else ["continue"],
                 }
             )
             frontier = frontier.model_copy(
@@ -438,13 +447,16 @@ def admitted_case(
             spec=EpistemicContractSpec(
                 growth_contract_digest=document_digest(c),
                 frontier_digest=document_digest(frontier) if frontier else None,
-                observation_alphabet=["recorded"],
+                observation_alphabet=["other", "recorded"],
                 kernel=[
                     EpistemicKernelRow(
                         model_id=theta,
                         action_digest=r.action_digest,
                         successor_id=s.successor_id,
-                        observations=["recorded"],
+                        observations=["other"]
+                        if epistemic_mode == "joint-mismatch"
+                        and s.successor_id == "prepare:success"
+                        else ["recorded"],
                     )
                     for r in c.spec.action_catalogue
                     for s in r.successors

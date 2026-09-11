@@ -55,3 +55,8 @@ ambiguity retains all compatible ledger/frontier states. Debug fields cannot
 select a hidden successor. Model-only catalogue revisions and certificates are
 unsigned proposals, never replacement admission authority. See
 [the observation boundary](epistemic-growth-control.md#evidence-and-replay).
+
+Receipt outcomes, ledger records and observation symbols must additionally admit
+one joint fixed-model history. Checking each separately could accept contradictory
+projections. This rejection check does not turn hidden ledger fields into a public
+observation channel or select a favorable support state.

@@ -29,6 +29,11 @@ only hypothetical reuse. Fresh original admission is required for evidence-drive
 replanning; never substitute a cached assessment or promote fixture keys. Export
 primitive job proposals with existing policy coverage and external authorization.
 
+Admitted symbols and ledger records must fit one joint fixed-model receipt history.
+Separate compatibility checks are insufficient. Use hidden ledger data only for
+model-consistency validation; do not let it select a controller action or shrink
+the public support outside the registered observation channel.
+
 Canonical guides: `docs/epistemic-growth-control.md`, `docs/information-value.md`,
 `docs/checked-capability-composition.md`, `docs/public-api.md`. The
 `epistemic-integrated` example completes the synthetic probe/support/composition/
