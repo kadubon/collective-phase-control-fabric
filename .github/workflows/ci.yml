@@ -147,6 +147,7 @@ jobs:
           CPCF_TEST_OWNER_DATABASE_URL: postgresql+psycopg://cpcf_owner:cpcf-test@localhost:5432/cpcf
 
   mutation-shards:
+    needs: [core-platform, quality-security, postgres-integration]
     strategy:
       fail-fast: false
       matrix:

@@ -324,6 +324,11 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
         if name == "ci.yml":
             assert gate["if"] == "${{ always() }}"
             assert "if" not in shard_job
+            assert shard_job["needs"] == [
+                "core-platform",
+                "quality-security",
+                "postgres-integration",
+            ]
         else:
             exception = (
                 "github.event_name == 'release' && github.event.release.tag_name == 'v1.0.0' && "

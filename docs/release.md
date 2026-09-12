@@ -57,6 +57,8 @@ as literal arguments to the fixed Mutmut command. These selectors partition
 all positive indices modulo 20 without overlap, including single-digit indices.
 Every part uses the same frozen configuration, mutation
 targets, coverage-based generation, test selection, baseline checks and per-mutant timeouts.
+CI starts mutation parts after platform, quality and PostgreSQL checks, so the 20
+mutation jobs cannot occupy all hosted slots while those prerequisite checks wait.
 Each part's execution step is bounded to 300 minutes so a step timeout can still retain its
 complete diagnostic status list before the hosted job limit.
 
