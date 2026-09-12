@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Execute one disjoint quarter of an unchanged modulo-five mutation shard."""
+"""Print literal selectors for one quarter of a modulo-five mutation shard."""
 
 from __future__ import annotations
 
 import argparse
-import subprocess
-import sys
 
 from scripts.merge_mutation_results import SHARDS
 
@@ -28,11 +26,9 @@ def main() -> int:
     parser.add_argument("--shard", type=int, choices=range(SHARDS), required=True)
     parser.add_argument("--part", type=int, choices=range(PARTS), required=True)
     args = parser.parse_args()
-    # Argument vectors preserve literal glob patterns; Mutmut performs matching.
-    return subprocess.run(
-        [sys.executable, "-m", "mutmut", "run", *selectors(args.shard, args.part)],
-        check=False,
-    ).returncode
+    for pattern in selectors(args.shard, args.part):
+        print(pattern)
+    return 0
 
 
 if __name__ == "__main__":

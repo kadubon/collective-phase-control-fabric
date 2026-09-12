@@ -45,7 +45,8 @@ the external operational evidence listed above.
 
 CI and release retain five logical shards: positive Mutmut indices modulo five.
 Each logical shard has four physical parts, assigned by `(index // 5) % 4`.
-The 20 jobs run `scripts.run_mutation_shard`, whose literal selectors partition
+The 20 jobs read `scripts.mutation_selectors` output into a Bash array and pass it
+as literal arguments to the fixed Mutmut command. These selectors partition
 all positive indices modulo 20 without overlap, including single-digit indices.
 Every part uses the same frozen configuration, mutation
 targets, coverage-based generation, test selection, baseline checks and per-mutant timeouts.

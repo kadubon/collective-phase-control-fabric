@@ -15,7 +15,7 @@ import yaml
 
 from scripts.check_mutation_score import COUNTED_FAILURES, COUNTED_SUCCESSES
 from scripts.merge_mutation_results import SHARDS, merge_results, read_results
-from scripts.run_mutation_shard import PARTS, selectors
+from scripts.mutation_selectors import PARTS, selectors
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -114,22 +114,21 @@ def test_invalid_partition_counts_and_indices_are_rejected(tmp_path: Path) -> No
             selectors(shard, part)
 
 
-def test_part_runner_preserves_failed_exit_and_literal_selectors(
+def test_partition_cli_only_emits_validated_literal_selectors(
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    from scripts import run_mutation_shard
-
-    commands: list[list[str]] = []
-
-    def run(command: list[str], *, check: bool) -> subprocess.CompletedProcess[str]:
-        assert check is False
-        commands.append(command)
-        return subprocess.CompletedProcess(command, 7)
+    from scripts import mutation_selectors
 
     monkeypatch.setattr(sys, "argv", ["runner", "--shard", "1", "--part", "0"])
-    monkeypatch.setattr(run_mutation_shard.subprocess, "run", run)
-    assert run_mutation_shard.main() == 7
-    assert commands == [[sys.executable, "-m", "mutmut", "run", *selectors(1, 0)]]
+    assert mutation_selectors.main() == 0
+    assert capsys.readouterr().out.splitlines() == selectors(1, 0)
+    for value in ("1; echo injected", "$(echo injected)", "-1", "5"):
+        monkeypatch.setattr(sys, "argv", ["runner", "--shard", value, "--part", "0"])
+        with pytest.raises(SystemExit) as error:
+            mutation_selectors.main()
+        assert error.value.code == 2
+        assert capsys.readouterr().out == ""
 
 
 def test_complete_shards_reproduce_the_unsharded_score(tmp_path: Path) -> None:
@@ -300,9 +299,11 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
             step for step in shard_job["steps"] if step.get("name") == "Run assigned mutants"
         )
         assert (
-            'python -m scripts.run_mutation_shard --shard "$MUTATION_SHARD" '
-            '--part "$MUTATION_PART"' in run["run"]
+            'python -m scripts.mutation_selectors --shard "$MUTATION_SHARD" '
+            '--part "$MUTATION_PART" > mutation-selectors.txt' in run["run"]
         )
+        assert "mapfile -t mutation_selectors < mutation-selectors.txt" in run["run"]
+        assert 'uv run --frozen mutmut run "${mutation_selectors[@]}"' in run["run"]
         assert run["working-directory"] == ".cache/mutation-workspace"
         assert "uv sync --frozen --all-extras --group dev --group security" in run["run"]
         preparation = next(

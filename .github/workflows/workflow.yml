@@ -186,7 +186,9 @@ jobs:
           MUTATION_PART: ${{ matrix.part }}
         run: |
           uv sync --frozen --all-extras --group dev --group security
-          uv run --frozen python -m scripts.run_mutation_shard --shard "$MUTATION_SHARD" --part "$MUTATION_PART"
+          uv run --frozen python -m scripts.mutation_selectors --shard "$MUTATION_SHARD" --part "$MUTATION_PART" > mutation-selectors.txt
+          mapfile -t mutation_selectors < mutation-selectors.txt
+          uv run --frozen mutmut run "${mutation_selectors[@]}"
       - run: uv run --frozen mutmut results --all true > mutation-results.txt
         working-directory: .cache/mutation-workspace
         if: ${{ always() }}
