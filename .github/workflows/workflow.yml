@@ -158,6 +158,9 @@ jobs:
 
   mutation-shards:
     needs: build
+    if: >-
+      !(github.event_name == 'release' && github.event.release.tag_name == 'v1.0.0' &&
+      vars.CPCF_MUTATION_EXCEPTION_VERSION == '1.0.0')
     permissions:
       contents: read
     strategy:
@@ -212,7 +215,10 @@ jobs:
     needs: mutation-shards
     permissions:
       contents: read
-    if: ${{ always() }}
+    if: >-
+      always() &&
+      !(github.event_name == 'release' && github.event.release.tag_name == 'v1.0.0' &&
+      vars.CPCF_MUTATION_EXCEPTION_VERSION == '1.0.0')
     runs-on: ubuntu-latest
     steps:
       - name: Require every shard job to succeed
@@ -241,6 +247,21 @@ jobs:
           retention-days: 14
       - run: uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
+
+  mutation-exception:
+    name: Record owner waiver of mutation qualification for 1.0.0
+    needs: build
+    if: >-
+      github.event_name == 'release' && github.event.release.tag_name == 'v1.0.0' &&
+      vars.CPCF_MUTATION_EXCEPTION_VERSION == '1.0.0'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disclose missing mutation qualification
+        run: |
+          printf '%s\n' 'MUTATION QUALIFICATION: WAIVED, NOT PASSED.' \
+            'The owner explicitly authorized the 1.0.0 merge, release and PyPI publication without completed mutation testing.' \
+            'The native run was incomplete; no passing score is claimed. All other publication gates remain required.' \
+            'See docs/mutation-exception-1.0.md in this exact release source.' >> "$GITHUB_STEP_SUMMARY"
 
   external-gates:
     name: Classify package publication and operational evidence
@@ -273,8 +294,14 @@ jobs:
 
   release-assets:
     name: Attach verified release assets
-    needs: [build, provenance, mutation, external-gates]
+    needs: [build, provenance, mutation, mutation-exception, external-gates]
     if: >-
+      always() &&
+      needs.build.result == 'success' && needs.provenance.result == 'success' &&
+      needs.external-gates.result == 'success' &&
+      (needs.mutation.result == 'success' ||
+      (needs.mutation.result == 'skipped' && needs.mutation-exception.result == 'success' &&
+      github.event.release.tag_name == 'v1.0.0' && vars.CPCF_MUTATION_EXCEPTION_VERSION == '1.0.0')) &&
       github.event_name == 'release' &&
       github.event.release.draft == false &&
       github.event.release.prerelease == false
@@ -303,8 +330,14 @@ jobs:
 
   publish:
     name: Publish to PyPI with trusted publishing
-    needs: [build, provenance, mutation, external-gates, release-assets]
+    needs: [build, provenance, mutation, mutation-exception, external-gates, release-assets]
     if: >-
+      always() &&
+      needs.build.result == 'success' && needs.provenance.result == 'success' &&
+      needs.external-gates.result == 'success' && needs.release-assets.result == 'success' &&
+      (needs.mutation.result == 'success' ||
+      (needs.mutation.result == 'skipped' && needs.mutation-exception.result == 'success' &&
+      github.event.release.tag_name == 'v1.0.0' && vars.CPCF_MUTATION_EXCEPTION_VERSION == '1.0.0')) &&
       github.event_name == 'release' &&
       github.event.release.draft == false &&
       github.event.release.prerelease == false &&

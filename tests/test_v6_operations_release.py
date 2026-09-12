@@ -192,7 +192,7 @@ def test_release_workflow_fails_closed_on_external_and_per_group_gates() -> None
     assert "external-gates:" in workflow
     assert "check_external_release_evidence.py" in workflow
     assert "--publication-class beta" in workflow
-    assert "needs: [build, provenance, mutation, external-gates]" in workflow
+    assert "needs: [build, provenance, mutation, mutation-exception, external-gates]" in workflow
     assert "GH_REPO: ${{ github.repository }}" in workflow
     assert "PYPI_PUBLISH_ENABLED == 'true'" in workflow
     security = Path(".github/workflows/security.yml").read_text(encoding="utf-8")

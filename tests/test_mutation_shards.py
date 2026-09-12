@@ -320,7 +320,19 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
             "MUTATION_PART": "${{ matrix.part }}",
         }
         gate = jobs["mutation"]
-        assert gate["needs"] == "mutation-shards" and gate["if"] == "${{ always() }}"
+        assert gate["needs"] == "mutation-shards"
+        if name == "ci.yml":
+            assert gate["if"] == "${{ always() }}"
+            assert "if" not in shard_job
+        else:
+            exception = (
+                "github.event_name == 'release' && github.event.release.tag_name == 'v1.0.0' && "
+                "vars.CPCF_MUTATION_EXCEPTION_VERSION == '1.0.0'"
+            )
+            assert shard_job["if"] == f"!({exception})"
+            assert gate["if"] == f"always() && !({exception})"
+            assert jobs["mutation-exception"]["if"] == exception
+            assert jobs["mutation-exception"]["needs"] == "build"
         reject = gate["steps"][0]
         assert reject["if"] == "${{ needs.mutation-shards.result != 'success' }}"
         assert reject["run"] == "exit 1"
@@ -339,3 +351,34 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
             commands[-1] == "uv run --frozen python scripts/check_mutation_score.py "
             "mutation-results.txt --minimum 85"
         )
+
+
+def test_release_waiver_cannot_mask_other_failures_or_claim_a_mutation_pass() -> None:
+    jobs = yaml.safe_load((ROOT / ".github/workflows/workflow.yml").read_text())["jobs"]
+    for job_id in ("release-assets", "publish"):
+        job = jobs[job_id]
+        assert set(job["needs"]) >= {
+            "build",
+            "provenance",
+            "mutation",
+            "mutation-exception",
+            "external-gates",
+        }
+        condition = job["if"]
+        for dependency in ("build", "provenance", "external-gates"):
+            assert f"needs.{dependency}.result == 'success' &&" in condition
+        assert (
+            "(needs.mutation.result == 'success' || "
+            "(needs.mutation.result == 'skipped' && "
+            "needs.mutation-exception.result == 'success' && "
+            "github.event.release.tag_name == 'v1.0.0' && "
+            "vars.CPCF_MUTATION_EXCEPTION_VERSION == '1.0.0')) &&" in condition
+        )
+        assert "github.event_name == 'release' &&" in condition
+        assert "github.event.release.draft == false &&" in condition
+        assert "github.event.release.prerelease == false" in condition
+    assert "needs.release-assets.result == 'success' &&" in jobs["publish"]["if"]
+    assert "vars.PYPI_PUBLISH_ENABLED == 'true'" in jobs["publish"]["if"]
+    assert jobs["publish"]["environment"]["name"] == "pypi"
+    record = jobs["mutation-exception"]["steps"][0]["run"]
+    assert "WAIVED, NOT PASSED" in record and "native run was incomplete" in record

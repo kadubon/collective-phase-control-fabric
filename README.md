@@ -9,19 +9,22 @@ CPCF reports an `operational_organization_profile`. It does not create, detect, 
 collective-superintelligence phase. It also does not certify causality, statistical validity,
 thermodynamic feasibility, physical phase behavior, or runner isolation.
 
-> Release status: v0.7.0 is a Beta research package. Package publication does not establish
+> Release classification: Beta research package. Package publication does not establish
 > deployment assurance. Operational evidence remains unavailable until the external security,
 > restore, soak, and independent-review gates in [release readiness](docs/release-readiness.md) pass.
 
 ## Install
 
-The 1.0.0 development work adds opt-in fixed-model observation planning, separate
+Version 1.0.0 adds opt-in fixed-model observation planning, separate
 information-use and net sensing comparisons, and independently checked finite
 workflow composition. See the [release verification matrix](docs/roadmap-to-1.0.md)
 for actual completion status, the [epistemic guide](docs/epistemic-growth-control.md),
 [composition guide](docs/checked-capability-composition.md), and
 [maintained public API](docs/public-api.md). Version 1.0 concerns API maintenance;
 the package remains Beta and makes no empirical acceleration claim.
+
+Mutation qualification for 1.0.0 is [explicitly waived by the owner](docs/mutation-exception-1.0.md),
+not passed. Other publication checks and protected PyPI approval remain required.
 
 The one public distribution contains the offline core, CLI, schema registry, bundle verifier,
 runner protocol models, and all import packages.

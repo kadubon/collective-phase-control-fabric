@@ -25,6 +25,13 @@ checks, merge authorization and the actual Wiki update are release prerequisites
 The specific owner-authorized 1.0 review exception is recorded in the requirement
 matrix; it does not waive any verification or publication environment gate.
 
+The owner subsequently authorized a separate, explicit **mutation qualification
+waiver for 1.0.0 merge and publication**. See the
+[exception record](mutation-exception-1.0.md). The release workflow's narrow,
+version-bound route records mutation as skipped/waived, not passed. All other
+verification and publication environment gates remain mandatory. Remove
+`CPCF_MUTATION_EXCEPTION_VERSION` after the release attempt.
+
 Operational assurance separately requires `release-evidence/vX.Y.Z.json`. The strict default mode
 checks exact version and commit bindings and requires passed availability-soak,
 intended-deployment restore, load, chaos, independent threat-model, and independent

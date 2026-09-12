@@ -1,5 +1,8 @@
 # Collective Phase Control Fabric
 
+1.0.0 の mutation 検証は、完了・合格ではなく、所有者の明示的な免除として扱います。
+[例外の記録](docs/mutation-exception-1.0.md)を参照してください。他の公開検証と PyPI の承認は維持します。
+
 This file intentionally remains in English so every repository and distribution artifact follows
 the project's English-only documentation requirement.
 

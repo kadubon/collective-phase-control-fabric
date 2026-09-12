@@ -40,6 +40,11 @@ catalogue fingerprint, all shard-success dependencies, missing/overlap/incomplet
 and the unchanged aggregate 85% floor. Never treat an interrupted or skipped shard as a pass.
 See `docs/release.md` before changing the mutation catalogue or scheduling.
 
+The owner explicitly waived completed mutation qualification for the 1.0.0 merge,
+release and PyPI publication only. Follow `docs/mutation-exception-1.0.md`; record
+waived/skipped, never passed. All other checks, environment approval and scientific
+boundaries remain mandatory. Normal CI and all other releases retain the full gate.
+
 Mutation runs use `scripts.prepare_mutation_workspace` to create a hash-checked
 single-`src` copy. Keep the import-origin and catalogue-scope checks: the pinned
 tool otherwise skips decorated control classes and mismatches nested package

@@ -3,7 +3,9 @@
 **In progress; not release approval or publication evidence.** The implementation
 is being prepared on `codex/cpcf-1.0-epistemic-growth`. The source baseline is the
 released 0.7.0 commit recorded in the [requirement matrix](roadmap-to-1.0.md).
-Historical 0.7.0 measurements are not reused as 1.0.0 evidence.
+Historical 0.7.0 measurements are not reused as 1.0.0 evidence. The owner
+subsequently [waived mutation qualification for 1.0.0](mutation-exception-1.0.md);
+this record does not claim complete mutation assurance.
 
 | Area | Verification and current status |
 | --- | --- |
@@ -15,7 +17,7 @@ Historical 0.7.0 measurements are not reused as 1.0.0 evidence.
 | Backward compatibility | Old signed-fixture scope and expected golden hashes preserved; 55 released schema identities retained |
 | Public API and installed base wheel | Local 1.0.0 wheel installed outside checkout; all five import versions/origins, pip check and six network-disabled scenarios passed; public-index publication verification pending |
 | Coverage | Local full, CI-selected and release-selected critical suites passed the unchanged aggregate and all 17 per-subsystem gates; metrics below; hosted matrix pending |
-| Mutation | Complete generated inventory of 17,581 names reviewed; all 30 configured modules and required control methods included; full execution, all five shards and 85% aggregate gate pending |
+| Mutation | Complete 17,581-name inventory and module/method scope reviewed; execution incomplete and no passing score established; owner explicitly waived qualification for 1.0.0 merge and publication |
 | Security and publication hygiene | Local Ruff, strict mypy (133 sources), Bandit, OSV audit, generated references, 225 schemas, 9 fixtures, source/history/archive hygiene, Gitleaks, build and Twine passed; final staged/push and hosted security checks pending |
 | GitHub, Wiki and PyPI | Feature branch and candidate Wiki pushed; PR, required checks, owner-authorized merge and publication verification pending; the specific review exception is recorded in the requirement matrix |
 
@@ -72,7 +74,10 @@ CI run `34668423252` failed when all five expanded mutation jobs reached the
 five logical shards now each have four disjoint physical parts, with all 20
 success dependencies and complete-catalogue validation. This scheduling repair
 has no effect on test selection, mutation operators, timeouts or the score floor.
-The independent native full run continues; neither run is reported as passed.
+The independent native full run was still incomplete when the owner authorized
+publication without mutation qualification. Neither run is reported as passed.
+Normal CI retains the full gate; the release's version-bound exception is explicit
+and does not weaken other security, coverage, provenance or OIDC approval checks.
 
 Coverage reports must distinguish statement coverage (covered executable lines /
 all executable lines), branch coverage (covered branch destinations / all branch

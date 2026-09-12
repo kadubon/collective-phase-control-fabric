@@ -2,6 +2,10 @@
 
 ## 1.0.0 (unreleased)
 
+- Mutation qualification is explicitly waived by the owner for 1.0.0 publication;
+  no complete passing score is claimed. Other release checks remain mandatory.
+  See `docs/mutation-exception-1.0.md` for scope and the incomplete-run record.
+
 - Add an opt-in fixed-model observation sidecar with correlated full-ledger
   information states, bounded observation-based policy search, independent
   reconstruction and fresh original-evidence reassessment.

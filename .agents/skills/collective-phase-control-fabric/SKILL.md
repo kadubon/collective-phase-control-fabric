@@ -189,6 +189,8 @@ scope and shard checks. The pinned mutation tool's exclusion of decorated classe
 and its nested-package naming limits must not silently omit control logic.
 All 20 physical parts of the five logical shards must succeed; retain the full
 catalogue and reject missing, overlapping or incomplete part results.
+The explicit owner waiver in `docs/mutation-exception-1.0.md` applies to 1.0.0
+publication only; report missing mutation qualification as waived, never passed.
 
 ## References
 

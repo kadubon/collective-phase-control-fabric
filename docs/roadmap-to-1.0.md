@@ -25,6 +25,11 @@ authenticated repository owner cannot provide an independent approval of their o
 The owner subsequently authorized an administrator review exception specifically for
 the 1.0.0 PR, conditional on every required check passing. This is not independent
 review and does not authorize bypassing checks or publication environment approval.
-The merge and its exact check results remain pending.
+The owner subsequently explicitly waived mutation qualification for the 1.0.0
+merge, release and PyPI publication. The assumption that native mutation had
+completed was corrected; it remained incomplete. See the
+[specific exception record](mutation-exception-1.0.md). All other required checks
+and the protected publication approval remain mandatory. The merge and its exact
+check results remain pending.
 
 Detailed qualification status and metric definitions: [1.0 validation](validation-1.0.md).
