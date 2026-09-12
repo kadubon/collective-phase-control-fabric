@@ -8,6 +8,9 @@ the project's English-only documentation requirement.
 
 Use [README.md](README.md) for installation, scope, commands, and safety boundaries.
 
+For 1.0.1, [full mutation qualification](docs/mutation-qualification-1.0.1.md) is required;
+the historical 1.0.0 waiver cannot qualify this patch.
+
 The 1.0 development target adds [fixed-model observation control](docs/epistemic-growth-control.md)
 and [checked finite workflows](docs/checked-capability-composition.md). It defines
 a [maintained public API](docs/public-api.md) while retaining Beta classification.

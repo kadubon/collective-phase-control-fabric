@@ -28,6 +28,7 @@ Offline growth: cpcf growth inspect/plan/check-plan/compare/export/replay/ingest
 Synthetic input: cpcf growth example growth-demo --json.
 Growth guide: docs/growth-planning.md; theory mapping: docs/growth-research-mapping.md.
 1.0 development: docs/roadmap-to-1.0.md; docs/public-api.md; docs/epistemic-growth-control.md.
+1.0.1 full mutation qualification: docs/mutation-qualification-1.0.1.md; no transferred 1.0.0 waiver.
 Opt-in --epistemic binds a fixed-model observation kernel; replay consumes visible symbols.
 Retain correlated full-ledger support and common observation-based entry/continuation.
 Information-use and net sensing value are distinct reoptimized comparisons; no probabilities.

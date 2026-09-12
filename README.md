@@ -26,6 +26,10 @@ the package remains Beta and makes no empirical acceleration claim.
 Mutation qualification for 1.0.0 is [explicitly waived by the owner](docs/mutation-exception-1.0.md),
 not passed. Other publication checks and protected PyPI approval remain required.
 
+The 1.0.1 patch restores the full mutation qualification requirement and strengthens
+control-summary and OIDC regression tests. See the [qualification procedure](docs/mutation-qualification-1.0.1.md)
+and linked CI status; the historical waiver supplies no passing 1.0.1 evidence.
+
 The one public distribution contains the offline core, CLI, schema registry, bundle verifier,
 runner protocol models, and all import packages.
 

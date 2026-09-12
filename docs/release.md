@@ -1,5 +1,8 @@
 # Release Process
 
+For the 1.0.1 patch, follow the [mutation qualification procedure](mutation-qualification-1.0.1.md).
+The full gate applies; the 1.0.0 waiver is not transferable.
+
 The GitHub repository, workflow, and PyPI project identifiers are fixed:
 
 - repository: `kadubon/collective-phase-control-fabric`

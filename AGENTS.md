@@ -45,6 +45,9 @@ release and PyPI publication only. Follow `docs/mutation-exception-1.0.md`; reco
 waived/skipped, never passed. All other checks, environment approval and scientific
 boundaries remain mandatory. Normal CI and all other releases retain the full gate.
 
+For 1.0.1, follow `docs/mutation-qualification-1.0.1.md`. Never transfer an old
+interrupted run's terminal subset into a new revision's qualification results.
+
 Mutation runs use `scripts.prepare_mutation_workspace` to create a hash-checked
 single-`src` copy. Keep the import-origin and catalogue-scope checks: the pinned
 tool otherwise skips decorated control classes and mismatches nested package

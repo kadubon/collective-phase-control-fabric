@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.1 — unreleased
+## 1.0.1
 
 - Strengthen mutation regression tests for exact onboarding blockers, OIDC request
   bindings and polling bounds, and correlated epistemic inspection summaries.

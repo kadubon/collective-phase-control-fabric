@@ -192,6 +192,9 @@ catalogue and reject missing, overlapping or incomplete part results.
 The explicit owner waiver in `docs/mutation-exception-1.0.md` applies to 1.0.0
 publication only; report missing mutation qualification as waived, never passed.
 
+For 1.0.1 use the [full qualification procedure](../../../docs/mutation-qualification-1.0.1.md).
+Old incomplete execution results are diagnostic only, never replacement shard evidence.
+
 ## References
 
 - [v0.6 authority and scientific boundaries](references/v6-boundaries.md)
