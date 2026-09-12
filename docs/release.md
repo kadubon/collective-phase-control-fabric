@@ -69,16 +69,18 @@ The required `mutation` job runs even when a shard fails and explicitly rejects 
 After all 20 parts succeed, it downloads their full reports and runs:
 
 ```text
-uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json --parts 4
+uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.1.json --parts 4
 uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
 uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 ```
 
 The merger requires identical complete catalogues and the reviewed Mutmut version, count
-and SHA-256 fingerprint in `audit/mutation-catalogue-v1.0.json`: 17,581 unique names
+and SHA-256 fingerprint in `audit/mutation-catalogue-v1.0.1.json`: 17,601 unique names
 from the complete generated native catalogue, including all configured modules
 and required control methods. The historical 0.7 record remains unchanged at
-12,284 names. Each fingerprint is the SHA-256 of
+12,284 names, and the historical 1.0 record remains unchanged at 17,581 names.
+The 20 added 1.0.1 mutant bodies concern previously uncovered invalid-token and
+expired-device responses; no old mutant body was removed. Each fingerprint is the SHA-256 of
 UTF-8 sorted names, each followed by a newline. It identifies catalogue membership, not
 empirical evidence or source authenticity; the CI commit binds the source and execution.
 

@@ -5,8 +5,10 @@
 - Strengthen mutation regression tests for exact onboarding blockers, OIDC request
   bindings and polling bounds, and correlated epistemic inspection summaries.
 - Restore the normal full-catalogue mutation qualification requirement after the
-  explicit 1.0.0-only publication waiver. Qualification is pending; no passing
-  score is claimed until every assigned mutation has a terminal result.
+  explicit 1.0.0-only publication waiver. Require every assigned mutation to have
+  a terminal result and all 20 execution parts to pass before claiming a score.
+- Expand the reviewed catalogue from 17,581 to 17,601 mutants as new tests reach
+  invalid-token and expired-device response paths; remove no mutant bodies.
 - Preserve the maintained 1.0 public API, `cpcf.io/v0.6` protocol identity and Beta
   classification. No external empirical acceleration experiment was performed.
 

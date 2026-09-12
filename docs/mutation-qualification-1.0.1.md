@@ -28,9 +28,13 @@ The merger rejects missing, overlapping, incomplete and foreign-catalogue
 reports. The independent scope check and unchanged aggregate 85% floor are
 mandatory. A tool exit code or catalogue fingerprint alone cannot qualify a run.
 
-The reviewed catalogue is `audit/mutation-catalogue-v1.0.json`: 17,581 names,
+The reviewed catalogue is `audit/mutation-catalogue-v1.0.1.json`: 17,601 names,
 Mutmut 3.6.0, sorted-name SHA-256
-`bac5c7a52347be74c53590a0bd8e53f285d05ef48ef80795d5bf9b42eaa64cd3`.
+`9038e37021f519f537e80163df82112d242bf57d602a901f134a5295a0f38690`.
+Compared with the historical 1.0 catalogue, coverage of invalid-token and
+expired-device response paths adds 20 mutant bodies and removes none. Both the
+complete name inventory and the actual generated function-body differences were
+reviewed; a shifted mutation index alone is not evidence of a new mutation.
 Reuse of this membership record is permitted only when the freshly generated
 complete inventory matches it. Results from the interrupted 1.0.0 run are
 diagnostic material and cannot replace any 1.0.1 execution part.

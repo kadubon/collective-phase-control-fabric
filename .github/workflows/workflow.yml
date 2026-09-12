@@ -238,7 +238,7 @@ jobs:
           path: mutation-shards
       - run: >-
           uv run --frozen python -m scripts.merge_mutation_results
-          mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json --parts 4
+          mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.1.json --parts 4
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: mutation-results
