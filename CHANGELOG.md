@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (unreleased)
+## 1.0.0
 
 - Mutation qualification is explicitly waived by the owner for 1.0.0 publication;
   no complete passing score is claimed. Other release checks remain mandatory.
