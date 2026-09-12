@@ -21,12 +21,16 @@ protocol identity are unchanged.
 
 ## Evidence required before publication
 
-Follow [the release procedure](release.md). All 20 physical parts of the five
+Follow [the release procedure](release.md). All 40 physical parts of the five
 logical shards must succeed against the same revision, configuration and full
 catalogue. Preserve the isolated source hash manifest and import-origin checks.
 The merger rejects missing, overlapping, incomplete and foreign-catalogue
 reports. The independent scope check and unchanged aggregate 85% floor are
 mandatory. A tool exit code or catalogue fingerprint alone cannot qualify a run.
+
+The initial 20-part run completed nine parts but eleven exceeded 300 minutes,
+leaving 266 assigned mutants unchecked. It did not qualify. Eight physical parts
+per logical shard reduce scheduling load without changing any mutation or test.
 
 The reviewed catalogue is `audit/mutation-catalogue-v1.0.1.json`: 17,601 names,
 Mutmut 3.6.0, sorted-name SHA-256

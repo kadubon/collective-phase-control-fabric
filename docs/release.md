@@ -54,22 +54,23 @@ the external operational evidence listed above.
 ## Complete mutation assurance within hosted job limits
 
 CI and release retain five logical shards: positive Mutmut indices modulo five.
-Each logical shard has four physical parts, assigned by `(index // 5) % 4`.
-The 20 jobs read `scripts.mutation_selectors` output into a Bash array and pass it
+Each logical shard has eight physical parts, assigned by `(index // 5) % 8`.
+The 40 jobs read `scripts.mutation_selectors` output into a Bash array and pass it
 as literal arguments to the fixed Mutmut command. These selectors partition
-all positive indices modulo 20 without overlap, including single-digit indices.
+all positive indices modulo 40 without overlap. The last three digits determine
+the residue; separate exact patterns cover indices below 100 without leading zeros.
 Every part uses the same frozen configuration, mutation
 targets, coverage-based generation, test selection, baseline checks and per-mutant timeouts.
-CI starts mutation parts after platform, quality and PostgreSQL checks, so the 20
+CI starts mutation parts after platform, quality and PostgreSQL checks, so the 40
 mutation jobs cannot occupy all hosted slots while those prerequisite checks wait.
 Each part's execution step is bounded to 300 minutes so a step timeout can still retain its
 complete diagnostic status list before the hosted job limit.
 
 The required `mutation` job runs even when a shard fails and explicitly rejects that failure.
-After all 20 parts succeed, it downloads their full reports and runs:
+After all 40 parts succeed, it downloads their full reports and runs:
 
 ```text
-uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.1.json --parts 4
+uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.1.json --parts 8
 uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
 uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 ```
@@ -90,6 +91,15 @@ the assigned part supplies each mutant's terminal status. Missing parts cannot b
 with reports from an earlier run or another revision. The full union retains surviving,
 untested, timeout, suspicious and segfault results as failures under the unchanged 85% gate.
 Raw shard artifacts and the combined report remain available for 14 days.
+
+The first 1.0.1 run `34692733145` used 20 execution parts: nine succeeded and
+eleven reached the 300-minute limit, leaving 266 assigned mutants unchecked.
+Its 17,335 terminal results cannot qualify the full 17,601-member catalogue.
+The move to 40 parts halves each assignment while preserving logical ownership,
+the selected tests, catalogue, operators, per-mutant timeouts and the 85% floor.
+Old reports remain diagnostic only; every new part must execute and succeed.
+The merger still reads historical one- and four-part layouts when explicitly
+requested, but they cannot substitute for the current eight-part layout.
 
 The initial expanded-catalogue CI run `34668423252` reached the unchanged 300-minute
 limit in all five original execution jobs. Its incomplete results did not qualify.

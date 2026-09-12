@@ -6,9 +6,12 @@
   bindings and polling bounds, and correlated epistemic inspection summaries.
 - Restore the normal full-catalogue mutation qualification requirement after the
   explicit 1.0.0-only publication waiver. Require every assigned mutation to have
-  a terminal result and all 20 execution parts to pass before claiming a score.
+  a terminal result and all 40 execution parts to pass before claiming a score.
 - Expand the reviewed catalogue from 17,581 to 17,601 mutants as new tests reach
   invalid-token and expired-device response paths; remove no mutant bodies.
+- Split each logical mutation shard into eight execution parts after the 20-part
+  run exceeded hosted limits. Preserve full membership, every-part success,
+  missing/overlap/incomplete rejection, test selection and the 85% floor.
 - Preserve the maintained 1.0 public API, `cpcf.io/v0.6` protocol identity and Beta
   classification. No external empirical acceleration experiment was performed.
 

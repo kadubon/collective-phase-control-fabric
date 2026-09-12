@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def reports(directory: Path, parts: int = 1) -> dict[str, str]:
     expected = {
         f"example.function__mutmut_{index}": "survived" if index == 1 else "killed"
-        for index in range(1, 21)
+        for index in range(1, max(20, SHARDS * parts * 2) + 1)
     }
     for owner in range(SHARDS * parts):
         shard, part = owner % SHARDS, owner // SHARDS
@@ -71,6 +71,28 @@ def test_physical_parts_preserve_full_results_and_logical_owners(tmp_path: Path)
         assert matches == [(number % SHARDS, (number // SHARDS) % PARTS)]
 
 
+def test_previous_four_part_reports_remain_readable_without_reassignment(tmp_path: Path) -> None:
+    directory = tmp_path / "parts"
+    expected = reports(directory, 4)
+    assert merge_results(directory, tmp_path / "catalogue.json", parts=4) == expected
+    with pytest.raises(ValueError, match="mutation_shard_set_mismatch"):
+        merge_results(directory, tmp_path / "catalogue.json", parts=8)
+
+
+def test_large_indices_have_one_owner_without_decimal_suffix_aliasing() -> None:
+    for power in (3, 6, 9, 12):
+        for offset in range(80):
+            number = 10**power + offset
+            owners = [
+                shard + SHARDS * part
+                for shard in range(SHARDS)
+                for part in range(PARTS)
+                for pattern in selectors(shard, part)
+                if fnmatch.fnmatchcase(f"module.fn__mutmut_{number}", pattern)
+            ]
+            assert owners == [number % (SHARDS * PARTS)]
+
+
 @pytest.mark.parametrize(
     ("alteration", "code"),
     [
@@ -92,7 +114,7 @@ def test_physical_part_failures_are_not_masked(tmp_path: Path, alteration: str, 
         path.unlink()
         path.parent.rmdir()
     elif alteration == "extra":
-        (directory / "mutation-shard-1-4").mkdir()
+        (directory / f"mutation-shard-1-{PARTS}").mkdir()
     elif alteration in {"incomplete", "interrupted"}:
         status = "not checked" if alteration == "incomplete" else "check was interrupted by user"
         path.write_text(content.replace("__mutmut_16: killed", f"__mutmut_16: {status}"))
@@ -109,7 +131,7 @@ def test_physical_part_failures_are_not_masked(tmp_path: Path, alteration: str, 
 def test_invalid_partition_counts_and_indices_are_rejected(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="mutation_partition_count_invalid"):
         merge_results(tmp_path, tmp_path / "absent", parts=2)
-    for shard, part in ((-1, 0), (5, 0), (0, -1), (0, 4)):
+    for shard, part in ((-1, 0), (5, 0), (0, -1), (0, PARTS)):
         with pytest.raises(ValueError, match="mutation_partition_invalid"):
             selectors(shard, part)
 
@@ -131,9 +153,15 @@ def test_partition_cli_only_emits_validated_literal_selectors(
         assert capsys.readouterr().out == ""
 
 
-def test_complete_shards_reproduce_the_unsharded_score(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "parts,count,score,reject_threshold",
+    [(1, 20, "95.00%", 96), (4, 40, "97.50%", 98), (8, 80, "98.75%", 99)],
+)
+def test_complete_shards_reproduce_the_unsharded_score(
+    tmp_path: Path, parts: int, count: int, score: str, reject_threshold: int
+) -> None:
     directory = tmp_path / "shards"
-    expected = reports(directory)
+    expected = reports(directory, parts)
     output = tmp_path / "combined.txt"
     result = subprocess.run(
         [
@@ -144,6 +172,8 @@ def test_complete_shards_reproduce_the_unsharded_score(tmp_path: Path) -> None:
             str(output),
             "--catalogue",
             str(tmp_path / "catalogue.json"),
+            "--parts",
+            str(parts),
         ],
         cwd=ROOT,
         check=False,
@@ -151,9 +181,13 @@ def test_complete_shards_reproduce_the_unsharded_score(tmp_path: Path) -> None:
         text=True,
     )
     assert result.returncode == 0
-    assert "20 unique mutants" in result.stdout and "example.function" not in result.stdout
-    assert read_results(output) == merge_results(directory, tmp_path / "catalogue.json") == expected
-    for threshold, exit_code in ((85, 0), (96, 1)):
+    assert f"{count} unique mutants" in result.stdout and "example.function" not in result.stdout
+    assert (
+        read_results(output)
+        == merge_results(directory, tmp_path / "catalogue.json", parts=parts)
+        == expected
+    )
+    for threshold, exit_code in ((85, 0), (reject_threshold, 1)):
         scored = subprocess.run(
             [
                 sys.executable,
@@ -167,7 +201,7 @@ def test_complete_shards_reproduce_the_unsharded_score(tmp_path: Path) -> None:
             capture_output=True,
             text=True,
         )
-        assert scored.returncode == exit_code and "95.00%" in scored.stdout
+        assert scored.returncode == exit_code and score in scored.stdout
 
 
 @pytest.mark.parametrize("status", sorted(COUNTED_FAILURES | COUNTED_SUCCESSES))
@@ -350,7 +384,7 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
         assert (
             "uv run --frozen python -m scripts.merge_mutation_results "
             "mutation-shards mutation-results.txt --catalogue "
-            "audit/mutation-catalogue-v1.0.1.json --parts 4" in commands
+            "audit/mutation-catalogue-v1.0.1.json --parts 8" in commands
         )
         assert (
             commands[-1] == "uv run --frozen python scripts/check_mutation_score.py "
