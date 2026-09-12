@@ -7,7 +7,10 @@ On 2026-09-12 the repository owner explicitly authorized merging without complet
 mutation tests, then extended that authorization to the GitHub release and PyPI
 publication. The accompanying assumption that local mutation testing had already
 completed was corrected: the native run was still incomplete. Its partial results
-are not a passing score or release assurance.
+are not a passing score or release assurance. The native run was subsequently
+stopped with its full diagnostic report preserved: 12,951 evaluated, 4,630
+incomplete. The score gate rejected it as incomplete; the tool's zero exit code
+on interruption is not treated as a successful verification.
 
 The first expanded CI run, `34668423252`, reached the 300-minute limit in all five
 mutation jobs. Its aggregate correctly failed. The catalogue contains 17,581 names,
