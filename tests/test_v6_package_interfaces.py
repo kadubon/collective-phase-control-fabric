@@ -219,7 +219,7 @@ def test_authz_runner_exports_and_process_entrypoint_fail_closed(
             maximum_token_lifetime_seconds=1,
         )
 
-    assert __version__ == "0.7.0"
+    assert __version__ == "1.0.0"
     assert RunnerConformance(accepted=True, code="ok").accepted
     assert callable(validate_receipt)
 

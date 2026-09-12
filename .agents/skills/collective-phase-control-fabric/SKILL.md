@@ -1,11 +1,11 @@
 ---
 name: collective-phase-control-fabric
-description: Inspect CPCF v0.6 evidence and plan bounded offline capability growth with finite endogenous frontiers while preserving model, observation, and authority boundaries. Use for schema and bundle checks, finite growth planning, evidence and trust review, control-plane workflows, external receipts, and read-only legacy compatibility.
+description: Inspect CPCF evidence and plan finite growth with endogenous frontiers, fixed-model observations, and checked primitive compositions. Use for CPCF planning, evidence admission, schema/bundle inspection, and read-only legacy compatibility.
 license: Apache-2.0
 metadata:
   author: Collective Phase Control Fabric contributors
   repository: https://github.com/kadubon/collective-phase-control-fabric
-  version: "1.2"
+  version: "1.3"
 ---
 
 # Collective Phase Control Fabric
@@ -65,6 +65,11 @@ Matching object digests establish content consistency only. Without an admitted 
 and trust policy, report authenticity as `unknown`.
 
 ### Offline growth planning
+
+For opt-in fixed-model control and workflow synthesis, read
+[epistemic and composition boundaries](references/epistemic-composition.md).
+The maintained Python facade is `collective_phase_control_fabric.growth_control`;
+version 1.0 defines its public contract while retaining Beta publication status.
 
 For investment beyond blocker repair, use the explicit `cpcf growth` family. Read the
 [finite growth guide](../../../docs/growth-planning.md) and
@@ -177,6 +182,15 @@ quality, schema, fixture, reference, security, and publication-hygiene checks. S
 source-tree, staged-content, Gitleaks, and built wheel/source-distribution hygiene checks described
 in `docs/security.md`. A source push does not authorize a release, deployment, tag, or package
 publication.
+
+Before mutation qualification, follow [the release procedure](../../../docs/release.md).
+Use the isolated source layout and retain source-hash, import-origin, full-catalogue,
+scope and shard checks. The pinned mutation tool's exclusion of decorated classes
+and its nested-package naming limits must not silently omit control logic.
+All 20 physical parts of the five logical shards must succeed; retain the full
+catalogue and reject missing, overlapping or incomplete part results.
+The explicit owner waiver in `docs/mutation-exception-1.0.md` applies to 1.0.0
+publication only; report missing mutation qualification as waived, never passed.
 
 ## References
 

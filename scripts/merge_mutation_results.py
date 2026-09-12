@@ -35,7 +35,9 @@ def read_results(path: Path) -> dict[str, str]:
     return results
 
 
-def merge_results(directory: Path, catalogue_path: Path) -> dict[str, str]:
+def merge_results(directory: Path, catalogue_path: Path, *, parts: int = 1) -> dict[str, str]:
+    if parts not in {1, 4}:
+        raise ValueError("mutation_partition_count_invalid")
     declaration = json.loads(catalogue_path.read_text(encoding="utf-8"))
     if not isinstance(declaration, dict) or set(declaration) != {
         "mutmut_version",
@@ -45,12 +47,17 @@ def merge_results(directory: Path, catalogue_path: Path) -> dict[str, str]:
         raise ValueError("mutation_catalogue_declaration_invalid")
     if declaration["mutmut_version"] != importlib.metadata.version("mutmut"):
         raise ValueError("mutation_tool_version_mismatch")
-    expected = {f"mutation-shard-{index}" for index in range(SHARDS)}
+    names = [
+        f"mutation-shard-{shard}" + (f"-{part}" if parts > 1 else "")
+        for part in range(parts)
+        for shard in range(SHARDS)
+    ]
+    expected = set(names)
     if {path.name for path in directory.iterdir()} != expected:
         raise ValueError("mutation_shard_set_mismatch")
     reports = []
-    for index in range(SHARDS):
-        folder = directory / f"mutation-shard-{index}"
+    for folder_name in names:
+        folder = directory / folder_name
         if folder.is_symlink() or not folder.is_dir():
             raise ValueError("mutation_shard_path_invalid")
         path = folder / "mutation-results.txt"
@@ -71,8 +78,8 @@ def merge_results(directory: Path, catalogue_path: Path) -> dict[str, str]:
         raise ValueError("mutation_declared_catalogue_mismatch")
     combined: dict[str, str] = {}
     for name in sorted(catalogue):
-        # CLI selectors partition the final decimal digit as [05], [16], [27], [38], [49].
-        owner = int(name.rsplit("__mutmut_", 1)[1]) % SHARDS
+        # Four physical parts retain each original modulo-five logical owner.
+        owner = int(name.rsplit("__mutmut_", 1)[1]) % (SHARDS * parts)
         for index, report in enumerate(reports):
             status = report[name]
             if index == owner:
@@ -89,9 +96,10 @@ def main() -> int:
     parser.add_argument("directory", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--catalogue", type=Path, required=True)
+    parser.add_argument("--parts", type=int, choices=(1, 4), default=1)
     args = parser.parse_args()
     try:
-        combined = merge_results(args.directory, args.catalogue)
+        combined = merge_results(args.directory, args.catalogue, parts=args.parts)
         args.output.write_text(
             "".join(f"{name}: {status}\n" for name, status in combined.items()),
             encoding="utf-8",
@@ -101,7 +109,10 @@ def main() -> int:
         code = str(error) if isinstance(error, ValueError) else "mutation_shard_io_error"
         print(f"mutation shard gate failed: {code}")
         return 1
-    print(f"mutation shards complete: {len(combined)} unique mutants across {SHARDS} shards")
+    print(
+        f"mutation shards complete: {len(combined)} unique mutants across "
+        f"{SHARDS} logical shards and {SHARDS * args.parts} execution parts"
+    )
     return 0
 
 

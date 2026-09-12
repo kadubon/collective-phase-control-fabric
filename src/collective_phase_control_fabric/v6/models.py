@@ -1912,6 +1912,261 @@ class GrowthFrontierAssessment(Document):
     spec: GrowthFrontierAssessmentSpec
 
 
+class EpistemicKernelRow(StrictModel):
+    model_id: Identifier
+    action_digest: Digest
+    successor_id: Identifier
+    observations: list[Identifier] = Field(min_length=1, max_length=32)
+
+
+class EpistemicCostEvent(StrictModel):
+    event_id: Identifier
+    source_digest: Digest
+    after_primitive_steps: int = Field(ge=0, le=16)
+    charges: dict[Identifier, dict[Identifier, Rational]] = Field(min_length=1, max_length=6)
+    duration: Rational
+    reserved_synthesis_expansions: int = Field(default=0, ge=0, le=1_000_000)
+
+
+class EpistemicContractSpec(StrictModel):
+    growth_contract_digest: Digest
+    frontier_digest: Digest | None = None
+    semantics: Literal["fixed-model-adversarial-outcomes"] = "fixed-model-adversarial-outcomes"
+    visible_channels: Literal["declared-symbols-only"] = "declared-symbols-only"
+    measurement_mapping: Literal["receipt-stdout-symbol-v1"] = "receipt-stdout-symbol-v1"
+    # Timing, resource readbacks, availability and simulator/debug IDs are not channels.
+    observation_alphabet: list[Identifier] = Field(min_length=1, max_length=32)
+    kernel: list[EpistemicKernelRow] = Field(min_length=1, max_length=16384)
+    max_support: int = Field(default=128, ge=1, le=512)
+    max_support_bytes: int = Field(default=1_000_000, ge=1, le=4_000_000)
+    max_history: int = Field(default=16, ge=1, le=16)
+    cost_events: list[EpistemicCostEvent] = Field(default_factory=list, max_length=16)
+
+
+class EpistemicContract(Document):
+    kind: Literal["epistemic-contract"] = "epistemic-contract"
+    spec: EpistemicContractSpec
+
+
+class EpistemicHypothesis(StrictModel):
+    model_id: Identifier
+    state: GrowthFrontierState | GrowthState
+    entry: GrowthCheckpoint | None = None
+    primitive_steps: int = Field(default=0, ge=0, le=16)
+
+
+class EpistemicStep(StrictModel):
+    action_id: Identifier
+    observation: Identifier
+    entry: bool = False
+    comparison_history_length: int = Field(default=0, ge=0, le=16)
+
+
+class EpistemicPolicyNode(StrictModel):
+    support_digest: Digest
+    action_id: Identifier | None = None
+    entry: bool = False
+    branches: dict[Identifier, EpistemicPolicyNode] = Field(default_factory=dict, max_length=32)
+
+
+class EpistemicPlanSpec(StrictModel):
+    input_digest: Digest
+    epistemic_contract_digest: Digest
+    checker_version: Literal["epistemic-reference-1"] = "epistemic-reference-1"
+    history: list[EpistemicStep] = Field(default_factory=list, max_length=16)
+    observation_map: dict[Identifier, Identifier] = Field(max_length=32)
+    excluded_action_ids: list[Identifier] = Field(default_factory=list, max_length=16)
+    excluded_interactions: list[Identifier] = Field(default_factory=list, max_length=32)
+    code: Identifier
+    policy: EpistemicPolicyNode | None = None
+    policy_digest: Digest | None = None
+    objective: GrowthObjective | None = None
+    search: GrowthSearchReport
+    comparisons: list[GrowthComparison] = Field(default_factory=list, max_length=128)
+    peak_support: int = Field(ge=0, le=512)
+    primitive_transitions: int = Field(ge=0)
+    model_only: Literal[True] = True
+    execution_authorized: Literal[False] = False
+    empirical_attribution: Literal["undetermined"] = "undetermined"
+
+
+class EpistemicPlan(Document):
+    kind: Literal["epistemic-plan"] = "epistemic-plan"
+    spec: EpistemicPlanSpec
+
+
+class InformationDifference(StrictModel):
+    comparison_complete: bool
+    entry_status: Literal["both", "full-only", "comparator-only", "neither", "unknown"]
+    entry_time_delta: Rational | None = None
+    terminal_attainment_delta: Rational | None = None
+    cost_delta: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    debt_delta: dict[Identifier, Rational] = Field(default_factory=dict, max_length=32)
+    duration_delta: Rational | None = None
+    direction: Literal["full-minus-comparator"] = "full-minus-comparator"
+
+
+class InformationValueSpec(StrictModel):
+    full: EpistemicPlan
+    information_blind: EpistemicPlan
+    without_sensing: EpistemicPlan
+    masked_channel: dict[Identifier, Identifier] = Field(min_length=1, max_length=32)
+    optional_sensing_actions: list[Identifier] = Field(min_length=1, max_length=16)
+    information_use: InformationDifference
+    net_sensing: InformationDifference
+    scope: Literal["prior-free-finite-model-relative"] = "prior-free-finite-model-relative"
+    empirical_attribution: Literal["undetermined"] = "undetermined"
+
+
+class InformationValue(Document):
+    kind: Literal["information-value"] = "information-value"
+    spec: InformationValueSpec
+
+
+class WorkflowPrimitiveBinding(StrictModel):
+    action_digest: Digest
+    capability_digest: Digest
+    input_schema_digest: Digest
+    output_schema_digest: Digest
+    execution_policy_digest: Digest
+
+
+class WorkflowRequestSpec(StrictModel):
+    input_digest: Digest
+    history: list[EpistemicStep] = Field(default_factory=list, max_length=16)
+    grammar: Literal["finite-observation-tree"] = "finite-observation-tree"
+    library: list[WorkflowPrimitiveBinding] = Field(min_length=1, max_length=16)
+    input_schema_digest: Digest
+    output_schema_digest: Digest
+    target_capacities: dict[Identifier, Rational] = Field(min_length=1, max_length=32)
+    maximum_spent: dict[Identifier, Rational] = Field(min_length=1, max_length=32)
+    formation_charges: dict[Identifier, dict[Identifier, Rational]] = Field(
+        min_length=4, max_length=4
+    )
+    formation_duration: Rational
+    per_use_charges: dict[Identifier, dict[Identifier, Rational]] = Field(
+        min_length=2, max_length=2
+    )
+    per_use_duration: Rational
+    max_primitive_steps: int = Field(ge=1, le=16)
+    max_candidates: int = Field(default=32, ge=1, le=128)
+
+
+class WorkflowRequest(Document):
+    kind: Literal["workflow-request"] = "workflow-request"
+    spec: WorkflowRequestSpec
+
+
+class WorkflowCandidateSpec(StrictModel):
+    request_digest: Digest
+    checked_domain_digest: Digest
+    workflow_id: Identifier
+    ir: EpistemicPolicyNode
+    constituent_digests: list[Digest] = Field(min_length=1, max_length=64)
+    expanded_primitive_steps: int = Field(ge=1, le=16)
+    expires: Rational
+    model_only: Literal[True] = True
+    execution_authorized: Literal[False] = False
+
+
+class WorkflowCandidate(Document):
+    kind: Literal["workflow-candidate"] = "workflow-candidate"
+    spec: WorkflowCandidateSpec
+
+
+class WorkflowCertificateSpec(StrictModel):
+    request_digest: Digest
+    candidate_digest: Digest
+    input_digest: Digest
+    initial_support_digest: Digest
+    terminal_support_digests: list[Digest] = Field(min_length=1, max_length=4096)
+    objective: GrowthObjective
+    primitive_steps: int = Field(ge=1, le=16)
+    checker_version: Literal["finite-workflow-checker-1"] = "finite-workflow-checker-1"
+    acceptance: Literal["finite-model-domain-only"] = "finite-model-domain-only"
+    capability_admitted: Literal[False] = False
+    execution_authorized: Literal[False] = False
+
+
+class WorkflowCertificate(Document):
+    kind: Literal["workflow-certificate"] = "workflow-certificate"
+    spec: WorkflowCertificateSpec
+
+
+class WorkflowSynthesisSpec(StrictModel):
+    request_digest: Digest
+    proposed_epistemic_contract: EpistemicContract
+    code: Identifier
+    candidates: list[WorkflowCandidate] = Field(default_factory=list, max_length=128)
+    certificates: list[WorkflowCertificate] = Field(default_factory=list, max_length=128)
+    search: GrowthSearchReport
+    existing_primitive_alternative: EpistemicPlan | None = None
+    reuse_without_formation_preferred: bool | None = None
+    formation_costs_incurred: Literal[True] = True
+    empirical_attribution: Literal["undetermined"] = "undetermined"
+
+
+class WorkflowSynthesis(Document):
+    kind: Literal["workflow-synthesis"] = "workflow-synthesis"
+    spec: WorkflowSynthesisSpec
+
+
+class CatalogueRevisionSpec(StrictModel):
+    parent_revision_digest: Digest | None = None
+    parent_epistemic_digest: Digest
+    proposed_epistemic_contract: EpistemicContract
+    history: list[EpistemicStep] = Field(max_length=16)
+    request_digest: Digest
+    candidate_digest: Digest
+    certificate_digest: Digest
+    revision_number: int = Field(ge=1, le=4)
+    cumulative_synthesis_expansions: int = Field(ge=0, le=1_000_000)
+    primitive_step_limit: int = Field(ge=1, le=16)
+    required_admission: Literal["existing-independent-capability-and-policy-quorum"] = (
+        "existing-independent-capability-and-policy-quorum"
+    )
+    model_only: Literal[True] = True
+    signed_history_modified: Literal[False] = False
+    execution_authorized: Literal[False] = False
+
+
+class CatalogueRevision(Document):
+    kind: Literal["catalogue-revision"] = "catalogue-revision"
+    spec: CatalogueRevisionSpec
+
+
+class EpistemicObservationSpec(StrictModel):
+    epistemic_contract_digest: Digest
+    growth_observation_digest: Digest
+    evaluator_principal_id: Identifier
+    history: list[EpistemicStep] = Field(min_length=1, max_length=16)
+    lifecycle: Lifecycle
+
+
+class EpistemicObservation(Document):
+    kind: Literal["epistemic-observation"] = "epistemic-observation"
+    spec: EpistemicObservationSpec
+
+
+class EpistemicAssessmentSpec(StrictModel):
+    input_digest: Digest
+    observation_digest: Digest
+    code: Identifier
+    external_evidence_compatibility: Literal["compatible", "incompatible"]
+    legacy_evidence_assessment: GrowthAssessment
+    compatible_support_digest: Digest | None = None
+    history: list[EpistemicStep] = Field(default_factory=list, max_length=16)
+    reasons: list[Identifier] = Field(default_factory=list, max_length=256)
+    empirical_attribution: Literal["undetermined"] = "undetermined"
+    capability_admitted: Literal[False] = False
+    execution_authorized: Literal[False] = False
+
+
+class EpistemicAssessment(Document):
+    kind: Literal["epistemic-assessment"] = "epistemic-assessment"
+    spec: EpistemicAssessmentSpec
+
+
 type DocumentType = (
     UnitRegistryDocument
     | PhaseContract
@@ -1968,6 +2223,16 @@ type DocumentType = (
     | GrowthCapabilityFrontier
     | GrowthFrontierPlan
     | GrowthFrontierAssessment
+    | EpistemicContract
+    | EpistemicPlan
+    | InformationValue
+    | WorkflowRequest
+    | WorkflowCandidate
+    | WorkflowCertificate
+    | WorkflowSynthesis
+    | CatalogueRevision
+    | EpistemicObservation
+    | EpistemicAssessment
 )
 
 DOCUMENT_MODELS: dict[str, type[Document]] = {
@@ -2028,6 +2293,16 @@ DOCUMENT_MODELS: dict[str, type[Document]] = {
         GrowthCapabilityFrontier,
         GrowthFrontierPlan,
         GrowthFrontierAssessment,
+        EpistemicContract,
+        EpistemicPlan,
+        InformationValue,
+        WorkflowRequest,
+        WorkflowCandidate,
+        WorkflowCertificate,
+        WorkflowSynthesis,
+        CatalogueRevision,
+        EpistemicObservation,
+        EpistemicAssessment,
     )
 }
 

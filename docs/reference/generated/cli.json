@@ -609,6 +609,308 @@
         {
           "choices": null,
           "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--request"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--candidate"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--synthesis"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--parent"
+          ],
+          "help": "",
+          "required": false
+        }
+      ],
+      "argv": [
+        "growth",
+        "catalogue-propose"
+      ],
+      "description": "Propose a checked unsigned next model catalogue.",
+      "help": "Propose a checked unsigned next model catalogue."
+    },
+    {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--request"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--candidate"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--revision"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--certificate"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--model-only"
+          ],
+          "help": "",
+          "required": false
+        }
+      ],
+      "argv": [
+        "growth",
+        "catalogue-replan"
+      ],
+      "description": "Replan with an explicitly model-only checked catalogue.",
+      "help": "Replan with an explicitly model-only checked catalogue."
+    },
+    {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--request"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--candidate"
+          ],
+          "help": "",
+          "required": true
+        }
+      ],
+      "argv": [
+        "growth",
+        "check-composition"
+      ],
+      "description": "Independently unfold a finite workflow candidate.",
+      "help": "Independently unfold a finite workflow candidate."
+    },
+    {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
             "--frontier"
           ],
           "help": "Optional closed model-only capability frontier.",
@@ -663,6 +965,22 @@
           ],
           "help": "",
           "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
         },
         {
           "choices": null,
@@ -728,7 +1046,17 @@
             "frontier-chain",
             "frontier-cycle",
             "frontier-comparator",
-            "frontier-no-entry"
+            "frontier-no-entry",
+            "epistemic-probe",
+            "epistemic-ambiguous",
+            "epistemic-verifier",
+            "epistemic-information",
+            "epistemic-composition",
+            "epistemic-integrated",
+            "epistemic-budget",
+            "epistemic-uninformative",
+            "epistemic-no-composition",
+            "epistemic-rejected-composition"
           ],
           "flags": [
             "--scenario"
@@ -769,6 +1097,22 @@
           ],
           "help": "",
           "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
         },
         {
           "choices": null,
@@ -839,6 +1183,22 @@
         {
           "choices": null,
           "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
             "--frontier"
           ],
           "help": "Optional closed model-only capability frontier.",
@@ -851,6 +1211,96 @@
           ],
           "help": "Directory of immutable model documents.",
           "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--masked-channel"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--sensing-action"
+          ],
+          "help": "",
+          "required": true
+        }
+      ],
+      "argv": [
+        "growth",
+        "information-value"
+      ],
+      "description": "Reoptimize information-blind and no-sensing policy classes.",
+      "help": "Reoptimize information-blind and no-sensing policy classes."
+    },
+    {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic-observation"
+          ],
+          "help": "",
+          "required": false
         },
         {
           "choices": null,
@@ -945,6 +1395,22 @@
         {
           "choices": null,
           "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
             "--frontier"
           ],
           "help": "Optional closed model-only capability frontier.",
@@ -991,6 +1457,22 @@
           ],
           "help": "",
           "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
         },
         {
           "choices": null,
@@ -1045,6 +1527,22 @@
         {
           "choices": null,
           "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
             "--frontier"
           ],
           "help": "Optional closed model-only capability frontier.",
@@ -1057,6 +1555,14 @@
           ],
           "help": "Directory of immutable model documents.",
           "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic-observation"
+          ],
+          "help": "",
+          "required": false
         },
         {
           "choices": null,
@@ -1151,6 +1657,22 @@
         {
           "choices": null,
           "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
             "--frontier"
           ],
           "help": "Optional closed model-only capability frontier.",
@@ -1163,6 +1685,14 @@
           ],
           "help": "Directory of immutable model documents.",
           "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic-observation"
+          ],
+          "help": "",
+          "required": false
         },
         {
           "choices": null,
@@ -1257,6 +1787,22 @@
         {
           "choices": null,
           "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
             "--frontier"
           ],
           "help": "Optional closed model-only capability frontier.",
@@ -1285,6 +1831,14 @@
           ],
           "help": "",
           "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--observation-symbol"
+          ],
+          "help": "",
+          "required": false
         }
       ],
       "argv": [
@@ -1293,6 +1847,146 @@
       ],
       "description": "Read-only hypothetical replay; never admit an observation.",
       "help": "Read-only hypothetical replay; never admit an observation."
+    },
+    {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        }
+      ],
+      "argv": [
+        "growth",
+        "support"
+      ],
+      "description": "Inspect correlated fixed-model support from visible history.",
+      "help": "Inspect correlated fixed-model support from visible history."
+    },
+    {
+      "arguments": [
+        {
+          "choices": null,
+          "flags": [
+            "--json"
+          ],
+          "help": "",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--output"
+          ],
+          "help": "Write the complete result as UTF-8 JSON.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "contract"
+          ],
+          "help": "",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--epistemic"
+          ],
+          "help": "Opt-in closed fixed-model observation sidecar.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--history"
+          ],
+          "help": "JSON array of visible action/observation steps.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--frontier"
+          ],
+          "help": "Optional closed model-only capability frontier.",
+          "required": false
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--objects"
+          ],
+          "help": "Directory of immutable model documents.",
+          "required": true
+        },
+        {
+          "choices": null,
+          "flags": [
+            "--request"
+          ],
+          "help": "",
+          "required": true
+        }
+      ],
+      "argv": [
+        "growth",
+        "synthesize"
+      ],
+      "description": "Compile bounded typed primitive observation workflows.",
+      "help": "Compile bounded typed primitive observation workflows."
     },
     {
       "arguments": [],

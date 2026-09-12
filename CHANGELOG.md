@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0 (unreleased)
+
+- Mutation qualification is explicitly waived by the owner for 1.0.0 publication;
+  no complete passing score is claimed. Other release checks remain mandatory.
+  See `docs/mutation-exception-1.0.md` for scope and the incomplete-run record.
+
+- Add an opt-in fixed-model observation sidecar with correlated full-ledger
+  information states, bounded observation-based policy search, independent
+  reconstruction and fresh original-evidence reassessment.
+- Distinguish reoptimized information-use value from net sensing benefit, with
+  typed objective differences and unknown results for incomplete comparisons.
+- Compile finite typed primitive workflows, independently check every prefix,
+  and propose charged copy-on-write catalogue revisions for explicit model-only
+  reuse. Primitive budgets, debt, time and activation depth remain in force.
+- Define a maintained growth-control facade while preserving released 0.6.1 and
+  0.7.0 schema identities and no-opt-in semantics. Protocol remains `cpcf.io/v0.6`.
+- Release qualification is pending in `docs/roadmap-to-1.0.md`. Retain Beta
+  classification; no external empirical acceleration experiment was performed.
+
 ## 0.7.0
 
 - Add bounded endogenous capability frontier expansion over an immutable finite

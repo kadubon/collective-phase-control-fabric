@@ -34,10 +34,21 @@ uv build
 
 Use the checked-in `uv.lock`. Do not regenerate it as a side effect of an unrelated command.
 
-CI and release partition mutation execution into five disjoint shards. Preserve the full
+CI and release partition mutation execution into five disjoint logical shards, each with four
+physical execution parts to fit hosted job limits. Require all 20 parts to succeed. Preserve the full
 catalogue fingerprint, all shard-success dependencies, missing/overlap/incomplete rejection,
 and the unchanged aggregate 85% floor. Never treat an interrupted or skipped shard as a pass.
 See `docs/release.md` before changing the mutation catalogue or scheduling.
+
+The owner explicitly waived completed mutation qualification for the 1.0.0 merge,
+release and PyPI publication only. Follow `docs/mutation-exception-1.0.md`; record
+waived/skipped, never passed. All other checks, environment approval and scientific
+boundaries remain mandatory. Normal CI and all other releases retain the full gate.
+
+Mutation runs use `scripts.prepare_mutation_workspace` to create a hash-checked
+single-`src` copy. Keep the import-origin and catalogue-scope checks: the pinned
+tool otherwise skips decorated control classes and mismatches nested package
+names. An unprepared monorepo run cannot qualify the complete mutation scope.
 
 Core and CLI checks must work in PowerShell, cmd-compatible Python execution, and POSIX shells on
 Windows and Linux. PostgreSQL, S3, OIDC, KMS, OCI, and Kubernetes are required only for server and
@@ -57,6 +68,14 @@ deployment integration tests, never for offline core inspection.
   original 52 native schema identities. Never treat model enablement as capability admission or
   execution authority; carry depth and prerequisite expiry across replanning.
 - `v6/runner.py`, `v6/projection.py`: external runner receipts and independent projection.
+- `growth_control.py`: maintained finite-growth public facade; do not freeze all internals.
+- `v6/epistemic.py`, `v6/epistemic_planning.py`, `v6/epistemic_checking.py`: fixed-parameter
+  correlated supports and observation policies. Retain all compatible ledgers; never branch on
+  hidden model IDs or take the union of enabled actions. Checker feasibility is not optimality.
+- `v6/information_value.py`: reoptimized paid-but-masked and no-sensing comparators are distinct.
+- `v6/composition.py`, `v6/synthesis.py`, `v6/catalogue_revision.py`: finite typed primitive
+  workflows, fresh unfolding certificates and charged model-only proposals. Never compress
+  primitive time/steps, reset debt/depth, or infer composite authority from primitive policies.
 - `v6/trials.py`: registration and external evidence compatibility.
 - `v6/storage.py`: immutable ledger and copy-on-write legacy boundary.
 - `packages/cpcf-api`: optional OIDC/RLS/S3 control plane; no adapter execution.

@@ -177,3 +177,13 @@ observation-driven model-set contraction and prior-free value-of-information pla
 The current rectangular adversary can choose a different applicable model at each step.
 A future `Theta_t` would retain the models compatible with the full observed history and
 contract that set after observations. That extension is not implemented in 0.7.0.
+
+## Frontier state under fixed-model observation control
+
+The optional epistemic sidecar retains a separate frontier and activation lineage
+for every compatible model/ledger pair. An action enabled in only some pairs is
+not universally available. Observation-based planning must use one common policy
+and preserve depth and expiry across catalogue proposals. See
+[epistemic control](epistemic-growth-control.md) and
+[checked workflow composition](checked-capability-composition.md). These finite
+extensions do not create executable authority or empirical capability evidence.

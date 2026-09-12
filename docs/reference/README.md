@@ -1,5 +1,9 @@
 # Runtime Reference
 
+The 1.0 development target adds ten closed epistemic/composition kinds while
+preserving all 55 previously released identities. New CLI modes and failure codes
+are generated from the same registries; see [the public surface](../public-api.md).
+
 The files in `generated/` are generated from runtime registries:
 
 - `cli.json` — installed CLI command tree

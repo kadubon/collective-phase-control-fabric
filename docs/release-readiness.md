@@ -56,3 +56,14 @@ penetration testing and live provider/runner containment evidence remain externa
 Existing partial audit findings remain partial. No receipts, trials or operational-assurance
 records are fabricated for package publication. See [release procedures](release.md) and the
 [frontier specification](endogenous-capability-frontier.md).
+
+## 1.0.0 qualification
+
+Version 1.0 defines the documented maintained software API while retaining Beta
+classification. M8/M9/M10 implementation and validation are tracked in the
+[requirement matrix](roadmap-to-1.0.md). All existing branch, coverage, mutation,
+security and publication gates remain mandatory. Actual Wiki publication precedes
+release. Normal review, branch protection and environment approvals must not be
+bypassed. Public-index installation and artifact/provenance verification are
+required before reporting publication complete. Existing operational-assurance
+and scientific limitations remain unresolved unless separately evidenced.

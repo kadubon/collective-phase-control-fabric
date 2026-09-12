@@ -71,6 +71,10 @@ jobs:
           tests/test_v6_db_worker_assurance.py tests/test_v6_golden_semantics.py
           tests/test_v6_growth.py tests/test_v6_growth_evidence.py tests/test_v6_growth_cli.py
           tests/test_v6_growth_frontier.py tests/test_v6_frontier_evidence_cli.py
+          tests/test_v6_epistemic.py tests/test_v6_epistemic_oracle.py
+          tests/test_v6_epistemic_evidence.py tests/test_v6_composition.py
+          tests/test_v6_epistemic_cli.py
+          tests/test_v6_epistemic_limits.py tests/test_v6_information_value.py
           tests/test_v6_intervention.py
           tests/test_v6_cli_auth.py tests/test_v6_coordination_trial_assurance.py
           tests/test_v6_model_assurance.py tests/test_v6_models_trust.py
@@ -94,6 +98,7 @@ jobs:
       - run: uv build
       - run: uv run --frozen python scripts/run_growth_examples.py --check
       - run: uv run --frozen python scripts/run_frontier_examples.py --check
+      - run: uv run --frozen python scripts/run_epistemic_examples.py --check
       - run: uv run --frozen python scripts/check_release_artifacts.py --dist dist --metadata-out release-metadata
       - run: uv run --frozen twine check dist/*
       - run: uv run --frozen python scripts/generate_sbom.py uv.lock release-metadata/cpcf-sbom.cdx.json
@@ -142,15 +147,12 @@ jobs:
           CPCF_TEST_OWNER_DATABASE_URL: postgresql+psycopg://cpcf_owner:cpcf-test@localhost:5432/cpcf
 
   mutation-shards:
+    needs: [core-platform, quality-security, postgres-integration]
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - {shard: 0, selector: "*__mutmut_*[05]"}
-          - {shard: 1, selector: "*__mutmut_*[16]"}
-          - {shard: 2, selector: "*__mutmut_*[27]"}
-          - {shard: 3, selector: "*__mutmut_*[38]"}
-          - {shard: 4, selector: "*__mutmut_*[49]"}
+        shard: [0, 1, 2, 3, 4]
+        part: [0, 1, 2, 3]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@e8d4307400f9427dba7cb98e488d6ab85f1cec5f
@@ -162,18 +164,34 @@ jobs:
           python-version: "3.14.6"
           enable-cache: true
       - run: uv sync --frozen --all-extras --group dev --group security
+      - name: Prepare isolated mutation layout
+        run: uv run --frozen python -m scripts.prepare_mutation_workspace .cache/mutation-workspace
       - name: Run assigned mutants
         timeout-minutes: 300
+        working-directory: .cache/mutation-workspace
         env:
-          MUTATION_SELECTOR: ${{ matrix.selector }}
-        run: uv run --frozen mutmut run "$MUTATION_SELECTOR"
+          MUTATION_SHARD: ${{ matrix.shard }}
+          MUTATION_PART: ${{ matrix.part }}
+        run: |
+          uv sync --frozen --all-extras --group dev --group security
+          uv run --frozen python -m scripts.mutation_selectors --shard "$MUTATION_SHARD" --part "$MUTATION_PART" > mutation-selectors.txt
+          mapfile -t mutation_selectors < mutation-selectors.txt
+          uv run --frozen mutmut run "${mutation_selectors[@]}"
       - run: uv run --frozen mutmut results --all true > mutation-results.txt
+        working-directory: .cache/mutation-workspace
         if: ${{ always() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: ${{ always() }}
         with:
-          name: mutation-shard-${{ matrix.shard }}
-          path: mutation-results.txt
+            name: mutation-shard-${{ matrix.shard }}-${{ matrix.part }}
+            path: .cache/mutation-workspace/mutation-results.txt
+            if-no-files-found: error
+            retention-days: 14
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: ${{ always() }}
+        with:
+          name: mutation-source-map-${{ matrix.shard }}-${{ matrix.part }}
+          path: .cache/mutation-workspace/mutation-source-manifest.json
           if-no-files-found: error
           retention-days: 14
 
@@ -199,13 +217,14 @@ jobs:
           path: mutation-shards
       - run: >-
           uv run --frozen python -m scripts.merge_mutation_results
-          mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v0.7.json
+          mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json --parts 4
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: mutation-results
           path: mutation-results.txt
           if-no-files-found: error
           retention-days: 14
+      - run: uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
       - run: uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 
   reference-operations:

@@ -62,6 +62,16 @@ GROWTH_EXTENSION_KINDS = {
     "growth-capability-frontier",
     "growth-frontier-plan",
     "growth-frontier-assessment",
+    "epistemic-contract",
+    "epistemic-plan",
+    "epistemic-observation",
+    "epistemic-assessment",
+    "information-value",
+    "workflow-request",
+    "workflow-candidate",
+    "workflow-certificate",
+    "workflow-synthesis",
+    "catalogue-revision",
 }
 
 

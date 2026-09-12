@@ -75,6 +75,10 @@ The mathematical tools are bounded formal accounting methods. Preserve these lim
 
 ## Review sequence
 
+Fixed-model support and composition add no authority. See
+[epistemic/composition boundaries](epistemic-composition.md) when those modes are
+selected. Keep independent policy feasibility distinct from complete optimization.
+
 1. Identify the immutable snapshot and analysis-basis digest.
 2. Determine the source-of-record owner for every material external object.
 3. Verify canonical document/schema identity and source pointer reconstruction.

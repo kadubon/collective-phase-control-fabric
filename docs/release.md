@@ -12,10 +12,25 @@ non-prerelease GitHub Release whose `vX.Y.Z` tag exactly matches package metadat
 also requires the repository variable `PYPI_PUBLISH_ENABLED=true` and approval in the protected
 `pypi` environment.
 
-The 0.6 and 0.7 series are published with the package classifier `Development Status :: 4 - Beta`.
+The 0.6 and 0.7 series and the 1.0 release target use the classifier `Development Status :: 4 - Beta`.
 The release workflow uses the explicit `beta` publication class, which permits OSS package
 distribution without treating absent external evidence as satisfied. A Beta package release is not
 an operational-assurance decision.
+
+The 1.0 target defines a maintained public API, not production maturity. Its
+qualification matrix is [tracked separately](roadmap-to-1.0.md). Complete the new
+epistemic/composition coverage and expanded mutation catalogue before release;
+the historical 0.7 catalogue below is not sufficient for changed source. Required
+checks, merge authorization and the actual Wiki update are release prerequisites.
+The specific owner-authorized 1.0 review exception is recorded in the requirement
+matrix; it does not waive any verification or publication environment gate.
+
+The owner subsequently authorized a separate, explicit **mutation qualification
+waiver for 1.0.0 merge and publication**. See the
+[exception record](mutation-exception-1.0.md). The release workflow's narrow,
+version-bound route records mutation as skipped/waived, not passed. All other
+verification and publication environment gates remain mandatory. Remove
+`CPCF_MUTATION_EXCEPTION_VERSION` after the release attempt.
 
 Operational assurance separately requires `release-evidence/vX.Y.Z.json`. The strict default mode
 checks exact version and commit bindings and requires passed availability-soak,
@@ -35,33 +50,62 @@ the external operational evidence listed above.
 
 ## Complete mutation assurance within hosted job limits
 
-CI and release run the same five selectors: `*__mutmut_*[05]`, `*__mutmut_*[16]`,
-`*__mutmut_*[27]`, `*__mutmut_*[38]`, and `*__mutmut_*[49]`. They partition positive
-Mutmut indices modulo five. Every shard keeps the original frozen configuration, mutation
+CI and release retain five logical shards: positive Mutmut indices modulo five.
+Each logical shard has four physical parts, assigned by `(index // 5) % 4`.
+The 20 jobs read `scripts.mutation_selectors` output into a Bash array and pass it
+as literal arguments to the fixed Mutmut command. These selectors partition
+all positive indices modulo 20 without overlap, including single-digit indices.
+Every part uses the same frozen configuration, mutation
 targets, coverage-based generation, test selection, baseline checks and per-mutant timeouts.
-Each shard's execution step is bounded to 300 minutes so a step timeout can still retain its
+CI starts mutation parts after platform, quality and PostgreSQL checks, so the 20
+mutation jobs cannot occupy all hosted slots while those prerequisite checks wait.
+Each part's execution step is bounded to 300 minutes so a step timeout can still retain its
 complete diagnostic status list before the hosted job limit.
 
 The required `mutation` job runs even when a shard fails and explicitly rejects that failure.
-After all five succeed, it downloads their full reports and runs:
+After all 20 parts succeed, it downloads their full reports and runs:
 
 ```text
-uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v0.7.json
+uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json --parts 4
+uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
 uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 ```
 
 The merger requires identical complete catalogues and the reviewed Mutmut version, count
-and SHA-256 fingerprint in `audit/mutation-catalogue-v0.7.json`. That record was generated
-from the complete local 0.7.0 run: 12,284 unique names. Its fingerprint is the SHA-256 of
+and SHA-256 fingerprint in `audit/mutation-catalogue-v1.0.json`: 17,581 unique names
+from the complete generated native catalogue, including all configured modules
+and required control methods. The historical 0.7 record remains unchanged at
+12,284 names. Each fingerprint is the SHA-256 of
 UTF-8 sorted names, each followed by a newline. It identifies catalogue membership, not
 empirical evidence or source authenticity; the CI commit binds the source and execution.
 
 Missing or altered members, duplicate lines, unexpected shards/files, unknown statuses,
 incomplete owner results and execution assigned to the wrong shard all fail closed. Only
-the assigned shard supplies each mutant's terminal status. The full union retains surviving,
+the assigned part supplies each mutant's terminal status. Missing parts cannot be replaced
+with reports from an earlier run or another revision. The full union retains surviving,
 untested, timeout, suspicious and segfault results as failures under the unchanged 85% gate.
 Raw shard artifacts and the combined report remain available for 14 days.
 
+The initial expanded-catalogue CI run `34668423252` reached the unchanged 300-minute
+limit in all five original execution jobs. Its incomplete results did not qualify.
+Physical subdivision addresses this measured scheduling limit; it does not change
+catalogue membership, selected tests, operators, per-mutant timeouts or the 85% floor.
+
+The pinned Mutmut excludes decorated classes. Epistemic control and policy search
+therefore use ordinary classes so their actual methods are mutated. Its import
+and mutation names do not agree for nested source roots. The isolated workspace
+preparer copies source into one `src` root and verifies every file's SHA-256.
+Only mutation source placement/path settings change: the lock, source bytes,
+test selection, operators and timeouts remain fixed. Per-shard source maps are
+retained as separate artifacts. The baseline checks every target's actual import
+origin. `scripts.check_mutation_scope` rejects a catalogue missing any
+configured module or a required epistemic control method, independently of the
+membership fingerprint and the full execution/score gates. Scope membership
+alone is not a passing mutation result.
+
 If reviewed source, test selection or a pinned Mutmut update changes the generated catalogue,
-produce and inspect a complete native result before regenerating its version/count/fingerprint.
-Do not refresh the record merely to silence a mismatch or copy a partial passing subset.
+produce and inspect the complete native catalogue/status inventory before regenerating
+its version/count/fingerprint. Membership may be reviewed while execution continues;
+it cannot qualify execution, waive a shard failure or establish a score. Never select
+only passing mutants or refresh the record merely to silence a mismatch. Release still
+requires complete terminal results, every shard's success and the unchanged 85% gate.

@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.6.0",
   "name": "cpcf",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "cli": "cpcf",
   "development_environment": "uv 0.11.28 with Python 3.14.6",
   "distribution": "collective-phase-control-fabric",
@@ -63,6 +63,13 @@
     "guide": "docs/growth-planning.md",
     "frontier": "finite super-catalogue with bounded model-only endogenous activation",
     "frontier_guide": "docs/endogenous-capability-frontier.md",
-    "frontier_admission": "existing registration quorum and fresh admitted receipts/capabilities; no execution authority"
+    "frontier_admission": "existing registration quorum and fresh admitted receipts/capabilities; no execution authority",
+    "epistemic": "opt-in fixed-model correlated support; declared visible symbols only",
+    "epistemic_guide": "docs/epistemic-growth-control.md",
+    "information_value": "reoptimized information-use and net sensing comparisons, no probabilities",
+    "composition": "bounded typed primitive workflows with independent finite-domain checking",
+    "composition_guide": "docs/checked-capability-composition.md",
+    "public_api": "docs/public-api.md",
+    "release_qualification": "docs/roadmap-to-1.0.md"
   }
 }

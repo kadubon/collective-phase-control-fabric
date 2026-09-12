@@ -1,0 +1,64 @@
+{
+  "audit_version": "1.0.0-development",
+  "audited_version": "1.0.0-unreleased",
+  "claim": "Finite software checks in progress; no external empirical or operational assurance.",
+  "historical_findings": "audit/findings-v0.6.json",
+  "findings": [
+    {
+      "id": "V1-001",
+      "severity": "critical",
+      "exploit": "A controller selects a hidden favorable model, ledger or frontier instead of a common observation policy.",
+      "correction": "Retain correlated fixed-model full-ledger supports and reconstruct every visible branch independently.",
+      "regression_test": "tests/test_v6_epistemic.py; tests/test_v6_epistemic_oracle.py",
+      "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-002",
+      "severity": "high",
+      "exploit": "A paid probe is compared against an unmatched or incompletely optimized information baseline.",
+      "correction": "Reoptimize paid-but-masked and no-sensing classes separately; incomplete results remain unknown.",
+      "regression_test": "tests/test_v6_epistemic.py; tests/test_v6_epistemic_limits.py",
+      "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-003",
+      "severity": "critical",
+      "exploit": "A composite bypasses interior costs, primitive limits, evidence admission or execution authority.",
+      "correction": "Unfold finite typed IR over every adverse primitive branch, charge formation/use and recheck domain-bound certificates.",
+      "regression_test": "tests/test_v6_composition.py; tests/test_v6_epistemic_evidence.py",
+      "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-004",
+      "severity": "high",
+      "exploit": "Replanning changes an entry comparison epoch or resets synthesis work and existing ledger obligations.",
+      "correction": "Bind the entry comparison checkpoint in visible history, replay accumulated cost events and reserve maximum synthesis expansions.",
+      "regression_test": "tests/test_v6_epistemic_cli.py; tests/test_v6_epistemic_limits.py; tests/test_v6_composition.py",
+      "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-005",
+      "severity": "critical",
+      "exploit": "Individually compatible symbols and recorded ledger projections may have no common fixed-model history.",
+      "correction": "Reconstruct a bounded joint receipt/ledger/kernel trace; reject contradiction while preserving the full visible-only controller support.",
+      "regression_test": "tests/test_v6_epistemic_evidence.py::test_evidence_weakening_cannot_enable_replanning; tests/test_v6_epistemic_evidence.py::test_receipt_joint_validation_does_not_leak_hidden_ledger_to_controller",
+      "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-006",
+      "severity": "high",
+      "exploit": "A mutation score can omit decorated control classes or import original nested packages instead of their mutated copies.",
+      "correction": "Use undecorated control classes, copy hash-identical sources into one mutation import layout, assert baseline import origins and reject incomplete module/method scope separately from execution and score gates.",
+      "regression_test": "tests/test_mutation_scope.py; tests/test_mutation_import_origins.py; tests/test_mutation_shards.py; tests/test_mutation_workspace.py",
+      "status": "validation-in-progress"
+    },
+    {
+      "id": "V1-007",
+      "severity": "high",
+      "exploit": "Expanded mutation jobs exceed hosted time limits; accepting partial reports would misrepresent qualification.",
+      "correction": "Split each modulo-five logical shard into four disjoint physical parts; require all 20 jobs and reject missing, overlapping or incomplete full-catalogue reports without changing score treatment.",
+      "regression_test": "tests/test_mutation_shards.py::test_physical_parts_preserve_full_results_and_logical_owners; tests/test_mutation_shards.py::test_physical_part_failures_are_not_masked",
+      "status": "validation-in-progress"
+    }
+  ]
+}

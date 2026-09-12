@@ -194,3 +194,14 @@ server, cloud connector, autonomous execution, dashboard or training framework i
 
 See [the paper mapping](growth-research-mapping.md) and the unchanged
 [scientific boundaries](scientific-boundaries.md).
+
+## Opt-in fixed-model observations and workflow composition
+
+Use `--epistemic` with the new closed sidecar for correlated fixed-model support.
+The old mode remains rectangular-adversarial. See
+[epistemic control](epistemic-growth-control.md),
+[information value](information-value.md), and
+[checked composition](checked-capability-composition.md).
+`cpcf growth example --scenario epistemic-integrated --json` demonstrates the
+synthetic probe, support update, workflow formation, proposal and checked replan.
+Model activation, admitted evidence and external execution remain distinct.

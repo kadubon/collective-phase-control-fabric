@@ -1,0 +1,1072 @@
+{
+  "empirical_attribution": "undetermined",
+  "examples": {
+    "epistemic-ambiguous": {
+      "code": "epistemic_policy_found",
+      "input_digest": "sha256:f9a409f8bbbaba5257bf64bf56205ba278eefb3110dbfa267ed5f65656c6bc79",
+      "objective": {
+        "terminal_min_attainment": "4/3",
+        "worst_cost": {
+          "credits": "5"
+        },
+        "worst_debt": {
+          "research": "0",
+          "task": "0",
+          "verification": "0"
+        },
+        "worst_duration": "4",
+        "worst_entry_time": "3"
+      },
+      "peak_support": 2,
+      "policy": {
+        "action_id": "serial",
+        "branches": {
+          "recorded": {
+            "action_id": "continue",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": null,
+                    "branches": {},
+                    "entry": false,
+                    "support_digest": "sha256:e922929ba27abe5a44ef56691a4ed6effa648676a610c66858fdf7ac539fc25a"
+                  }
+                },
+                "entry": true,
+                "support_digest": "sha256:b3e9f7df686cf8e104b7e9656d26700340d7e06ed9158edcfdd279572932bbdf"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:53e750498c437fd0e9df9d9626381db5f9d4be28fb40548b35d3da2facf957c6"
+          }
+        },
+        "entry": false,
+        "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+      },
+      "primitive_transitions": 997,
+      "search": {
+        "complete": true,
+        "expansions": 1157,
+        "limits": {
+          "max_depth": 8,
+          "max_expansions": 100000,
+          "max_policies": 100000,
+          "max_states": 10000,
+          "max_witness_nodes": 4096
+        },
+        "maximum_depth": 5,
+        "policies": 11,
+        "states": 487
+      }
+    },
+    "epistemic-budget": {
+      "code": "epistemic_support_budget",
+      "input_digest": "sha256:d3c9358cc7852ba9841c1cad8b7bb3c178ba9b9c2814b863f4bab6bc544217e7",
+      "objective": null,
+      "peak_support": 2,
+      "policy": null,
+      "primitive_transitions": 0,
+      "search": {
+        "complete": false,
+        "expansions": 0,
+        "limits": {
+          "max_depth": 8,
+          "max_expansions": 100000,
+          "max_policies": 100000,
+          "max_states": 10000,
+          "max_witness_nodes": 4096
+        },
+        "maximum_depth": 0,
+        "policies": 0,
+        "states": 0
+      }
+    },
+    "epistemic-information": {
+      "information_use": {
+        "comparison_complete": true,
+        "cost_delta": {
+          "credits": "0"
+        },
+        "debt_delta": {
+          "research": "0",
+          "task": "0",
+          "verification": "0"
+        },
+        "direction": "full-minus-comparator",
+        "duration_delta": "-1",
+        "entry_status": "both",
+        "entry_time_delta": "-1",
+        "terminal_attainment_delta": "0"
+      },
+      "masked_channel": {
+        "blue": "recorded",
+        "recorded": "recorded",
+        "red": "recorded"
+      },
+      "net_sensing": {
+        "comparison_complete": true,
+        "cost_delta": {
+          "credits": "0"
+        },
+        "debt_delta": {
+          "research": "0",
+          "task": "0",
+          "verification": "0"
+        },
+        "direction": "full-minus-comparator",
+        "duration_delta": "-1",
+        "entry_status": "both",
+        "entry_time_delta": "-1",
+        "terminal_attainment_delta": "0"
+      },
+      "optional_sensing_actions": [
+        "prepare"
+      ],
+      "policies": {
+        "full": {
+          "code": "epistemic_policy_found",
+          "input_digest": "sha256:f0554d6d934813e9863a19018cec5b8b73705b760af373f1501768078881a327",
+          "objective": {
+            "terminal_min_attainment": "4/3",
+            "worst_cost": {
+              "credits": "5"
+            },
+            "worst_debt": {
+              "research": "0",
+              "task": "0",
+              "verification": "0"
+            },
+            "worst_duration": "3",
+            "worst_entry_time": "2"
+          },
+          "peak_support": 2,
+          "policy": {
+            "action_id": "prepare",
+            "branches": {
+              "blue": {
+                "action_id": "reuse-beta",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:55d46ec0f46f790adfcf58f919ae3e645acfd9a5480ea0cd51ee944ebe7931ad"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:dcab220b59749afcf5c2a7d254be6edb66ad0d207eba6bc91c3103d3bc55fd81"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:fd63ca7bd42b247771439dc1c2b9cddc4ad55ccbba48044d8ac2532e4476618e"
+              },
+              "red": {
+                "action_id": "reuse",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:e4ddaa937c4527feadbb2b6b6e9240d9a41b2d85f0ac245a9aa0f5c2d0cddfbf"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:5ca0eab07d0699eaca6a6199b302c3965a03b3fa18030d6b993c51f76348027f"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:0299c1068fdcbabfcb85e501bf7849afa65a50ae3b4f0c39fbbcf68e506a2b6f"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+          },
+          "primitive_transitions": 1204,
+          "search": {
+            "complete": true,
+            "expansions": 1535,
+            "limits": {
+              "max_depth": 8,
+              "max_expansions": 100000,
+              "max_policies": 100000,
+              "max_states": 10000,
+              "max_witness_nodes": 4096
+            },
+            "maximum_depth": 5,
+            "policies": 62,
+            "states": 1094
+          }
+        },
+        "information_blind": {
+          "code": "epistemic_policy_found",
+          "input_digest": "sha256:c5de41d4950df5ed2a4412972fffb5bbfa91e55e028c62aae68a5b6c5a61e27a",
+          "objective": {
+            "terminal_min_attainment": "4/3",
+            "worst_cost": {
+              "credits": "5"
+            },
+            "worst_debt": {
+              "research": "0",
+              "task": "0",
+              "verification": "0"
+            },
+            "worst_duration": "4",
+            "worst_entry_time": "3"
+          },
+          "peak_support": 2,
+          "policy": {
+            "action_id": "serial",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:e922929ba27abe5a44ef56691a4ed6effa648676a610c66858fdf7ac539fc25a"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:b3e9f7df686cf8e104b7e9656d26700340d7e06ed9158edcfdd279572932bbdf"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:53e750498c437fd0e9df9d9626381db5f9d4be28fb40548b35d3da2facf957c6"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+          },
+          "primitive_transitions": 997,
+          "search": {
+            "complete": true,
+            "expansions": 1157,
+            "limits": {
+              "max_depth": 8,
+              "max_expansions": 100000,
+              "max_policies": 100000,
+              "max_states": 10000,
+              "max_witness_nodes": 4096
+            },
+            "maximum_depth": 5,
+            "policies": 11,
+            "states": 487
+          }
+        },
+        "without_sensing": {
+          "code": "epistemic_policy_found",
+          "input_digest": "sha256:a02a1de3c0592e27aed77f9bdfcb7a3f716011f05e642bdb60a8db0e5d040bfe",
+          "objective": {
+            "terminal_min_attainment": "4/3",
+            "worst_cost": {
+              "credits": "5"
+            },
+            "worst_debt": {
+              "research": "0",
+              "task": "0",
+              "verification": "0"
+            },
+            "worst_duration": "4",
+            "worst_entry_time": "3"
+          },
+          "peak_support": 2,
+          "policy": {
+            "action_id": "serial",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:e922929ba27abe5a44ef56691a4ed6effa648676a610c66858fdf7ac539fc25a"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:b3e9f7df686cf8e104b7e9656d26700340d7e06ed9158edcfdd279572932bbdf"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:53e750498c437fd0e9df9d9626381db5f9d4be28fb40548b35d3da2facf957c6"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+          },
+          "primitive_transitions": 188,
+          "search": {
+            "complete": true,
+            "expansions": 209,
+            "limits": {
+              "max_depth": 8,
+              "max_expansions": 100000,
+              "max_policies": 100000,
+              "max_states": 10000,
+              "max_witness_nodes": 4096
+            },
+            "maximum_depth": 5,
+            "policies": 3,
+            "states": 94
+          }
+        }
+      }
+    },
+    "epistemic-integrated": {
+      "certificate": {
+        "api_version": "cpcf.io/v0.6",
+        "extensions": {},
+        "kind": "workflow-certificate",
+        "metadata": {
+          "created_at": "2026-09-07T00:00:00Z",
+          "object_id": "workflow-request",
+          "tenant_id": "synthetic",
+          "workspace_id": "growth-example"
+        },
+        "spec": {
+          "acceptance": "finite-model-domain-only",
+          "candidate_digest": "sha256:4af79335f4c1fea6a6a315611325127c872e98c0bfd5721836f616028b761360",
+          "capability_admitted": false,
+          "checker_version": "finite-workflow-checker-1",
+          "execution_authorized": false,
+          "initial_support_digest": "sha256:3c5b42caac8e610aacff485ed197ae86de4b4db24beb1a321f4ea6cad33751c0",
+          "input_digest": "sha256:2b8eae3ab80edabbcaf8d3cce972d0f17dd9670ffb53c91a25660dbe03fdc4fe",
+          "objective": {
+            "terminal_min_attainment": "4/3",
+            "worst_cost": {
+              "credits": "28/5"
+            },
+            "worst_debt": {
+              "research": "0",
+              "task": "0",
+              "verification": "0"
+            },
+            "worst_duration": "3",
+            "worst_entry_time": "2"
+          },
+          "primitive_steps": 2,
+          "request_digest": "sha256:9e53643d942e5772813ae117023b34f6e694fb6f25a9f9635f8d23a08a40df34",
+          "terminal_support_digests": [
+            "sha256:32fedc2d660fde757a3a0efc6008fdec7db02bce461976219c409eb59b8de61c"
+          ]
+        }
+      },
+      "code": "epistemic_composition_example",
+      "continuation_check": {
+        "code": "epistemic_policy_checked",
+        "empirical_attribution": "undetermined",
+        "execution_authorized": false,
+        "global_optimality_checked": false,
+        "input_digest": "sha256:2b8eae3ab80edabbcaf8d3cce972d0f17dd9670ffb53c91a25660dbe03fdc4fe",
+        "objective": {
+          "terminal_min_attainment": "4/3",
+          "worst_cost": {
+            "credits": "28/5"
+          },
+          "worst_debt": {
+            "research": "0",
+            "task": "0",
+            "verification": "0"
+          },
+          "worst_duration": "3",
+          "worst_entry_time": "2"
+        },
+        "policy_digest": "sha256:edab12d8ff1dd57e91c62754f9ded73ec31977cbc5ef9620f096767affa2611a",
+        "policy_feasible": true,
+        "witness_nodes": 3
+      },
+      "initial_policy": {
+        "code": "epistemic_policy_found",
+        "input_digest": "sha256:f0554d6d934813e9863a19018cec5b8b73705b760af373f1501768078881a327",
+        "objective": {
+          "terminal_min_attainment": "4/3",
+          "worst_cost": {
+            "credits": "5"
+          },
+          "worst_debt": {
+            "research": "0",
+            "task": "0",
+            "verification": "0"
+          },
+          "worst_duration": "3",
+          "worst_entry_time": "2"
+        },
+        "peak_support": 2,
+        "policy": {
+          "action_id": "prepare",
+          "branches": {
+            "blue": {
+              "action_id": "reuse-beta",
+              "branches": {
+                "recorded": {
+                  "action_id": "continue",
+                  "branches": {
+                    "recorded": {
+                      "action_id": null,
+                      "branches": {},
+                      "entry": false,
+                      "support_digest": "sha256:55d46ec0f46f790adfcf58f919ae3e645acfd9a5480ea0cd51ee944ebe7931ad"
+                    }
+                  },
+                  "entry": true,
+                  "support_digest": "sha256:dcab220b59749afcf5c2a7d254be6edb66ad0d207eba6bc91c3103d3bc55fd81"
+                }
+              },
+              "entry": false,
+              "support_digest": "sha256:fd63ca7bd42b247771439dc1c2b9cddc4ad55ccbba48044d8ac2532e4476618e"
+            },
+            "red": {
+              "action_id": "reuse",
+              "branches": {
+                "recorded": {
+                  "action_id": "continue",
+                  "branches": {
+                    "recorded": {
+                      "action_id": null,
+                      "branches": {},
+                      "entry": false,
+                      "support_digest": "sha256:e4ddaa937c4527feadbb2b6b6e9240d9a41b2d85f0ac245a9aa0f5c2d0cddfbf"
+                    }
+                  },
+                  "entry": true,
+                  "support_digest": "sha256:5ca0eab07d0699eaca6a6199b302c3965a03b3fa18030d6b993c51f76348027f"
+                }
+              },
+              "entry": false,
+              "support_digest": "sha256:0299c1068fdcbabfcb85e501bf7849afa65a50ae3b4f0c39fbbcf68e506a2b6f"
+            }
+          },
+          "entry": false,
+          "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+        },
+        "primitive_transitions": 1204,
+        "search": {
+          "complete": true,
+          "expansions": 1535,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 5,
+          "policies": 62,
+          "states": 1094
+        }
+      },
+      "replanned_policy": {
+        "code": "epistemic_policy_found",
+        "input_digest": "sha256:2b8eae3ab80edabbcaf8d3cce972d0f17dd9670ffb53c91a25660dbe03fdc4fe",
+        "objective": {
+          "terminal_min_attainment": "4/3",
+          "worst_cost": {
+            "credits": "28/5"
+          },
+          "worst_debt": {
+            "research": "0",
+            "task": "0",
+            "verification": "0"
+          },
+          "worst_duration": "3",
+          "worst_entry_time": "2"
+        },
+        "peak_support": 2,
+        "policy": {
+          "action_id": "reuse",
+          "branches": {
+            "recorded": {
+              "action_id": "continue",
+              "branches": {
+                "recorded": {
+                  "action_id": null,
+                  "branches": {},
+                  "entry": false,
+                  "support_digest": "sha256:32fedc2d660fde757a3a0efc6008fdec7db02bce461976219c409eb59b8de61c"
+                }
+              },
+              "entry": true,
+              "support_digest": "sha256:0fb011a6db6235e1ed387a3f6e3ec7da7df80d03efd41a0b90e4003060e2cc52"
+            }
+          },
+          "entry": false,
+          "support_digest": "sha256:3c5b42caac8e610aacff485ed197ae86de4b4db24beb1a321f4ea6cad33751c0"
+        },
+        "primitive_transitions": 175,
+        "search": {
+          "complete": true,
+          "expansions": 403,
+          "limits": {
+            "max_depth": 8,
+            "max_expansions": 100000,
+            "max_policies": 100000,
+            "max_states": 10000,
+            "max_witness_nodes": 4096
+          },
+          "maximum_depth": 5,
+          "policies": 32,
+          "states": 166
+        }
+      },
+      "reuse_without_formation_preferred": true,
+      "support": {
+        "activation_depth_bounds": {
+          "lower": 1,
+          "upper": 1
+        },
+        "bounds_are_not_a_substitute_for_correlated_support": true,
+        "capacity_bounds": {
+          "research": {
+            "lower": "1",
+            "upper": "1"
+          },
+          "task": {
+            "lower": "1",
+            "upper": "1"
+          },
+          "verification": {
+            "lower": "1",
+            "upper": "1"
+          }
+        },
+        "compatible_models": [
+          "alpha"
+        ],
+        "compatible_pairs": 1,
+        "elapsed_bounds": {
+          "lower": "1",
+          "upper": "1"
+        },
+        "empirical_attribution": "undetermined",
+        "execution_authorized": false,
+        "mode": "fixed-model-adversarial-outcomes",
+        "repair_debt_bounds": {
+          "research": {
+            "lower": "0",
+            "upper": "0"
+          },
+          "task": {
+            "lower": "0",
+            "upper": "0"
+          },
+          "verification": {
+            "lower": "0",
+            "upper": "0"
+          }
+        },
+        "resource_bounds": {
+          "credits": {
+            "lower": "6",
+            "upper": "6"
+          }
+        },
+        "spent_bounds": {
+          "credits": {
+            "lower": "2",
+            "upper": "2"
+          }
+        },
+        "support_digest": "sha256:0299c1068fdcbabfcb85e501bf7849afa65a50ae3b4f0c39fbbcf68e506a2b6f",
+        "universally_model_enabled": [
+          "continue",
+          "greedy",
+          "idle",
+          "prepare",
+          "reuse",
+          "reuse-beta",
+          "serial"
+        ],
+        "visible_channels": "declared-symbols-only"
+      },
+      "synthetic_observation": "red",
+      "workflow": {
+        "api_version": "cpcf.io/v0.6",
+        "extensions": {},
+        "kind": "workflow-candidate",
+        "metadata": {
+          "created_at": "2026-09-07T00:00:00Z",
+          "object_id": "workflow-request",
+          "tenant_id": "synthetic",
+          "workspace_id": "growth-example"
+        },
+        "spec": {
+          "checked_domain_digest": "sha256:2b8eae3ab80edabbcaf8d3cce972d0f17dd9670ffb53c91a25660dbe03fdc4fe",
+          "constituent_digests": [
+            "sha256:2aa82275fe0c58c3cc3457de7132d12fd156918a6421f7cee8e283f202480da5",
+            "sha256:315ca0f913aac0a8750c38518a96918781ef4544c6758856f5c63c1cb6e9fd2e",
+            "sha256:3ea3b112dfadfc5227203ce830555e3e5af3a3853fb9e4e320e5699f8495d2f7",
+            "sha256:45e9670263b8460edeb2dc409cbfa4e415049614bdce3504c8595d1056e3e6fe",
+            "sha256:c80011640b2cfb7fbd036f3902a1488f276b15236213d8fbb8b6b079ec593d28",
+            "sha256:f1e1398cf1845c1dfb76a2dc876e8630bcbebad4a85ca32f4cc4fd4105ff2a41"
+          ],
+          "execution_authorized": false,
+          "expanded_primitive_steps": 2,
+          "expires": "5",
+          "ir": {
+            "action_id": "reuse",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": null,
+                    "branches": {},
+                    "entry": false,
+                    "support_digest": "sha256:32fedc2d660fde757a3a0efc6008fdec7db02bce461976219c409eb59b8de61c"
+                  }
+                },
+                "entry": true,
+                "support_digest": "sha256:0fb011a6db6235e1ed387a3f6e3ec7da7df80d03efd41a0b90e4003060e2cc52"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:3c5b42caac8e610aacff485ed197ae86de4b4db24beb1a321f4ea6cad33751c0"
+          },
+          "model_only": true,
+          "request_digest": "sha256:9e53643d942e5772813ae117023b34f6e694fb6f25a9f9635f8d23a08a40df34",
+          "workflow_id": "workflow-edab12d8ff1dd57e91c62754f9ded73ec31977cbc5ef9620f096767affa2611a"
+        }
+      }
+    },
+    "epistemic-no-composition": {
+      "candidates": [],
+      "code": "composition_no_candidate",
+      "formation_costs_incurred": true,
+      "search": {
+        "complete": true,
+        "expansions": 403,
+        "limits": {
+          "max_depth": 8,
+          "max_expansions": 100000,
+          "max_policies": 100000,
+          "max_states": 10000,
+          "max_witness_nodes": 4096
+        },
+        "maximum_depth": 5,
+        "policies": 32,
+        "states": 166
+      }
+    },
+    "epistemic-probe": {
+      "code": "epistemic_policy_found",
+      "input_digest": "sha256:f0554d6d934813e9863a19018cec5b8b73705b760af373f1501768078881a327",
+      "objective": {
+        "terminal_min_attainment": "4/3",
+        "worst_cost": {
+          "credits": "5"
+        },
+        "worst_debt": {
+          "research": "0",
+          "task": "0",
+          "verification": "0"
+        },
+        "worst_duration": "3",
+        "worst_entry_time": "2"
+      },
+      "peak_support": 2,
+      "policy": {
+        "action_id": "prepare",
+        "branches": {
+          "blue": {
+            "action_id": "reuse-beta",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": null,
+                    "branches": {},
+                    "entry": false,
+                    "support_digest": "sha256:55d46ec0f46f790adfcf58f919ae3e645acfd9a5480ea0cd51ee944ebe7931ad"
+                  }
+                },
+                "entry": true,
+                "support_digest": "sha256:dcab220b59749afcf5c2a7d254be6edb66ad0d207eba6bc91c3103d3bc55fd81"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:fd63ca7bd42b247771439dc1c2b9cddc4ad55ccbba48044d8ac2532e4476618e"
+          },
+          "red": {
+            "action_id": "reuse",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": null,
+                    "branches": {},
+                    "entry": false,
+                    "support_digest": "sha256:e4ddaa937c4527feadbb2b6b6e9240d9a41b2d85f0ac245a9aa0f5c2d0cddfbf"
+                  }
+                },
+                "entry": true,
+                "support_digest": "sha256:5ca0eab07d0699eaca6a6199b302c3965a03b3fa18030d6b993c51f76348027f"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:0299c1068fdcbabfcb85e501bf7849afa65a50ae3b4f0c39fbbcf68e506a2b6f"
+          }
+        },
+        "entry": false,
+        "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+      },
+      "primitive_transitions": 1204,
+      "search": {
+        "complete": true,
+        "expansions": 1535,
+        "limits": {
+          "max_depth": 8,
+          "max_expansions": 100000,
+          "max_policies": 100000,
+          "max_states": 10000,
+          "max_witness_nodes": 4096
+        },
+        "maximum_depth": 5,
+        "policies": 62,
+        "states": 1094
+      }
+    },
+    "epistemic-rejected-composition": {
+      "candidate_accepted": false,
+      "code": "composition_constituent_tampered",
+      "execution_authorized": false,
+      "synthetic": true
+    },
+    "epistemic-uninformative": {
+      "information_use": {
+        "comparison_complete": true,
+        "cost_delta": {
+          "credits": "0"
+        },
+        "debt_delta": {
+          "research": "0",
+          "task": "0",
+          "verification": "0"
+        },
+        "direction": "full-minus-comparator",
+        "duration_delta": "0",
+        "entry_status": "both",
+        "entry_time_delta": "0",
+        "terminal_attainment_delta": "0"
+      },
+      "masked_channel": {
+        "blue": "recorded",
+        "recorded": "recorded",
+        "red": "recorded"
+      },
+      "net_sensing": {
+        "comparison_complete": true,
+        "cost_delta": {
+          "credits": "0"
+        },
+        "debt_delta": {
+          "research": "0",
+          "task": "0",
+          "verification": "0"
+        },
+        "direction": "full-minus-comparator",
+        "duration_delta": "0",
+        "entry_status": "both",
+        "entry_time_delta": "0",
+        "terminal_attainment_delta": "0"
+      },
+      "optional_sensing_actions": [
+        "prepare"
+      ],
+      "policies": {
+        "full": {
+          "code": "epistemic_policy_found",
+          "input_digest": "sha256:f9a409f8bbbaba5257bf64bf56205ba278eefb3110dbfa267ed5f65656c6bc79",
+          "objective": {
+            "terminal_min_attainment": "4/3",
+            "worst_cost": {
+              "credits": "5"
+            },
+            "worst_debt": {
+              "research": "0",
+              "task": "0",
+              "verification": "0"
+            },
+            "worst_duration": "4",
+            "worst_entry_time": "3"
+          },
+          "peak_support": 2,
+          "policy": {
+            "action_id": "serial",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:e922929ba27abe5a44ef56691a4ed6effa648676a610c66858fdf7ac539fc25a"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:b3e9f7df686cf8e104b7e9656d26700340d7e06ed9158edcfdd279572932bbdf"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:53e750498c437fd0e9df9d9626381db5f9d4be28fb40548b35d3da2facf957c6"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+          },
+          "primitive_transitions": 997,
+          "search": {
+            "complete": true,
+            "expansions": 1157,
+            "limits": {
+              "max_depth": 8,
+              "max_expansions": 100000,
+              "max_policies": 100000,
+              "max_states": 10000,
+              "max_witness_nodes": 4096
+            },
+            "maximum_depth": 5,
+            "policies": 11,
+            "states": 487
+          }
+        },
+        "information_blind": {
+          "code": "epistemic_policy_found",
+          "input_digest": "sha256:ae24b5c19b5a2dd3d7ac60520a15b36468de56e828247873d77f10fca7ad9af9",
+          "objective": {
+            "terminal_min_attainment": "4/3",
+            "worst_cost": {
+              "credits": "5"
+            },
+            "worst_debt": {
+              "research": "0",
+              "task": "0",
+              "verification": "0"
+            },
+            "worst_duration": "4",
+            "worst_entry_time": "3"
+          },
+          "peak_support": 2,
+          "policy": {
+            "action_id": "serial",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:e922929ba27abe5a44ef56691a4ed6effa648676a610c66858fdf7ac539fc25a"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:b3e9f7df686cf8e104b7e9656d26700340d7e06ed9158edcfdd279572932bbdf"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:53e750498c437fd0e9df9d9626381db5f9d4be28fb40548b35d3da2facf957c6"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+          },
+          "primitive_transitions": 997,
+          "search": {
+            "complete": true,
+            "expansions": 1157,
+            "limits": {
+              "max_depth": 8,
+              "max_expansions": 100000,
+              "max_policies": 100000,
+              "max_states": 10000,
+              "max_witness_nodes": 4096
+            },
+            "maximum_depth": 5,
+            "policies": 11,
+            "states": 487
+          }
+        },
+        "without_sensing": {
+          "code": "epistemic_policy_found",
+          "input_digest": "sha256:90f9ba00550480225ffac1f0c7f36ba46742b9da12353ed3763e8f354e06352a",
+          "objective": {
+            "terminal_min_attainment": "4/3",
+            "worst_cost": {
+              "credits": "5"
+            },
+            "worst_debt": {
+              "research": "0",
+              "task": "0",
+              "verification": "0"
+            },
+            "worst_duration": "4",
+            "worst_entry_time": "3"
+          },
+          "peak_support": 2,
+          "policy": {
+            "action_id": "serial",
+            "branches": {
+              "recorded": {
+                "action_id": "continue",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:e922929ba27abe5a44ef56691a4ed6effa648676a610c66858fdf7ac539fc25a"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:b3e9f7df686cf8e104b7e9656d26700340d7e06ed9158edcfdd279572932bbdf"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:53e750498c437fd0e9df9d9626381db5f9d4be28fb40548b35d3da2facf957c6"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:163b6c7bced635c64591908e944d91dea712110cb343573b55eca57a7110fbc0"
+          },
+          "primitive_transitions": 188,
+          "search": {
+            "complete": true,
+            "expansions": 209,
+            "limits": {
+              "max_depth": 8,
+              "max_expansions": 100000,
+              "max_policies": 100000,
+              "max_states": 10000,
+              "max_witness_nodes": 4096
+            },
+            "maximum_depth": 5,
+            "policies": 3,
+            "states": 94
+          }
+        }
+      }
+    },
+    "epistemic-verifier": {
+      "code": "epistemic_policy_found",
+      "input_digest": "sha256:8d39cfb6605e1276d32dfa887f79aaaae42089e1856ff614c0ad54ef3a99fbc0",
+      "objective": {
+        "terminal_min_attainment": "4/3",
+        "worst_cost": {
+          "credits": "6"
+        },
+        "worst_debt": {
+          "research": "0",
+          "task": "0",
+          "verification": "0"
+        },
+        "worst_duration": "4",
+        "worst_entry_time": "3"
+      },
+      "peak_support": 2,
+      "policy": {
+        "action_id": "prepare",
+        "branches": {
+          "blue": {
+            "action_id": "verifier",
+            "branches": {
+              "recorded": {
+                "action_id": "reuse-beta",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:06931fd35cc13ff51a8410dde70dfab932cf02cb758943983609c6e9b2e0a376"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:a4d600da005cd88cf57cf6356d4b72129fdde9ad044a28874bcdaea55030e032"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:ab3cca5f1c5d9068efe8b7c8027ac304f44c652e446e1bfbe437c273ead99ea7"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:5dfd8733cabdd415397c463d0c9d35612a0e564ca0b1ac0e4e92fbec28a60924"
+          },
+          "red": {
+            "action_id": "verifier",
+            "branches": {
+              "recorded": {
+                "action_id": "reuse",
+                "branches": {
+                  "recorded": {
+                    "action_id": "continue",
+                    "branches": {
+                      "recorded": {
+                        "action_id": null,
+                        "branches": {},
+                        "entry": false,
+                        "support_digest": "sha256:83045ed804707664de4a0b443d19ab238b292312279c1b8ad07dcd37dd4db47c"
+                      }
+                    },
+                    "entry": true,
+                    "support_digest": "sha256:b30023e8b2098a36b59885951c7b0143cb974ddbeefa7063cc6a23b6972f0260"
+                  }
+                },
+                "entry": false,
+                "support_digest": "sha256:33b292c488611ba96e6c698dadfc1101161acdaa82bcb2919a4452b0d4f32f52"
+              }
+            },
+            "entry": false,
+            "support_digest": "sha256:a4afbf05744d66d658c80387894a26fcbcded2ef41e8c1e9738356e3ba3252c1"
+          }
+        },
+        "entry": false,
+        "support_digest": "sha256:c1c2743662a495f2c57dde840b56f2d4a7e4519f6813df4aa42dcd1e3987f16e"
+      },
+      "primitive_transitions": 168,
+      "search": {
+        "complete": true,
+        "expansions": 270,
+        "limits": {
+          "max_depth": 8,
+          "max_expansions": 100000,
+          "max_policies": 100000,
+          "max_states": 10000,
+          "max_witness_nodes": 4096
+        },
+        "maximum_depth": 5,
+        "policies": 7,
+        "states": 117
+      }
+    }
+  },
+  "execution_authorized": false,
+  "synthetic": true
+}
