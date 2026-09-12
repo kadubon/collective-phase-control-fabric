@@ -15,22 +15,29 @@ import yaml
 
 from scripts.check_mutation_score import COUNTED_FAILURES, COUNTED_SUCCESSES
 from scripts.merge_mutation_results import SHARDS, merge_results, read_results
+from scripts.run_mutation_shard import PARTS, selectors
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def reports(directory: Path) -> dict[str, str]:
+def reports(directory: Path, parts: int = 1) -> dict[str, str]:
     expected = {
         f"example.function__mutmut_{index}": "survived" if index == 1 else "killed"
         for index in range(1, 21)
     }
-    for shard in range(SHARDS):
-        folder = directory / f"mutation-shard-{shard}"
+    for owner in range(SHARDS * parts):
+        shard, part = owner % SHARDS, owner // SHARDS
+        folder = directory / (f"mutation-shard-{shard}" + (f"-{part}" if parts > 1 else ""))
         folder.mkdir(parents=True)
         (folder / "mutation-results.txt").write_text(
             "".join(
                 f"{name}: "
-                f"{status if int(name.rsplit('_', 1)[1]) % SHARDS == shard else 'not checked'}\n"
+                + (
+                    status
+                    if int(name.rsplit("_", 1)[1]) % (SHARDS * parts) == owner
+                    else "not checked"
+                )
+                + "\n"
                 for name, status in expected.items()
             ),
             encoding="utf-8",
@@ -47,6 +54,82 @@ def reports(directory: Path) -> dict[str, str]:
         )
     )
     return expected
+
+
+def test_physical_parts_preserve_full_results_and_logical_owners(tmp_path: Path) -> None:
+    directory = tmp_path / "parts"
+    expected = reports(directory, PARTS)
+    assert merge_results(directory, tmp_path / "catalogue.json", parts=PARTS) == expected
+    for number in range(1, 10001):
+        matches = [
+            (shard, part)
+            for shard in range(SHARDS)
+            for part in range(PARTS)
+            for pattern in selectors(shard, part)
+            if fnmatch.fnmatchcase(f"module.fn__mutmut_{number}", pattern)
+        ]
+        assert matches == [(number % SHARDS, (number // SHARDS) % PARTS)]
+
+
+@pytest.mark.parametrize(
+    ("alteration", "code"),
+    [
+        ("missing", "mutation_shard_set_mismatch"),
+        ("extra", "mutation_shard_set_mismatch"),
+        ("incomplete", "mutation_shard_incomplete"),
+        ("interrupted", "mutation_shard_incomplete"),
+        ("overlap", "mutation_shard_overlap"),
+        ("catalogue", "mutation_catalogue_mismatch"),
+        ("duplicate", "mutation_result_duplicate"),
+    ],
+)
+def test_physical_part_failures_are_not_masked(tmp_path: Path, alteration: str, code: str) -> None:
+    directory = tmp_path / "parts"
+    reports(directory, PARTS)
+    path = directory / "mutation-shard-1-3/mutation-results.txt"
+    content = path.read_text()
+    if alteration == "missing":
+        path.unlink()
+        path.parent.rmdir()
+    elif alteration == "extra":
+        (directory / "mutation-shard-1-4").mkdir()
+    elif alteration in {"incomplete", "interrupted"}:
+        status = "not checked" if alteration == "incomplete" else "check was interrupted by user"
+        path.write_text(content.replace("__mutmut_16: killed", f"__mutmut_16: {status}"))
+    elif alteration == "overlap":
+        path.write_text(content.replace("__mutmut_1: not checked", "__mutmut_1: killed"))
+    elif alteration == "catalogue":
+        path.write_text("\n".join(content.splitlines()[1:]))
+    else:
+        path.write_text(content + content.splitlines()[0] + "\n")
+    with pytest.raises(ValueError, match=code):
+        merge_results(directory, tmp_path / "catalogue.json", parts=PARTS)
+
+
+def test_invalid_partition_counts_and_indices_are_rejected(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="mutation_partition_count_invalid"):
+        merge_results(tmp_path, tmp_path / "absent", parts=2)
+    for shard, part in ((-1, 0), (5, 0), (0, -1), (0, 4)):
+        with pytest.raises(ValueError, match="mutation_partition_invalid"):
+            selectors(shard, part)
+
+
+def test_part_runner_preserves_failed_exit_and_literal_selectors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts import run_mutation_shard
+
+    commands: list[list[str]] = []
+
+    def run(command: list[str], *, check: bool) -> subprocess.CompletedProcess[str]:
+        assert check is False
+        commands.append(command)
+        return subprocess.CompletedProcess(command, 7)
+
+    monkeypatch.setattr(sys, "argv", ["runner", "--shard", "1", "--part", "0"])
+    monkeypatch.setattr(run_mutation_shard.subprocess, "run", run)
+    assert run_mutation_shard.main() == 7
+    assert commands == [[sys.executable, "-m", "mutmut", "run", *selectors(1, 0)]]
 
 
 def test_complete_shards_reproduce_the_unsharded_score(tmp_path: Path) -> None:
@@ -200,19 +283,26 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
     for name in ("ci.yml", "workflow.yml"):
         jobs = yaml.safe_load((ROOT / ".github/workflows" / name).read_text())["jobs"]
         shard_job = jobs["mutation-shards"]
-        matrix = shard_job["strategy"]["matrix"]["include"]
+        matrix = shard_job["strategy"]["matrix"]
         assert shard_job["strategy"]["fail-fast"] is False
-        assert {item["shard"] for item in matrix} == set(range(SHARDS))
+        assert matrix == {"shard": list(range(SHARDS)), "part": list(range(PARTS))}
         for number in range(1, 1001):
             mutant = f"example.function__mutmut_{number}"
             owners = [
-                item["shard"] for item in matrix if fnmatch.fnmatchcase(mutant, item["selector"])
+                shard + SHARDS * part
+                for shard in matrix["shard"]
+                for part in matrix["part"]
+                for pattern in selectors(shard, part)
+                if fnmatch.fnmatchcase(mutant, pattern)
             ]
-            assert owners == [number % SHARDS]
+            assert owners == [number % (SHARDS * PARTS)]
         run = next(
             step for step in shard_job["steps"] if step.get("name") == "Run assigned mutants"
         )
-        assert 'mutmut run "$MUTATION_SELECTOR"' in run["run"]
+        assert (
+            'python -m scripts.run_mutation_shard --shard "$MUTATION_SHARD" '
+            '--part "$MUTATION_PART"' in run["run"]
+        )
         assert run["working-directory"] == ".cache/mutation-workspace"
         assert "uv sync --frozen --all-extras --group dev --group security" in run["run"]
         preparation = next(
@@ -224,7 +314,10 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
             "uv run --frozen python -m scripts.prepare_mutation_workspace .cache/mutation-workspace"
         )
         assert run["timeout-minutes"] == 300
-        assert run["env"]["MUTATION_SELECTOR"] == "${{ matrix.selector }}"
+        assert run["env"] == {
+            "MUTATION_SHARD": "${{ matrix.shard }}",
+            "MUTATION_PART": "${{ matrix.part }}",
+        }
         gate = jobs["mutation"]
         assert gate["needs"] == "mutation-shards" and gate["if"] == "${{ always() }}"
         reject = gate["steps"][0]
@@ -238,8 +331,8 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
         )
         assert (
             "uv run --frozen python -m scripts.merge_mutation_results "
-            "mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json"
-            in commands
+            "mutation-shards mutation-results.txt --catalogue "
+            "audit/mutation-catalogue-v1.0.json --parts 4" in commands
         )
         assert (
             commands[-1] == "uv run --frozen python scripts/check_mutation_score.py "

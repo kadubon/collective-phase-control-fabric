@@ -187,6 +187,8 @@ Before mutation qualification, follow [the release procedure](../../../docs/rele
 Use the isolated source layout and retain source-hash, import-origin, full-catalogue,
 scope and shard checks. The pinned mutation tool's exclusion of decorated classes
 and its nested-package naming limits must not silently omit control logic.
+All 20 physical parts of the five logical shards must succeed; retain the full
+catalogue and reject missing, overlapping or incomplete part results.
 
 ## References
 

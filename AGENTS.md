@@ -34,7 +34,8 @@ uv build
 
 Use the checked-in `uv.lock`. Do not regenerate it as a side effect of an unrelated command.
 
-CI and release partition mutation execution into five disjoint shards. Preserve the full
+CI and release partition mutation execution into five disjoint logical shards, each with four
+physical execution parts to fit hosted job limits. Require all 20 parts to succeed. Preserve the full
 catalogue fingerprint, all shard-success dependencies, missing/overlap/incomplete rejection,
 and the unchanged aggregate 85% floor. Never treat an interrupted or skipped shard as a pass.
 See `docs/release.md` before changing the mutation catalogue or scheduling.

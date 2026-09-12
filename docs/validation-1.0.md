@@ -25,17 +25,18 @@ Core source commit: `5624681` on the feature branch. Windows Python 3.14.6,
 frozen dependencies, branch-enabled coverage and all five import packages:
 
 These fresh runs include the control-class mutation-scope correction. The later
-isolated-layout preparation has two additional passing regression tests; a full
-pre-PR rerun is also being recorded. Mutation execution remains pending.
+isolated-layout preparation has two additional passing regression tests; the full
+pre-PR rerun at `dec0a9c` passed with those tests. Mutation execution remains pending.
 
 | Suite | Tests | Statements | Branch destinations | Combined |
 | --- | --- | --- | --- | --- |
-| Full suite | 933 passed, 3 skipped | 17,772 / 19,021 (93.43%) | 6,164 / 7,156 (86.14%) | 91.44% |
+| Full suite | 935 passed, 3 skipped | 17,772 / 19,021 (93.43%) | 6,164 / 7,156 (86.14%) | 91.44% |
 | CI critical selection | 613 passed | 8,216 / 8,484 (96.84%) | 2,584 / 2,788 (92.68%) | 95.81% |
 | Release critical selection | 632 passed | 8,244 / 8,484 (97.17%) | 2,593 / 2,788 (93.01%) | 96.14% |
 
 The three local skips are the existing PostgreSQL tests without configured
-application/owner URLs. Required hosted PostgreSQL integration remains pending.
+application/owner URLs. Hosted PostgreSQL integration, all six platform jobs and
+quality/security checks passed at `dec0a9c`; a changed head requires fresh checks.
 All 17 critical subsystem combined percentages passed 95%; the newly included
 epistemic control, checked composition and growth CLI groups achieved 96.51%,
 96.72% and 97.77%, respectively. Their final hosted checks remain required.
@@ -65,6 +66,13 @@ from passing. The corrected complete native inventory is registered in
 `audit/mutation-catalogue-v1.0.json` so local execution and PR CI can proceed in
 parallel. That fingerprint is membership-only: a complete execution and passing
 score are still required, without selecting a successful subset.
+
+CI run `34668423252` failed when all five expanded mutation jobs reached the
+300-minute limit; its aggregate correctly rejected the incomplete runs. The
+five logical shards now each have four disjoint physical parts, with all 20
+success dependencies and complete-catalogue validation. This scheduling repair
+has no effect on test selection, mutation operators, timeouts or the score floor.
+The independent native full run continues; neither run is reported as passed.
 
 Coverage reports must distinguish statement coverage (covered executable lines /
 all executable lines), branch coverage (covered branch destinations / all branch

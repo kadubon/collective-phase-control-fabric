@@ -43,18 +43,20 @@ the external operational evidence listed above.
 
 ## Complete mutation assurance within hosted job limits
 
-CI and release run the same five selectors: `*__mutmut_*[05]`, `*__mutmut_*[16]`,
-`*__mutmut_*[27]`, `*__mutmut_*[38]`, and `*__mutmut_*[49]`. They partition positive
-Mutmut indices modulo five. Every shard uses the same frozen configuration, mutation
+CI and release retain five logical shards: positive Mutmut indices modulo five.
+Each logical shard has four physical parts, assigned by `(index // 5) % 4`.
+The 20 jobs run `scripts.run_mutation_shard`, whose literal selectors partition
+all positive indices modulo 20 without overlap, including single-digit indices.
+Every part uses the same frozen configuration, mutation
 targets, coverage-based generation, test selection, baseline checks and per-mutant timeouts.
-Each shard's execution step is bounded to 300 minutes so a step timeout can still retain its
+Each part's execution step is bounded to 300 minutes so a step timeout can still retain its
 complete diagnostic status list before the hosted job limit.
 
 The required `mutation` job runs even when a shard fails and explicitly rejects that failure.
-After all five succeed, it downloads their full reports and runs:
+After all 20 parts succeed, it downloads their full reports and runs:
 
 ```text
-uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json
+uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json --parts 4
 uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
 uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 ```
@@ -69,9 +71,15 @@ empirical evidence or source authenticity; the CI commit binds the source and ex
 
 Missing or altered members, duplicate lines, unexpected shards/files, unknown statuses,
 incomplete owner results and execution assigned to the wrong shard all fail closed. Only
-the assigned shard supplies each mutant's terminal status. The full union retains surviving,
+the assigned part supplies each mutant's terminal status. Missing parts cannot be replaced
+with reports from an earlier run or another revision. The full union retains surviving,
 untested, timeout, suspicious and segfault results as failures under the unchanged 85% gate.
 Raw shard artifacts and the combined report remain available for 14 days.
+
+The initial expanded-catalogue CI run `34668423252` reached the unchanged 300-minute
+limit in all five original execution jobs. Its incomplete results did not qualify.
+Physical subdivision addresses this measured scheduling limit; it does not change
+catalogue membership, selected tests, operators, per-mutant timeouts or the 85% floor.
 
 The pinned Mutmut excludes decorated classes. Epistemic control and policy search
 therefore use ordinary classes so their actual methods are mutated. Its import
