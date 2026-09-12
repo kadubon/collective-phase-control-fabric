@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.1 — unreleased
+
+- Strengthen mutation regression tests for exact onboarding blockers, OIDC request
+  bindings and polling bounds, and correlated epistemic inspection summaries.
+- Restore the normal full-catalogue mutation qualification requirement after the
+  explicit 1.0.0-only publication waiver. Qualification is pending; no passing
+  score is claimed until every assigned mutation has a terminal result.
+- Preserve the maintained 1.0 public API, `cpcf.io/v0.6` protocol identity and Beta
+  classification. No external empirical acceleration experiment was performed.
+
 ## 1.0.0
 
 - Mutation qualification is explicitly waived by the owner for 1.0.0 publication;

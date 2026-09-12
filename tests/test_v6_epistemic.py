@@ -19,7 +19,7 @@ from collective_phase_control_fabric.v6.epistemic_checking import (
 from collective_phase_control_fabric.v6.epistemic_examples import epistemic_example
 from collective_phase_control_fabric.v6.epistemic_planning import compare_epistemic, plan_epistemic
 from collective_phase_control_fabric.v6.information_value import difference, information_value
-from collective_phase_control_fabric.v6.models import EpistemicStep, GrowthInterval
+from collective_phase_control_fabric.v6.models import EpistemicStep, GrowthInterval, GrowthWork
 from collective_phase_control_fabric.v6.registry import document_digest, parse_document
 
 
@@ -62,6 +62,66 @@ def test_kernel_support_keeps_theta_and_multiple_same_model_states() -> None:
     assert len(expanded) == 2 and support_digest(expanded) != support_digest((alpha,))
     # The same parameter does not justify discarding a distinct resource/entry state.
     assert len(d.advance(expanded, "reuse")["recorded"]) == 2
+
+
+def test_controller_summary_preserves_correlated_bounds_and_never_grants_authority() -> None:
+    d = epistemic_example()
+    original = d.initial()
+    h = original[0]
+    changed = h.model_copy(
+        update={
+            "state": h.state.model_copy(
+                update={
+                    "capacities": {
+                        "task": GrowthInterval(lower="1/2", upper="3/2"),
+                        "research": GrowthInterval(lower="2", upper="3"),
+                        "verification": GrowthInterval(lower="1", upper="2"),
+                    },
+                    "resources": {"credits": "11/2"},
+                    "spent": {"credits": "5/2"},
+                    "elapsed": "3/2",
+                    "activation_depth": 2,
+                    "enabled_action_ids": ["continue", "prepare", "reuse"],
+                    "obligations": [
+                        GrowthWork(work_id="a", stage="task", remaining="1/2", deadline="9"),
+                        GrowthWork(work_id="b", stage="task", remaining="2", deadline="9"),
+                        GrowthWork(work_id="c", stage="research", remaining="3", deadline="9"),
+                    ],
+                }
+            )
+        }
+    )
+    support = canonical_support([*original, changed])
+    # This is an inspection fixture, not a claim that an observation admitted this ledger.
+    before = support_digest(support)
+    view = d.controller_view(support)
+    assert view == {
+        "mode": "fixed-model-adversarial-outcomes",
+        "visible_channels": "declared-symbols-only",
+        "support_digest": before,
+        "compatible_pairs": 3,
+        "compatible_models": ["alpha", "beta"],
+        "universally_model_enabled": ["continue", "prepare"],
+        "capacity_bounds": {
+            "task": {"lower": "1/2", "upper": "3/2"},
+            "research": {"lower": "1", "upper": "3"},
+            "verification": {"lower": "1", "upper": "2"},
+        },
+        "resource_bounds": {"credits": {"lower": "11/2", "upper": "7"}},
+        "spent_bounds": {"credits": {"lower": "1", "upper": "5/2"}},
+        "elapsed_bounds": {"lower": "0", "upper": "3/2"},
+        "repair_debt_bounds": {
+            "task": {"lower": "0", "upper": "5/2"},
+            "research": {"lower": "0", "upper": "3"},
+            "verification": {"lower": "0", "upper": "0"},
+        },
+        "activation_depth_bounds": {"lower": 0, "upper": 2},
+        "bounds_are_not_a_substitute_for_correlated_support": True,
+        "execution_authorized": False,
+        "empirical_attribution": "undetermined",
+    }
+    assert support_digest(support) == before
+    assert d.controller_view(tuple(reversed(support)))["resource_bounds"] == view["resource_bounds"]
 
 
 def test_latent_actions_and_foreign_models_do_not_become_available_by_union() -> None:
