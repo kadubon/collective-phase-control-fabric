@@ -15,28 +15,29 @@ Historical 0.7.0 measurements are not reused as 1.0.0 evidence.
 | Backward compatibility | Old signed-fixture scope and expected golden hashes preserved; 55 released schema identities retained |
 | Public API and installed base wheel | Local 1.0.0 wheel installed outside checkout; all five import versions/origins, pip check and six network-disabled scenarios passed; public-index publication verification pending |
 | Coverage | Local full, CI-selected and release-selected critical suites passed the unchanged aggregate and all 17 per-subsystem gates; metrics below; hosted matrix pending |
-| Mutation | New critical modules and tests selected; complete expanded catalogue, all five shards and 85% aggregate gate pending |
-| Security and publication hygiene | Local Ruff, strict mypy (131 sources), Bandit, OSV audit, generated references, 225 schemas, 9 fixtures, source/history/archive hygiene, Gitleaks, build and Twine passed; final staged/push and hosted security checks pending |
+| Mutation | Complete generated inventory of 17,581 names reviewed; all 30 configured modules and required control methods included; full execution, all five shards and 85% aggregate gate pending |
+| Security and publication hygiene | Local Ruff, strict mypy (133 sources), Bandit, OSV audit, generated references, 225 schemas, 9 fixtures, source/history/archive hygiene, Gitleaks, build and Twine passed; final staged/push and hosted security checks pending |
 | GitHub, Wiki and PyPI | Feature branch and candidate Wiki pushed; PR, required checks, owner-authorized merge and publication verification pending; the specific review exception is recorded in the requirement matrix |
 
 ## Local source qualification
 
-Core source commit: `13383d1` on the feature branch. Windows Python 3.14.6,
+Core source commit: `5624681` on the feature branch. Windows Python 3.14.6,
 frozen dependencies, branch-enabled coverage and all five import packages:
 
-These results precede the mutation-scope correction described below. The changed
-source requires fresh full and critical regression runs before final qualification.
+These fresh runs include the control-class mutation-scope correction. The later
+isolated-layout preparation has two additional passing regression tests; a full
+pre-PR rerun is also being recorded. Mutation execution remains pending.
 
 | Suite | Tests | Statements | Branch destinations | Combined |
 | --- | --- | --- | --- | --- |
-| Full suite | 928 passed, 3 skipped | 17,774 / 19,023 (93.43%) | 6,164 / 7,156 (86.14%) | 91.44% |
-| CI critical selection | 613 passed | 8,218 / 8,486 (96.84%) | 2,584 / 2,788 (92.68%) | 95.81% |
-| Release critical selection | 632 passed | 8,246 / 8,486 (97.17%) | 2,593 / 2,788 (93.01%) | 96.14% |
+| Full suite | 933 passed, 3 skipped | 17,772 / 19,021 (93.43%) | 6,164 / 7,156 (86.14%) | 91.44% |
+| CI critical selection | 613 passed | 8,216 / 8,484 (96.84%) | 2,584 / 2,788 (92.68%) | 95.81% |
+| Release critical selection | 632 passed | 8,244 / 8,484 (97.17%) | 2,593 / 2,788 (93.01%) | 96.14% |
 
 The three local skips are the existing PostgreSQL tests without configured
 application/owner URLs. Required hosted PostgreSQL integration remains pending.
 All 17 critical subsystem combined percentages passed 95%; the newly included
-epistemic control, checked composition and growth CLI groups achieved 96.52%,
+epistemic control, checked composition and growth CLI groups achieved 96.51%,
 96.72% and 97.77%, respectively. Their final hosted checks remain required.
 
 All original growth/frontier examples and nine generated epistemic/composition
@@ -60,7 +61,10 @@ were silently excluded by the pinned tool. That catalogue was rejected. The
 control classes now expose their methods to mutation. An isolated, hash-checked
 single-source layout makes nested package mutation names agree with their import
 names; copied package origins are checked. A separate catalogue-scope gate prevents this omission
-from passing. A complete regenerated execution and score are still required.
+from passing. The corrected complete native inventory is registered in
+`audit/mutation-catalogue-v1.0.json` so local execution and PR CI can proceed in
+parallel. That fingerprint is membership-only: a complete execution and passing
+score are still required, without selecting a successful subset.
 
 Coverage reports must distinguish statement coverage (covered executable lines /
 all executable lines), branch coverage (covered branch destinations / all branch

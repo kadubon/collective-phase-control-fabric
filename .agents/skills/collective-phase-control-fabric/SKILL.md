@@ -183,6 +183,11 @@ source-tree, staged-content, Gitleaks, and built wheel/source-distribution hygie
 in `docs/security.md`. A source push does not authorize a release, deployment, tag, or package
 publication.
 
+Before mutation qualification, follow [the release procedure](../../../docs/release.md).
+Use the isolated source layout and retain source-hash, import-origin, full-catalogue,
+scope and shard checks. The pinned mutation tool's exclusion of decorated classes
+and its nested-package naming limits must not silently omit control logic.
+
 ## References
 
 - [v0.6 authority and scientific boundaries](references/v6-boundaries.md)

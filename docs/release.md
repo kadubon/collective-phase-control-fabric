@@ -54,13 +54,16 @@ The required `mutation` job runs even when a shard fails and explicitly rejects 
 After all five succeed, it downloads their full reports and runs:
 
 ```text
-uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v0.7.json
+uv run --frozen python -m scripts.merge_mutation_results mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json
+uv run --frozen python -m scripts.check_mutation_scope mutation-results.txt
 uv run --frozen python scripts/check_mutation_score.py mutation-results.txt --minimum 85
 ```
 
 The merger requires identical complete catalogues and the reviewed Mutmut version, count
-and SHA-256 fingerprint in `audit/mutation-catalogue-v0.7.json`. That record was generated
-from the complete local 0.7.0 run: 12,284 unique names. Its fingerprint is the SHA-256 of
+and SHA-256 fingerprint in `audit/mutation-catalogue-v1.0.json`: 17,581 unique names
+from the complete generated native catalogue, including all configured modules
+and required control methods. The historical 0.7 record remains unchanged at
+12,284 names. Each fingerprint is the SHA-256 of
 UTF-8 sorted names, each followed by a newline. It identifies catalogue membership, not
 empirical evidence or source authenticity; the CI commit binds the source and execution.
 
@@ -83,5 +86,8 @@ membership fingerprint and the full execution/score gates. Scope membership
 alone is not a passing mutation result.
 
 If reviewed source, test selection or a pinned Mutmut update changes the generated catalogue,
-produce and inspect a complete native result before regenerating its version/count/fingerprint.
-Do not refresh the record merely to silence a mismatch or copy a partial passing subset.
+produce and inspect the complete native catalogue/status inventory before regenerating
+its version/count/fingerprint. Membership may be reviewed while execution continues;
+it cannot qualify execution, waive a shard failure or establish a score. Never select
+only passing mutants or refresh the record merely to silence a mismatch. Release still
+requires complete terminal results, every shard's success and the unchanged 85% gate.

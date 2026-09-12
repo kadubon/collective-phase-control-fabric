@@ -39,6 +39,11 @@ catalogue fingerprint, all shard-success dependencies, missing/overlap/incomplet
 and the unchanged aggregate 85% floor. Never treat an interrupted or skipped shard as a pass.
 See `docs/release.md` before changing the mutation catalogue or scheduling.
 
+Mutation runs use `scripts.prepare_mutation_workspace` to create a hash-checked
+single-`src` copy. Keep the import-origin and catalogue-scope checks: the pinned
+tool otherwise skips decorated control classes and mismatches nested package
+names. An unprepared monorepo run cannot qualify the complete mutation scope.
+
 Core and CLI checks must work in PowerShell, cmd-compatible Python execution, and POSIX shells on
 Windows and Linux. PostgreSQL, S3, OIDC, KMS, OCI, and Kubernetes are required only for server and
 deployment integration tests, never for offline core inspection.

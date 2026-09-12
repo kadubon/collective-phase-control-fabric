@@ -238,7 +238,7 @@ def test_ci_and_release_select_every_mutant_once_and_gate_failed_shards() -> Non
         )
         assert (
             "uv run --frozen python -m scripts.merge_mutation_results "
-            "mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v0.7.json"
+            "mutation-shards mutation-results.txt --catalogue audit/mutation-catalogue-v1.0.json"
             in commands
         )
         assert (
