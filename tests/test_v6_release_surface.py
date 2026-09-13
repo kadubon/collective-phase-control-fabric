@@ -16,6 +16,12 @@ from cpcf_cli.main import main
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_release_installed_check_matches_distribution_version() -> None:
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    workflow = (ROOT / ".github/workflows/workflow.yml").read_text(encoding="utf-8")
+    assert f'--source-root "$GITHUB_WORKSPACE" --version {project["version"]}\n' in workflow
+
+
 def test_root_distribution_is_single_and_complete() -> None:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert project["project"]["name"] == "collective-phase-control-fabric"

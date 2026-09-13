@@ -110,7 +110,7 @@ jobs:
         run: >-
           uv run --isolated --no-project --with "$(find "$GITHUB_WORKSPACE/dist" -name '*.whl')"
           python -I "$GITHUB_WORKSPACE/scripts/check_installed_release.py"
-          --source-root "$GITHUB_WORKSPACE" --version 1.0.0
+          --source-root "$GITHUB_WORKSPACE" --version 1.0.1
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: python-distributions
