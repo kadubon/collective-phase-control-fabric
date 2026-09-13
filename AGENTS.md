@@ -34,8 +34,8 @@ uv build
 
 Use the checked-in `uv.lock`. Do not regenerate it as a side effect of an unrelated command.
 
-CI and release partition mutation execution into five disjoint logical shards, each with four
-physical execution parts to fit hosted job limits. Require all 20 parts to succeed. Preserve the full
+CI and release partition mutation execution into five disjoint logical shards, each with eight
+physical execution parts to fit hosted job limits. Require all 40 parts to succeed. Preserve the full
 catalogue fingerprint, all shard-success dependencies, missing/overlap/incomplete rejection,
 and the unchanged aggregate 85% floor. Never treat an interrupted or skipped shard as a pass.
 See `docs/release.md` before changing the mutation catalogue or scheduling.
@@ -44,6 +44,9 @@ The owner explicitly waived completed mutation qualification for the 1.0.0 merge
 release and PyPI publication only. Follow `docs/mutation-exception-1.0.md`; record
 waived/skipped, never passed. All other checks, environment approval and scientific
 boundaries remain mandatory. Normal CI and all other releases retain the full gate.
+
+For 1.0.1, follow `docs/mutation-qualification-1.0.1.md`. Never transfer an old
+interrupted run's terminal subset into a new revision's qualification results.
 
 Mutation runs use `scripts.prepare_mutation_workspace` to create a hash-checked
 single-`src` copy. Keep the import-origin and catalogue-scope checks: the pinned

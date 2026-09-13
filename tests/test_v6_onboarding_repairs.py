@@ -228,6 +228,52 @@ def test_onboarding_aggregates_every_live_subsystem_and_exact_recovery_commands(
     report = aggregate_onboarding(state)
     assert report.status == "blocked"
     assert report.code == "onboarding_blockers_present"
+    assert report.generation_digest == state.generation_digest
+    assert report.subsystem_status == {
+        "migration": "satisfied",
+        "trust": "unknown",
+        "trusted_time": "violated",
+        "ledger": "satisfied",
+        "quarantine": "violated",
+        "perturbation": "unknown_due_to_budget",
+        "solver": "unknown",
+        "planner": "satisfied",
+        "runner": "unknown",
+        "pending_projections": "violated",
+        "coordination": "violated",
+        "trials": "unknown",
+        "quota": "satisfied",
+    }
+    assert report.science_dimensions == state.science_dimensions
+    assert report.blocker_codes == [
+        "coordination_violated",
+        "pending_projections_violated",
+        "perturbation_unknown_due_to_budget",
+        "quarantine_violated",
+        "runner_unknown",
+        "science_provenance_integrity_violated",
+        "science_structural_reachability_unknown_due_to_budget",
+        "solver_unknown",
+        "source_chain_invalid",
+        "trials_unknown",
+        "trust_unknown",
+        "trusted_time_violated",
+    ]
+    assert report.unresolved_human_decisions == [
+        "science_provenance_integrity_violated",
+        "science_structural_reachability_unknown_due_to_budget",
+        "trials_unknown",
+        "trust_unknown",
+        "trusted_time_violated",
+    ]
+    assert report.next_safe_commands == [
+        ["cpcf", "workspace", "status", "workspace-a", "--json"],
+        ["cpcf", "repair", "list", "workspace-a", "--json"],
+        ["cpcf", "projection", "pending", "workspace-a", "--json"],
+        ["cpcf", "trust", "status", "workspace-a", "--json"],
+        ["cpcf", "time", "status", "workspace-a", "--json"],
+        ["cpcf", "intervention", "analyze", "workspace-a", "--json"],
+    ]
     assert "trust_unknown" in report.blocker_codes
     assert "science_provenance_integrity_violated" in report.blocker_codes
     assert ["cpcf", "projection", "pending", "workspace-a", "--json"] in (report.next_safe_commands)

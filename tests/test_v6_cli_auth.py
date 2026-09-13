@@ -127,10 +127,96 @@ def test_device_login_polls_pending_and_slow_down_then_writes_keyring() -> None:
         sleep=sleeps.append,
     )
     assert result.code == "oidc_device_login_succeeded"
+    assert result.status == "ok"
+    assert result.user_code == "USER-CODE"
+    assert result.account == "https://api.example|cpcf-cli"
     assert result.verification_uri == "https://identity.example/activate"
     assert sleeps == [1, 6]
     assert keyring.writes == [(SERVICE_NAME, "https://api.example|cpcf-cli", "access-token")]
     assert all("access-token" not in repr(item) for item in client.requests)
+    assert client.requests == [
+        (
+            "https://identity.example/device",
+            {"client_id": "cpcf-cli", "scope": "openid profile offline_access"},
+        ),
+        *[
+            (
+                "https://identity.example/token",
+                {
+                    "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+                    "device_code": "device-code",
+                    "client_id": "cpcf-cli",
+                },
+            )
+        ]
+        * 3,
+    ]
+    assert not client.closed  # An injected client's lifetime belongs to its caller.
+
+
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"device_code": None},
+        {"user_code": None},
+        {"verification_uri": None},
+        {"expires_in": "30"},
+        {"expires_in": 0},
+        {"expires_in": 1801},
+        {"interval": "1"},
+        {"interval": 0},
+        {"interval": 61},
+    ],
+)
+def test_invalid_device_fields_cannot_poll_or_write_credentials(updates: dict[str, Any]) -> None:
+    client = FakeClient([FakeResponse(200, device_payload(**updates))])
+    keyring = FakeKeyring()
+    result = device_login(
+        environment=environment(),
+        client=client,  # type: ignore[arg-type]
+        keyring_backend=keyring,
+    )
+    assert (result.status, result.code) == ("error", "oidc_device_response_invalid")
+    assert len(client.requests) == 1
+    assert keyring.writes == []
+
+
+@pytest.mark.parametrize("expires_in,interval", [(1, 1), (1800, 60)])
+def test_device_field_inclusive_bounds_and_expiry_stop_polling(
+    expires_in: int, interval: int
+) -> None:
+    count = expires_in // interval
+    client = FakeClient(
+        [FakeResponse(200, device_payload(expires_in=expires_in, interval=interval))]
+        + [FakeResponse(400, {"error": "authorization_pending"})] * count
+    )
+    keyring = FakeKeyring()
+    sleeps: list[float] = []
+    result = device_login(
+        environment=environment(),
+        client=client,  # type: ignore[arg-type]
+        keyring_backend=keyring,
+        sleep=sleeps.append,
+    )
+    assert (result.status, result.code) == ("blocked", "oidc_device_code_expired")
+    assert result.user_code == "USER-CODE"
+    assert result.verification_uri == "https://identity.example/activate"
+    assert sleeps == [interval] * count
+    assert keyring.writes == []
+
+
+@pytest.mark.parametrize(
+    "payload", [{"access_token": 1}, {"access_token": "x", "token_type": "MAC"}]
+)
+def test_success_http_status_does_not_admit_invalid_token(payload: dict[str, Any]) -> None:
+    keyring = FakeKeyring()
+    result = device_login(
+        environment=environment(),
+        client=FakeClient([FakeResponse(200, device_payload()), FakeResponse(200, payload)]),  # type: ignore[arg-type]
+        keyring_backend=keyring,
+    )
+    assert (result.status, result.code) == ("error", "oidc_token_response_invalid")
+    assert keyring.writes == []
 
 
 @pytest.mark.parametrize(

@@ -36,7 +36,7 @@ def read_results(path: Path) -> dict[str, str]:
 
 
 def merge_results(directory: Path, catalogue_path: Path, *, parts: int = 1) -> dict[str, str]:
-    if parts not in {1, 4}:
+    if parts not in {1, 4, 8}:
         raise ValueError("mutation_partition_count_invalid")
     declaration = json.loads(catalogue_path.read_text(encoding="utf-8"))
     if not isinstance(declaration, dict) or set(declaration) != {
@@ -78,7 +78,7 @@ def merge_results(directory: Path, catalogue_path: Path, *, parts: int = 1) -> d
         raise ValueError("mutation_declared_catalogue_mismatch")
     combined: dict[str, str] = {}
     for name in sorted(catalogue):
-        # Four physical parts retain each original modulo-five logical owner.
+        # Physical subdivision retains each original modulo-five logical owner.
         owner = int(name.rsplit("__mutmut_", 1)[1]) % (SHARDS * parts)
         for index, report in enumerate(reports):
             status = report[name]
@@ -96,7 +96,7 @@ def main() -> int:
     parser.add_argument("directory", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--catalogue", type=Path, required=True)
-    parser.add_argument("--parts", type=int, choices=(1, 4), default=1)
+    parser.add_argument("--parts", type=int, choices=(1, 4, 8), default=1)
     args = parser.parse_args()
     try:
         combined = merge_results(args.directory, args.catalogue, parts=args.parts)
